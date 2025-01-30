@@ -18,7 +18,14 @@ import Main from './landing/Main';
 import Login from './auth/Login';
 import Register from './auth/Register';
 import Landing from './landing/Landing';
-import Dashboard from './pages/Dashboard';
+import Dashboard from './user/Dashboard';
+import LoanDetails from './user/LoanDetails';
+import PayEmi from './user/PayEmi';
+import { SharedWalletProvider } from './components/SharedWallet';
+import Wallet from './user/Wallet';
+import UserProfile from './user/UserProfile';
+import KYCForm from './user/Kyc';
+import LoanApplicationForm from './user/LoanApplication';
  
  
 
@@ -28,16 +35,34 @@ export default function App() {
   const navigate = useNavigate();
  
 
-  return (
- 
+  return (    
     <Routes>
     <Route path='/' element={<Landing/>}  />
     <Route path='login' element={<Login/>}  />
     <Route path='register' element={<Register/>}  />
     <Route path ='MainPage' element={<Main/>} />
-    <Route path ='dashboard' element={<Dashboard/>} /> 
+    <Route path ='dashboard' element={<Dashboard/>} />
+    <Route path ='loan-details' element={<LoanDetails/>} /> 
+    {/* Wrap only PayEmi, Wallet with SharedWalletProvider */}
+    <Route path="pay-emi" element={
+        <SharedWalletProvider>
+          <PayEmi />
+        </SharedWalletProvider>
+      } />
+    <Route path="wallet" element={
+        <SharedWalletProvider>
+          <Wallet />
+        </SharedWalletProvider>
+      } />
+
+<Route path ='user-profile' element={<UserProfile/>} /> 
+<Route path ='kyc' element={<KYCForm/>} /> 
+<Route path ='apply-for-loan' element={<LoanApplicationForm/>} /> 
+
+
+    
      
- 
+  
    </Routes>
  
 
