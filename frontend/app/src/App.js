@@ -19,7 +19,10 @@ import Login from './auth/Login';
 import Register from './auth/Register';
 import Landing from './landing/Landing';
 import Dashboard from './pages/Dashboard';
- 
+import AdminDashboard from './admin/AdminDashboard';
+import AdminClients from './admin/AdminClients';
+import AdminLoans from './admin/AdminLoans';
+import AdminEMI from './admin/AdminEMI';
  
 
 
@@ -35,7 +38,12 @@ export default function App() {
     <Route path='login' element={<Login/>}  />
     <Route path='register' element={<Register/>}  />
     <Route path ='MainPage' element={<Main/>} />
-    <Route path ='dashboard' element={<Dashboard/>} /> 
+    <Route path ='Dashboard' element={<Dashboard/>} />
+    <Route path ='AdminDashboard' element={<AdminDashboard/>} /> 
+    <Route path ='AdminClients' element={<AdminClients/>} /> 
+    <Route path ='AdminLoans' element={<AdminLoans/>} /> 
+    <Route path ='AdminEMI' element={<AdminEMI/>} /> 
+   
      
  
    </Routes>
