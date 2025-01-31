@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import AdminSidebar from './AdminSidebar'; // Import the AdminSidebar component
 import DataGridTable from '../components/DataGridTable';
 import { collection, getDocs, deleteDoc, doc, getDoc } from "firebase/firestore";
 import { db } from '../firebase';
@@ -72,7 +73,6 @@ const AdminEmi = () => {
             const recordDoc = await getDoc(recordDocRef);
             if (recordDoc.exists()) {
                 const recordData = { id: recordDoc.id, ...recordDoc.data() };
-                // console.log('recordData ', recordData);
                 setEditData(recordData);
                 setShowModal(true);
             } else {
@@ -84,7 +84,6 @@ const AdminEmi = () => {
     };
 
     const handleDeleteClick = async (id) => {
-
         confirmAlert({
             title: 'Confirm to submit',
             message: 'Are you sure to do this.',
@@ -99,8 +98,6 @@ const AdminEmi = () => {
                 }
             ]
         });
-
-
     };
 
     const handleDelete = async (id) => {
@@ -112,12 +109,11 @@ const AdminEmi = () => {
         } catch (error) {
             console.error("Error deleting record:", error);
         }
-    }
-
+    };
 
     const hideModal = () => {
         setShowModal(false);
-    }
+    };
 
     useEffect(() => {
         getUsers();
@@ -128,29 +124,30 @@ const AdminEmi = () => {
             const records = await getDocs(recordsCollectionRef);
             const recordsData = records.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
             setRecords(recordsData);
-            console.log("recordsDatas: ", recordsData);
         } catch (error) {
             console.error("Error fetching users:", error);
         }
     };
 
     return (
-        <div className='p-4 mx-4'>
-            {showModal && (
-                <CreateEmi hideModal={hideModal} editData={editData} loanEmails={loanEmails} />
-            )}
-            <h1 className='mt-5 text-2xl text-blue-600'>All EMIs</h1>
-            <div className="flex-grow flex justify-center">
-                <div className='mt-10'>
-                    <div className='my-3 flex justify-end mr-4'>
-                        <Button variant="outlined" size="small" onClick={() => { setEditData(null); setShowModal(true) }}>Add EMI</Button>
+        <AdminSidebar>
+            <div className='p-4 mx-4'>
+                {showModal && (
+                    <CreateEmi hideModal={hideModal} editData={editData} loanEmails={loanEmails} />
+                )}
+                <h1 className='mt-5 text-2xl text-blue-600'>All EMIs</h1>
+                <div className="flex-grow flex justify-center">
+                    <div className='mt-10'>
+                        <div className='my-3 flex justify-end mr-4'>
+                            <Button variant="outlined" size="small" onClick={() => { setEditData(null); setShowModal(true) }}>Add EMI</Button>
+                        </div>
+                        {!loading && (
+                            <DataGridTable data={records} columns={recordColumns} />
+                        )}
                     </div>
-                    {!loading && (
-                        <DataGridTable data={records} columns={recordColumns} />
-                    )}
                 </div>
             </div>
-        </div>
+        </AdminSidebar>
     );
 };
 

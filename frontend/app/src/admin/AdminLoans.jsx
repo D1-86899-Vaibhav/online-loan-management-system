@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import AdminSidebar from './AdminSidebar'; // Import AdminSidebar
 import DataGridTable from '../components/DataGridTable';
 import { collection, getDocs, deleteDoc, doc, getDoc } from "firebase/firestore";
 import { db } from '../firebase';
@@ -83,7 +84,6 @@ const AdminLoans = () => {
     };
 
     const handleDeleteClick = async (id) => {
-
         confirmAlert({
             title: 'Confirm to submit',
             message: 'Are you sure to do this.',
@@ -98,8 +98,6 @@ const AdminLoans = () => {
                 }
             ]
         });
-
-
     };
 
     const handleDelete = async (id) => {
@@ -111,12 +109,11 @@ const AdminLoans = () => {
         } catch (error) {
             console.error("Error deleting record:", error);
         }
-    }
-
+    };
 
     const hideModal = () => {
         setShowModal(false);
-    }
+    };
 
     useEffect(() => {
         getUsers();
@@ -127,27 +124,28 @@ const AdminLoans = () => {
             const records = await getDocs(recordsCollectionRef);
             const recordsData = records.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
             setRecords(recordsData);
-            // console.log("Fetched users:", usersData);
         } catch (error) {
             console.error("Error fetching users:", error);
         }
     };
 
     return (
-        <div className='p-4 mx-4'>
-            {showModal && (
-                <CreateLoan hideModal={hideModal} editData={editData} clientEmails={clientEmails} />
-            )}
-            <h1 className='mt-5 text-2xl text-blue-600'>All Loans</h1>
-            <div className='mt-10'>
-                <div className='my-3 flex justify-end mr-4'>
-                    <Button variant="outlined" size="small" onClick={() => { setEditData(null); setShowModal(true) }}>Add Loan Account</Button>
-                </div>
-                {!loading && (
-                    <DataGridTable data={records} columns={recordColumns} />
+        <AdminSidebar>
+            <div className='p-4 mx-4'>
+                {showModal && (
+                    <CreateLoan hideModal={hideModal} editData={editData} clientEmails={clientEmails} />
                 )}
+                <h1 className='mt-5 text-2xl text-blue-600'>All Loans</h1>
+                <div className='mt-10'>
+                    <div className='my-3 flex justify-end mr-4'>
+                        <Button variant="outlined" size="small" onClick={() => { setEditData(null); setShowModal(true) }}>Add Loan Account</Button>
+                    </div>
+                    {!loading && (
+                        <DataGridTable data={records} columns={recordColumns} />
+                    )}
+                </div>
             </div>
-        </div>
+        </AdminSidebar>
     );
 };
 

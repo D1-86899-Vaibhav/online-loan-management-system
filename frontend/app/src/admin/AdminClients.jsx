@@ -5,13 +5,12 @@ import { db } from '../firebase';
 import Button from '@mui/material/Button';
 import CreateClient from '../components/modal/createClient';
 import columns from '../components/columns/ClientColumns';
-import {
-    GridActionsCellItem,
-} from '@mui/x-data-grid';
+import { GridActionsCellItem } from '@mui/x-data-grid';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
+import AdminSidebar from './AdminSidebar';  // Import AdminSidebar
 
 const AdminClients = () => {
     const recordsCollectionRef = collection(db, "clients");
@@ -20,7 +19,6 @@ const AdminClients = () => {
     const [showModal, setShowModal] = useState(false);
     const [loading, setLoading] = useState(true);
     const [recordColumns, setRecordColumns] = useState(columns);
-
 
     useEffect(() => {
         const hasActionColumn = columns.some((col) => col.field === 'actions');
@@ -31,49 +29,22 @@ const AdminClients = () => {
                 headerName: 'Actions',
                 width: 100,
                 cellClassName: 'actions',
-                getActions: ({ id }) => {
-                    return [
-                        <GridActionsCellItem
-                            icon={<EditIcon />}
-                            label="Edit"
-                            onClick={() => handleEditClick(id)}
-                            color="inherit"
-                        />,
-                        <GridActionsCellItem
-                            icon={<DeleteIcon />}
-                            label="Delete"
-                            onClick={() => handleDeleteClick(id)}
-                            color="inherit"
-                        />,
-                    ];
-                },
+                getActions: ({ id }) => [
+                    <GridActionsCellItem icon={<EditIcon />} label="Edit" onClick={() => handleEditClick(id)} color="inherit" />,
+                    <GridActionsCellItem icon={<DeleteIcon />} label="Delete" onClick={() => handleDeleteClick(id)} color="inherit" />,
+                ],
             };
-
             setRecordColumns([...columns, actionColumn]);
         }
-
         setLoading(false);
-        // console.log('columns', columns);
     }, []);
 
     const handleEditClick = async (id) => {
         try {
-            // Create a reference to the document using its ID
             const recordDocRef = doc(recordsCollectionRef, id);
-
-            // Fetch the document
-
-
-
             const recordDoc = await getDoc(recordDocRef);
-
             if (recordDoc.exists()) {
-                // Access the data using recordDoc.data()
-                const recordData = { id: recordDoc.id, ...recordDoc.data() };
-                // console.log("Record data:", recordData);
-
-                // You can then set this data to a state if needed for editing
-                setEditData(recordData);
+                setEditData({ id: recordDoc.id, ...recordDoc.data() });
                 setShowModal(true);
             } else {
                 console.log("No such document found!");
@@ -83,47 +54,30 @@ const AdminClients = () => {
         }
     };
 
-
-    // const handleEditClick = (id) => {
-    //     console.log('handleEditClick ', id);
-    // };
-
-
     const handleDeleteClick = async (id) => {
-
         confirmAlert({
-            title: 'Confirm to submit',
-            message: 'Are you sure to do this.',
+            title: 'Confirm to delete',
+            message: 'Are you sure you want to delete this client?',
             buttons: [
-                {
-                    label: 'Yes',
-                    onClick: () => handleDelete(id)
-                },
-                {
-                    label: 'No',
-                    onClick: () => { }
-                }
+                { label: 'Yes', onClick: () => handleDelete(id) },
+                { label: 'No', onClick: () => {} }
             ]
         });
-
-
     };
 
     const handleDelete = async (id) => {
         try {
             const recordDocRef = doc(recordsCollectionRef, id);
             await deleteDoc(recordDocRef);
-            console.log(`Record with ID ${id} deleted successfully.`);
             setRecords((prevRecords) => prevRecords.filter(record => record.id !== id));
         } catch (error) {
             console.error("Error deleting record:", error);
         }
-    }
-
+    };
 
     const hideModal = () => {
         setShowModal(false);
-    }
+    };
 
     useEffect(() => {
         getUsers();
@@ -132,29 +86,25 @@ const AdminClients = () => {
     const getUsers = async () => {
         try {
             const records = await getDocs(recordsCollectionRef);
-            const recordsData = records.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-            setRecords(recordsData);
-            // console.log("Fetched users:", usersData);
+            setRecords(records.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
         } catch (error) {
             console.error("Error fetching users:", error);
         }
     };
 
     return (
-        <div className='p-4 mx-4'>
-            {showModal && (
-                <CreateClient hideModal={hideModal} editData={editData} />
-            )}
-            <h1 className='mt-5 text-2xl text-blue-600'>All Clients</h1>
-            <div className='mt-10'>
-                <div className='my-3 flex justify-end mr-4'>
-                    <Button variant="outlined" size="small" onClick={() => { setEditData(null); setShowModal(true) }}>Add Client</Button>
+        <AdminSidebar>
+            <div className='p-4 mx-4'>
+                {showModal && <CreateClient hideModal={hideModal} editData={editData} />}
+                <h1 className='mt-5 text-2xl text-blue-600'>All Clients</h1>
+                <div className='mt-10'>
+                    <div className='my-3 flex justify-end mr-4'>
+                        <Button variant="outlined" size="small" onClick={() => { setEditData(null); setShowModal(true) }}>Add Client</Button>
+                    </div>
+                    {!loading && <DataGridTable data={records} columns={recordColumns} />}
                 </div>
-                {!loading && (
-                    <DataGridTable data={records} columns={recordColumns} />
-                )}
             </div>
-        </div>
+        </AdminSidebar>
     );
 };
 
