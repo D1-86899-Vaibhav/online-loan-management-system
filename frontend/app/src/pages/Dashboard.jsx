@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../firebase';
-import Sidebar from './Sidebar';  // Import Sidebar component
+import {
+    collection,
+    getDocs,
+    query,
+    where,
+} from 'firebase/firestore';
+import { db } from '../firebase'; // Ensure this path is correct
 import StackedBarChart from '../components/charts/BarChart';
 import StackedAreaChart from '../components/charts/AreaChart';
 import BiaxialLineChart from '../components/charts/LineChart';
@@ -60,103 +64,96 @@ const Dashboard = () => {
     }, []);
 
     return (
-        <div className="flex">
-            {/* Sidebar */}
-            <div className="w-1/4 min-h-[88vh]">
-                <Sidebar />
-            </div>
-            {/* Main Content */}
-            <div className="w-3/4 p-4">
-                <div className="grid grid-cols-10 gap-4">
-                    <div className="col-span-7 min-h-[88vh]">
-                        <div className="grid grid-cols-3 gap-4">
-                            {/* Total Clients */}
-                            <div className={`rounded-lg flex justify-center p-2 shadow-md min-h-[100px] ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
-                                <div className="flex">
-                                    <div className="bg-purple-100 rounded-full my-5 p-5">
-                                        <PeopleAltIcon className="text-purple-500" />
-                                    </div>
-                                    <div className="ml-5 mt-6">
-                                        <div className="font-semibold">
-                                            <span className="text-xl">{clientsCount}</span>
-                                        </div>
-                                        <div className="text-xs text-slate-500 font-semibold">
-                                            Clients
-                                        </div>
-                                    </div>
+        <div className="p-4">
+            <div className="grid grid-cols-10 gap-4">
+                <div className="col-span-7 min-h-[88vh]">
+                    <div className="grid grid-cols-3 gap-4">
+                        {/* Total Clients */}
+                        <div className={`rounded-lg flex justify-center p-2 shadow-md min-h-[100px] ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
+                            <div className="flex">
+                                <div className="bg-purple-100 rounded-full my-5 p-5">
+                                    <PeopleAltIcon className="text-purple-500" />
                                 </div>
-                            </div>
-                            {/* Total Loan Accounts */}
-                            <div className={`rounded-lg flex justify-center p-2 shadow-md min-h-[100px] ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
-                                <div className="flex">
-                                    <div className="bg-blue-100 rounded-full my-5 p-5">
-                                        <CreditScoreIcon className="text-blue-500" />
+                                <div className="ml-5 mt-6">
+                                    <div className="font-semibold">
+                                        <span className="text-xl">{clientsCount}</span>
                                     </div>
-                                    <div className="ml-5 mt-6">
-                                        <div className="font-semibold">
-                                            <span className="text-xl">{loanAccountsCount}</span>
-                                        </div>
-                                        <div className="text-xs text-slate-500 font-semibold">
-                                            Loan Accounts
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            {/* Loan Distributed */}
-                            <div>
-                                <div className={`rounded-lg flex justify-center p-1 shadow-md min-h-[50px] ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
-                                    <div className="flex">
-                                        <div className="bg-yellow-100 rounded-full my-2 p-1">
-                                            <AccountBalanceIcon className="text-yellow-500" />
-                                        </div>
-                                        <div className="ml-5 mt-1">
-                                            <div className="font-semibold">
-                                                <span className="text-lg">₹{loanDistributed}</span>
-                                            </div>
-                                            <div className="text-xs text-slate-500 font-semibold">
-                                                Loan Distributed
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                {/* Loan Collected */}
-                                <div className={`rounded-lg mt-2 flex justify-center p-1 shadow-md min-h-[50px] ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
-                                    <div className="flex">
-                                        <div className="bg-red-100 rounded-full my-2 p-1">
-                                            <AccountBalanceWalletIcon className="text-red-500" />
-                                        </div>
-                                        <div className="ml-5 mt-1">
-                                            <div className="font-semibold">
-                                                <span className="text-lg">₹{loanCollected}</span>
-                                            </div>
-                                            <div className="text-xs text-slate-500 font-semibold">
-                                                Loan Collected
-                                            </div>
-                                        </div>
+                                    <div className="text-xs text-slate-500 font-semibold">
+                                        Clients
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        {/* Charts */}
-                        <div className={`mt-4 rounded-lg flex justify-center p-2 shadow-md ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
-                            <BiaxialLineChart />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4 mt-4">
-                            <div className={`rounded-lg flex justify-center p-2 shadow-md ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
-                                <TwoSimplePieChart client={clientsCount} loan={loanAccountsCount} emi={emiAccountsCount} />
+                        {/* Total Loan Accounts */}
+                        <div className={`rounded-lg flex justify-center p-2 shadow-md min-h-[100px] ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
+                            <div className="flex">
+                                <div className="bg-blue-100 rounded-full my-5 p-5">
+                                    <CreditScoreIcon className="text-blue-500" />
+                                </div>
+                                <div className="ml-5 mt-6">
+                                    <div className="font-semibold">
+                                        <span className="text-xl">{loanAccountsCount}</span>
+                                    </div>
+                                    <div className="text-xs text-slate-500 font-semibold">
+                                        Loan Accounts
+                                    </div>
+                                </div>
                             </div>
-                            <div className={`rounded-lg flex justify-center p-2 shadow-md ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
-                                <PieChartWithPaddingAngle client={clientsCount} loan={loanAccountsCount} emi={emiAccountsCount} />
+                        </div>
+                        {/* Loan Distributed */}
+                        <div>
+                            <div className={`rounded-lg flex justify-center p-1 shadow-md min-h-[50px] ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
+                                <div className="flex">
+                                    <div className="bg-yellow-100 rounded-full my-2 p-1">
+                                        <AccountBalanceIcon className="text-yellow-500" />
+                                    </div>
+                                    <div className="ml-5 mt-1">
+                                        <div className="font-semibold">
+                                            <span className="text-lg">₹{loanDistributed}</span>
+                                        </div>
+                                        <div className="text-xs text-slate-500 font-semibold">
+                                            Loan Distributed
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {/* Loan Collected */}
+                            <div className={`rounded-lg mt-2 flex justify-center p-1 shadow-md min-h-[50px] ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
+                                <div className="flex">
+                                    <div className="bg-red-100 rounded-full my-2 p-1">
+                                        <AccountBalanceWalletIcon className="text-red-500" />
+                                    </div>
+                                    <div className="ml-5 mt-1">
+                                        <div className="font-semibold">
+                                            <span className="text-lg">₹{loanCollected}</span>
+                                        </div>
+                                        <div className="text-xs text-slate-500 font-semibold">
+                                            Loan Collected
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div className="col-span-3 min-h-[88vh]">
+                    {/* Charts */}
+                    <div className={`mt-4 rounded-lg flex justify-center p-2 shadow-md ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
+                        <BiaxialLineChart />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 mt-4">
                         <div className={`rounded-lg flex justify-center p-2 shadow-md ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
-                            <StackedAreaChart />
+                            <TwoSimplePieChart client={clientsCount} loan={loanAccountsCount} emi={emiAccountsCount} />
                         </div>
-                        <div className={`rounded-lg flex justify-center p-2 mt-4 shadow-md ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
-                            <StackedBarChart />
+                        <div className={`rounded-lg flex justify-center p-2 shadow-md ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
+                            <PieChartWithPaddingAngle client={clientsCount} loan={loanAccountsCount} emi={emiAccountsCount} />
                         </div>
+                    </div>
+                </div>
+                <div className="col-span-3 min-h-[88vh]">
+                    <div className={`rounded-lg flex justify-center p-2 shadow-md ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
+                        <StackedAreaChart />
+                    </div>
+                    <div className={`rounded-lg flex justify-center p-2 mt-4 shadow-md ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
+                        <StackedBarChart />
                     </div>
                 </div>
             </div>
