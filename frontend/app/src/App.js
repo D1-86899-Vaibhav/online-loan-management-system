@@ -30,6 +30,9 @@ import Wallet from './user/Wallet';
 import UserProfile from './user/UserProfile';
 import KYCForm from './user/Kyc';
 import LoanApplicationForm from './user/LoanApplication';
+import AdminCalculator from './admin/AdminCalculator';
+import AdminUsers from './admin/AdminUsers';
+import AdminContact from './admin/AdminContact';
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -38,7 +41,7 @@ export default function App() {
   return (    
     <Routes>
       {/* Public Routes */}
-      <Route path="/" element={<Landing />} />
+      <Route path="/" element={<Landing/>} />
       <Route path="login" element={<Login />} />
       <Route path="register" element={<Register />} />
       <Route path="MainPage" element={<Main />} />
@@ -48,6 +51,11 @@ export default function App() {
       <Route path="AdminClients" element={<AdminClients />} /> 
       <Route path="AdminLoans" element={<AdminLoans />} /> 
       <Route path="AdminEMI" element={<AdminEMI />} /> 
+      <Route path="AdminCalculator" element={<AdminCalculator/>} /> 
+      <Route path="AdminUsers" element={<AdminUsers/>} /> 
+      <Route path="AdminContact" element={<AdminContact/>} /> 
+
+
 
       {/* User Routes */}
       <Route path="dashboard" element={<Dashboard />} />
