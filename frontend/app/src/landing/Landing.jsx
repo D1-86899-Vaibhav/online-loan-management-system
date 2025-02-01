@@ -102,8 +102,9 @@ function Landing() {
                     </p>
                     <Link to="login" className=" mt-5 relative px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg overflow-hidden group">
                         <span className="relative z-10">Apply Now!</span>
-                        <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition duration-300"></div>
                     </Link>
+                    <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition duration-300"></div>
+
                 </div>
                 <div className="absolute inset-0 bg-black opacity-40"></div>
             </section>
