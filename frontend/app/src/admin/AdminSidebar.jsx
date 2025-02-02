@@ -1,48 +1,54 @@
-import React from 'react';
-import { Link } from 'react-router-dom';  // Use this if you are using React Router for navigation
-import { useTheme } from '@mui/material/styles';
-import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
-import CreditScoreIcon from '@mui/icons-material/CreditScore';
-import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
-import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import React from "react";
+import { Link } from "react-router-dom";
+import { useTheme } from "@mui/material/styles";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import PeopleIcon from "@mui/icons-material/People";
+import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
+import PaymentIcon from "@mui/icons-material/Payment";
+import CalculateIcon from "@mui/icons-material/Calculate";
+import ContactsIcon from "@mui/icons-material/Contacts";
+import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
+import LogoutIcon from "@mui/icons-material/Logout";
 
-const AdminSidebar = ({ children }) => {
-    const theme = useTheme();
-    const isDarkMode = theme.palette.mode === 'dark';
 
-    return (
-        <div className="flex min-h-screen">
-            {/* Sidebar */}
-            <div className={`w-1/5 p-4 min-h-screen ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'} text-white`}>
-                
+const AdminSidebar = () => {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
 
-                {/* Sidebar Stats or Icons */}
-                <div className="mt-10">
-                    <div className="flex items-center space-x-3">
-                        <PeopleAltIcon className={`text-${isDarkMode ? 'purple-300' : 'purple-500'}`} />
-                        <span className="text-lg text-black">Clients</span>
-                    </div>
-                    <div className="flex items-center space-x-3 mt-4">
-                        <CreditScoreIcon className={`text-${isDarkMode ? 'blue-300' : 'blue-500'}`} />
-                        <span className="text-lg text-black">Loan Accounts</span>
-                    </div>
-                    <div className="flex items-center space-x-3 mt-4">
-                        <AccountBalanceIcon className={`text-${isDarkMode ? 'yellow-300' : 'yellow-500'}`} />
-                        <span className="text-lg text-black">Loan Distributed</span>
-                    </div>
-                    <div className="flex items-center space-x-3 mt-4">
-                        <AccountBalanceWalletIcon className={`text-${isDarkMode ? 'red-300' : 'red-500'}`} />
-                        <span className="text-lg text-black">Loan Collected</span>
-                    </div>
-                </div>
-            </div>
+  return (
+    <div
+      className={`w-64 md:w-72 lg:w-80 bg-${isDarkMode ? "gray-900" : "gray-100"} 
+      text-${isDarkMode ? "white" : "black"} p-4 h-screen flex flex-col`}
+    >
+      <h2 className="text-xl font-bold text-center py-4 border-b border-gray-400">
+        ADMIN DASHBOARD
+      </h2>
 
-            {/* Main Content */}
-            <div className="w-4/5 p-6 bg-gray-100">
-                {children}  {/* This ensures wrapped content is displayed */}
-            </div>
-        </div>
-    );
+      {/* Sidebar Links */}
+      <div className="mt-6 space-y-4">
+        {[
+          { name: "Dashboard", icon: <DashboardIcon />, path: "/AdminDashboard" },
+          { name: "Clients", icon: <PeopleIcon />, path: "/AdminClients" },
+          { name: "Loans", icon: <AccountBalanceIcon />, path: "/AdminLoans" },
+          { name: "EMI Payments", icon: <PaymentIcon />, path: "/AdminEMI" },
+          { name: "Calculator", icon: <CalculateIcon />, path: "/AdminCalculator" },
+          { name: "Users", icon: <SupervisorAccountIcon />, path: "/AdminUsers" },
+          { name: "Contact", icon: <ContactsIcon />, path: "/AdminContact" },
+          { name: "Logout", icon: <LogoutIcon />, path: "/logout" },
+        ].map((item, index) => (
+          <Link
+            key={index}
+            to={item.path}
+            className="flex items-center space-x-4 p-3 
+            hover:bg-gray-300 hover:rounded-lg transition duration-300 ease-in-out"
+          >
+            <span className="text-lg text-blue-500">{item.icon}</span>
+            <span className="text-md font-medium">{item.name}</span>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
 };
 
 export default AdminSidebar;

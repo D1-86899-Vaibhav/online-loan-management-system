@@ -33,6 +33,8 @@ import LoanApplicationForm from './user/LoanApplication';
 import AdminCalculator from './admin/AdminCalculator';
 import AdminUsers from './admin/AdminUsers';
 import AdminContact from './admin/AdminContact';
+import AdminNavbar from './admin/AdminNavbar';
+import Navbar from './user/Navbar';
 
 export default function App() {
   const [user, setUser] = useState(null);
