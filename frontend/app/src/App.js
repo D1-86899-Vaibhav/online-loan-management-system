@@ -1,20 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import Landing from './landing/Landing';
 import Main from './landing/Main';
 import Login from './auth/Login';
 import Register from './auth/Register';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import ContactsIcon from '@mui/icons-material/Contacts';
-import PeopleIcon from '@mui/icons-material/People';
-import PermContactCalendarIcon from '@mui/icons-material/PermContactCalendar';
-import CreditScoreIcon from '@mui/icons-material/CreditScore';
-import DateRangeIcon from '@mui/icons-material/DateRange';
-import CalculateIcon from '@mui/icons-material/Calculate';
-import LoginIcon from '@mui/icons-material/Login';
-
-import { SharedWalletProvider } from './components/SharedWallet';
 
 // Admin Routes
 import AdminDashboard from './admin/AdminDashboard';
@@ -22,6 +11,9 @@ import AdminClients from './admin/AdminClients';
 import AdminLoans from './admin/AdminLoans';
 import AdminEMI from './admin/AdminEMI';
 import AdminLogout from './admin/AdminLogout';
+import AdminCalculator from './admin/AdminCalculator';
+import AdminUsers from './admin/AdminUsers';
+import AdminContact from './admin/AdminContact';
 // User Routes
 import Dashboard from './user/Dashboard';
 import LoanDetails from './user/LoanDetails';
@@ -30,55 +22,126 @@ import Wallet from './user/Wallet';
 import UserProfile from './user/UserProfile';
 import KYCForm from './user/Kyc';
 import LoanApplicationForm from './user/LoanApplication';
-import AdminCalculator from './admin/AdminCalculator';
-import AdminUsers from './admin/AdminUsers';
-import AdminContact from './admin/AdminContact';
-import AdminNavbar from './admin/AdminNavbar';
-import Navbar from './user/Navbar';
+import Logout from './auth/Logout';  // Import Logout component
+
+import { SharedWalletProvider } from './components/SharedWallet';
+import ProtectedRoute from './auth/ProtectedRoute'; // Import ProtectedRoute
 
 export default function App() {
-  const [user, setUser] = useState(null);
+  const [userRole, setUserRole] = useState(null);
   const navigate = useNavigate();
 
-  return (    
+  useEffect(() => {
+    const token = sessionStorage.getItem('authToken');
+    const role = sessionStorage.getItem('userRole');
+
+    if (token && role) {
+      setUserRole(role);
+    } else {
+      // Redirect to login page if not authenticated
+      navigate('/login');
+    }
+  }, [navigate]);
+
+  const redirectBasedOnRole = () => {
+    if (userRole === 'ROLE_ADMIN') {
+      navigate('/AdminDashboard');
+    } else if (userRole === 'ROLE_USER') {
+      navigate('/dashboard');
+    }
+  };
+
+  return (
     <Routes>
       {/* Public Routes */}
-      <Route path="/" element={<Landing/>} />
+      <Route path="/" element={<Landing />} />
       <Route path="login" element={<Login />} />
       <Route path="register" element={<Register />} />
       <Route path="MainPage" element={<Main />} />
 
-      {/* Admin Routes */}
-      <Route path="AdminDashboard" element={<AdminDashboard />} /> 
-      <Route path="AdminClients" element={<AdminClients />} /> 
-      <Route path="AdminLoans" element={<AdminLoans />} /> 
-      <Route path="AdminEMI" element={<AdminEMI />} /> 
-      <Route path="AdminCalculator" element={<AdminCalculator/>} /> 
-      <Route path="AdminUsers" element={<AdminUsers/>} /> 
-      <Route path="AdminContact" element={<AdminContact/>} /> 
-      <Route path="logout" element={<AdminLogout />} />
+      {/* Admin Routes (only for Admin users) */}
+      <Route path="AdminDashboard" element={
+        <ProtectedRoute requiredRole="ROLE_ADMIN">
+          <AdminDashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="AdminClients" element={
+        <ProtectedRoute requiredRole="ROLE_ADMIN">
+          <AdminClients />
+        </ProtectedRoute>
+      } />
+      <Route path="AdminLoans" element={
+        <ProtectedRoute requiredRole="ROLE_ADMIN">
+          <AdminLoans />
+        </ProtectedRoute>
+      } />
+      <Route path="AdminEMI" element={
+        <ProtectedRoute requiredRole="ROLE_ADMIN">
+          <AdminEMI />
+        </ProtectedRoute>
+      } />
+      <Route path="AdminCalculator" element={
+        <ProtectedRoute requiredRole="ROLE_ADMIN">
+          <AdminCalculator />
+        </ProtectedRoute>
+      } />
+      <Route path="AdminUsers" element={
+        <ProtectedRoute requiredRole="ROLE_ADMIN">
+          <AdminUsers />
+        </ProtectedRoute>
+      } />
+      <Route path="AdminContact" element={
+        <ProtectedRoute requiredRole="ROLE_ADMIN">
+          <AdminContact />
+        </ProtectedRoute>
+      } />
 
-
-
-      {/* User Routes */}
-      <Route path="dashboard" element={<Dashboard />} />
-      <Route path="loan-details" element={<LoanDetails />} /> 
-      
-      {/* Wrap PayEmi & Wallet with SharedWalletProvider */}
+      {/* User Routes (only for regular users) */}
+      <Route path="dashboard" element={
+        <ProtectedRoute requiredRole="ROLE_USER">
+          <Dashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="loan-details" element={
+        <ProtectedRoute requiredRole="ROLE_USER">
+          <LoanDetails />
+        </ProtectedRoute>
+      } />
       <Route path="pay-emi" element={
-        <SharedWalletProvider>
-          <PayEmi />
-        </SharedWalletProvider>
+        <ProtectedRoute requiredRole="ROLE_USER">
+          <SharedWalletProvider>
+            <PayEmi />
+          </SharedWalletProvider>
+        </ProtectedRoute>
       } />
       <Route path="wallet" element={
-        <SharedWalletProvider>
-          <Wallet />
-        </SharedWalletProvider>
+        <ProtectedRoute requiredRole="ROLE_USER">
+          <SharedWalletProvider>
+            <Wallet />
+          </SharedWalletProvider>
+        </ProtectedRoute>
+      } />
+      <Route path="user-profile" element={
+        <ProtectedRoute requiredRole="ROLE_USER">
+          <UserProfile />
+        </ProtectedRoute>
+      } />
+      <Route path="kyc" element={
+        <ProtectedRoute requiredRole="ROLE_USER">
+          <KYCForm />
+        </ProtectedRoute>
+      } />
+      <Route path="apply-for-loan" element={
+        <ProtectedRoute requiredRole="ROLE_USER">
+          <LoanApplicationForm />
+        </ProtectedRoute>
       } />
 
-      <Route path="user-profile" element={<UserProfile />} /> 
-      <Route path="kyc" element={<KYCForm />} /> 
-      <Route path="apply-for-loan" element={<LoanApplicationForm />} /> 
+      {/* Logout Route */}
+      <Route path="logout" element={<Logout />} />
+
+      {/* Catch-all route redirects to login page if user is not authenticated */}
+      <Route path="*" element={<Login />} />
     </Routes>
   );
 }
