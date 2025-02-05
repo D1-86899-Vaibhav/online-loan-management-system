@@ -1,15 +1,15 @@
 import React, { useState } from "react";
 import { AppBar, Toolbar, IconButton, Badge, Menu, MenuItem, Typography, Box } from "@mui/material";
 import { Notifications, AccountCircle } from "@mui/icons-material";
-import { Link } from "react-router-dom";
-import { Logout } from "@mui/icons-material";
+import { Link, useNavigate } from "react-router-dom";
+import { Logout as LogoutIcon } from "@mui/icons-material";
 import { Tooltip } from "@mui/material";
-
-
+import toast from 'react-hot-toast';
 
 const Navbar = ({ isAuthenticated }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [notifications] = useState(3); // Example notification count
+  const navigate = useNavigate();
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -22,6 +22,17 @@ const Navbar = ({ isAuthenticated }) => {
   const handleLogout = () => {
     
     console.log("Logging out...");
+
+    // Clear sessionStorage when logging out
+    sessionStorage.removeItem('authToken');
+    sessionStorage.removeItem('userRole');
+    
+    // Optionally, show a toast message (if using toast)
+    toast.success("Logged out successfully!");
+
+    // Redirect user to the login page (or homepage if you prefer)
+    navigate('/login');
+
   };
 
   return (
@@ -65,28 +76,14 @@ const Navbar = ({ isAuthenticated }) => {
           ) : (
             <>
               {/* Login Button */}
-
               <Link
-                to="/user-profile"
-                className="text-blue-600 font-semibold flex items-center space-x-2"
-              >
-                <Tooltip title="User Profile" arrow>
-                  <AccountCircle fontSize="large" className="bg-transparent" />
-                </Tooltip>
-              </Link>
-
-
-
-              <Link to="/login" onClick={handleLogout}
-
+                to="/login"
                 className="relative px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg overflow-hidden group flex items-center space-x-2"
               >
-                {/* Logout Icon */}
-                <Logout fontSize="small" />
-                <span className="relative z-10">Logout</span>
+                <LogoutIcon fontSize="small" />
+                <span className="relative z-10">Login</span>
                 <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition duration-300"></div>
               </Link>
-
             </>
           )}
         </div>

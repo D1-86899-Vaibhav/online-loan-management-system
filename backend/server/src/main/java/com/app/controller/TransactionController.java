@@ -45,7 +45,8 @@ public class TransactionController {
         Long userId = jwtUtil.getUserIdFromJwtToken(claims);
 
         // Set user ID in the transaction
-//        transaction.setUser(userId);
+        //transaction.setUser(userId);
+        //transaction.setUser(userId);
 
         return transactionService.recordTransaction(transaction);
     }
