@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
@@ -7,7 +8,6 @@ export default function Login() {
     const [email, setEmail] = useState('');
     const [pass, setPass] = useState('');
 
-    // Replace with your actual API endpoint
     const API_URL = 'http://localhost:8080/users/login';
 
     const onLogin = async (e) => {
@@ -22,45 +22,42 @@ export default function Login() {
             return;
         }
 
-        const payload = {
-            email,
-            password: pass,
-        };
+        const payload = { email, password: pass };
 
         try {
-            // Show a loading toast
             toast.loading("Logging in...", { id: "loginToast" });
 
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(payload),
-            });
+            // Make API call using axios
+            const response = await axios.post(API_URL, payload);
 
-            // Remove the loading toast
             toast.dismiss("loginToast");
 
-            if (response.ok) {
-                const data = await response.json(); // Response should include the JWT token
-                const { token } = data; // Adjust based on your API's response structure
+            if (response.status === 200) {
+                const { token, role } = response.data; // Extract token & role from response
 
-                // Save JWT to sessionStorage
+                // Store token and role in sessionStorage
                 sessionStorage.setItem('authToken', token);
+                sessionStorage.setItem('userRole', role);
 
                 toast.success("Login Successful!");
 
-                // Redirect to the dashboard
-                navigate('/dashboard');
-            } else {
-                const errorData = await response.json();
-                const errorMessage = errorData.message || "Login failed. Please try again.";
-                toast.error(errorMessage);
+                // Redirect based on user role
+                if (role === 'ROLE_ADMIN') {
+                    navigate('/AdminDashboard');  // Admin dashboard
+                } else {
+                    navigate('/dashboard');  // User dashboard
+                }
             }
         } catch (error) {
             toast.dismiss("loginToast");
-            toast.error("An error occurred. Please try again.");
+
+            // Handle error gracefully
+            if (error.response) {
+                toast.error(error.response.data.message || "Login failed.");
+            } else {
+                toast.error("An error occurred. Please try again.");
+            }
+
             console.error("Login error:", error);
         }
     };
