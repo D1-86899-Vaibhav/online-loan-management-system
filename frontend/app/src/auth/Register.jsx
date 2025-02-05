@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 
 export default function Register() {
-    const navigate = useNavigate(); // Call useNavigate at the top level
+    const navigate = useNavigate();
     const [showOTP, setShowOTP] = useState(false);
 
     const [firstName, setFirst] = useState('');
@@ -14,46 +14,118 @@ export default function Register() {
     const [phone, setPhone] = useState('');
     const [otp, setOtp] = useState('');
 
-    const OnRegister = async (e) => {
-        e.preventDefault(); // Prevent form submission
+    // Replace with your actual API endpoint
+    const API_URL = 'http://localhost:8080/users/register';
 
-        if (firstName.length === 0) {
+    const OnRegister = async (e) => {
+        e.preventDefault();
+
+        // Frontend validation
+        if (firstName.trim() === '') {
             toast.error("First Name Required!");
-        } else if (lastName.length === 0) {
+            return;
+        }
+        if (lastName.trim() === '') {
             toast.error("Last Name Required!");
-        } else if (email.length === 0) {
+            return;
+        }
+        if (email.trim() === '') {
             toast.error("Email is Required!");
-        } else if (password.length === 0) {
+            return;
+        }
+        if (password.trim() === '') {
             toast.error("Password is Required!");
-        } else if (confirmPassword.length === 0) {
+            return;
+        }
+        if (confirmPassword.trim() === '') {
             toast.error("Please Confirm your Password!");
-        } else if (password !== confirmPassword) {
+            return;
+        }
+        if (password !== confirmPassword) {
             toast.error("Passwords do not match!");
-        } else if (phone.length === 0) {
+            return;
+        }
+        if (phone.trim() === '') {
             toast.error("Phone Number is Required!");
-        } else if (otp.length === 0) {
+            return;
+        }
+        if (otp.trim() === '') {
             toast.error("OTP is Required!");
-        } else {
-            alert("Are you want to Redirect to Login Page?");
-            toast.success("You Are Registered Successfully!");
-            setTimeout(() => {
-                navigate('/'); // Navigate to login page
-            }, 2000);
+            return;
+        }
+
+        // Prepare the payload. Adjust keys based on your API's requirements.
+        const payload = {
+            firstName,
+            lastName,
+            email,
+            password,
+            phone,
+            otp,
+        };
+
+        try {
+            // Show a loading toast or spinner if needed
+            toast.loading("Registering...", { id: "registerToast" });
+
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // Include any additional headers your API requires here
+                },
+                body: JSON.stringify(payload)
+            });
+
+            // Remove the loading toast
+            toast.dismiss("registerToast");
+
+            if (response.ok) {
+                // You can parse the response if needed
+                const data = await response.json();
+                toast.success("You are registered successfully!");
+
+                // Optional: ask the user confirmation before navigating
+                // alert("Do you want to redirect to the Login Page?");
+
+                // Redirect after a delay
+                setTimeout(() => {
+                    navigate('/login'); // Adjust the route if necessary
+                }, 2000);
+            } else {
+                // Extract error message from response if available
+                const errorData = await response.json();
+                const errorMessage = errorData.message || "Registration failed. Please try again.";
+                toast.error(errorMessage);
+            }
+        } catch (error) {
+            toast.dismiss("registerToast");
+            toast.error("An error occurred. Please try again later.");
+            console.error("Registration error:", error);
         }
     };
-    const onOtp=async()=>{
-        if(otp.length == 0){
-            toast.error("Please Enter OTP!")
+
+    const onOtp = async () => {
+        if (otp.trim() === '') {
+            toast.error("Please Enter OTP!");
+        } else {
+            // If your API has an endpoint to verify the OTP, you can call it here.
+            // For example:
+            // await verifyOtpAPI(phone, otp);
+            toast.success("OTP Verified!");
         }
-    }
+    };
 
     const handleSendOTP = () => {
-        setShowOTP(true);
-        if(phone.length ==0){
-            toast.error("Please Enter Phone Number!")
-        }else{
-            toast.success("OTP Sent On Registered Number!")
+        if (phone.trim() === '') {
+            toast.error("Please Enter Phone Number!");
+            return;
         }
+        setShowOTP(true);
+        // If your API supports sending OTP automatically, you can call it here.
+        // For example:
+        // await sendOtpAPI(phone);
+        toast.success("OTP Sent to the registered number!");
     };
 
     return (
@@ -174,12 +246,12 @@ export default function Register() {
                                 placeholder="Enter OTP"
                                 value={otp}
                                 onChange={(e) => setOtp(e.target.value)}
-                               
                             />
                         </div>
                         <button
                             className="px-4 py-2 mt-5 text-white bg-blue-950 hover:bg-blue-900 rounded-md"
-                            type="button"  onClick={onOtp}
+                            type="button"
+                            onClick={onOtp}
                         >
                             Verify OTP
                         </button>
@@ -202,7 +274,6 @@ export default function Register() {
                         Already have an account?
                         <span
                             className="ml-1 font-semibold hover:text-blue-900 text-slate-700"
-                            
                             onClick={() => navigate('/login')}
                         >
                             Sign In

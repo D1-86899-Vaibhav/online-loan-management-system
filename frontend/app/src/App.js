@@ -59,6 +59,7 @@ export default function App() {
       <Route path="logout" element={<AdminLogout />} />
 
 
+
       {/* User Routes */}
       <Route path="dashboard" element={<Dashboard />} />
       <Route path="loan-details" element={<LoanDetails />} /> 

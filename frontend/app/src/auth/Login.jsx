@@ -7,15 +7,61 @@ export default function Login() {
     const [email, setEmail] = useState('');
     const [pass, setPass] = useState('');
 
-    const onLogin = (e) => {
-        e.preventDefault(); // Prevent the form from submitting automatically
+    // Replace with your actual API endpoint
+    const API_URL = 'http://localhost:8080/users/login';
 
-        if (email.length === 0) {
-            toast.error("Please Enter Valid Email!");
-        } else if (pass.length === 0) {
+    const onLogin = async (e) => {
+        e.preventDefault();
+
+        if (email.trim() === '') {
+            toast.error("Please Enter a Valid Email!");
+            return;
+        }
+        if (pass.trim() === '') {
             toast.error("Please Enter the Password!");
-        } else {
-            navigate('/dashboard');
+            return;
+        }
+
+        const payload = {
+            email,
+            password: pass,
+        };
+
+        try {
+            // Show a loading toast
+            toast.loading("Logging in...", { id: "loginToast" });
+
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            });
+
+            // Remove the loading toast
+            toast.dismiss("loginToast");
+
+            if (response.ok) {
+                const data = await response.json(); // Response should include the JWT token
+                const { token } = data; // Adjust based on your API's response structure
+
+                // Save JWT to sessionStorage
+                sessionStorage.setItem('authToken', token);
+
+                toast.success("Login Successful!");
+
+                // Redirect to the dashboard
+                navigate('/dashboard');
+            } else {
+                const errorData = await response.json();
+                const errorMessage = errorData.message || "Login failed. Please try again.";
+                toast.error(errorMessage);
+            }
+        } catch (error) {
+            toast.dismiss("loginToast");
+            toast.error("An error occurred. Please try again.");
+            console.error("Login error:", error);
         }
     };
 
@@ -24,7 +70,7 @@ export default function Login() {
             <Toaster />
             <form
                 className="w-full max-w-md p-8 space-y-4 bg-white shadow-md rounded-2xl"
-                onSubmit={onLogin} // Handle form submission
+                onSubmit={onLogin}
             >
                 <div>
                     <h2 className="text-3xl font-bold mb-7 text-center text-blue-900">
@@ -61,7 +107,7 @@ export default function Login() {
                         <center>
                             <button
                                 className="px-7 py-2 text-white bg-blue-950 hover:bg-blue-900 rounded-md"
-                                type="submit" // Keep it as submit but prevent form submission in onLogin
+                                type="submit"
                             >
                                 <span className="text-sm">
                                     LOGIN
@@ -72,12 +118,10 @@ export default function Login() {
 
                     <div className="mt-5 text-center">
                         <p className="text-[13px] cursor-pointer text-slate-400 mt-1">
-                            Don't Have Account?
+                            Don't Have an Account?
                             <span
                                 className="ml-1 font-semibold hover:text-blue-900 text-slate-700"
-                                onClick={() => {
-                                    navigate('/register');
-                                }}
+                                onClick={() => navigate('/register')}
                             >
                                 Register
                             </span>
