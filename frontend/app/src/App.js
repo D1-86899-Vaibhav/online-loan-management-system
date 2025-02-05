@@ -34,14 +34,14 @@ export default function App() {
   useEffect(() => {
     const token = sessionStorage.getItem('authToken');
     const role = sessionStorage.getItem('userRole');
-
+  
     if (token && role) {
       setUserRole(role);
-    } else {
-      // Redirect to login page if not authenticated
-      navigate('/login');
-    }
+      redirectBasedOnRole();
+    } 
+    // REMOVE ELSE BLOCK to allow users to stay on Landing Page if not logged in.
   }, [navigate]);
+  
 
   const redirectBasedOnRole = () => {
     if (userRole === 'ROLE_ADMIN') {
