@@ -12,7 +12,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
+import com.app.security.CustomJWTAuthenticationFilter;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
@@ -31,7 +31,7 @@ public class SecurityConfiguration {
                     .permitAll()
                 .requestMatchers(HttpMethod.OPTIONS).permitAll()
                 // Wallet endpoints: Adjust permission as needed.
-                .requestMatchers("/users/wallet/withdraw-funds","/transactions","/users/wallet/add-funds","/loans/summary","/loans/details").hasRole("CUSTOMER")
+                .requestMatchers("/users/wallet/withdraw-funds","/transactions","/users/wallet/add-funds","/loans/summary","/loans/details").hasRole("USER")
                 .requestMatchers("/products/add", "/products/delete").hasRole("ADMIN")
                 .anyRequest().authenticated())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
