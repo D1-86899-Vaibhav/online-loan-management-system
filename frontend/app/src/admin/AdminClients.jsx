@@ -10,7 +10,8 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
-import AdminSidebar from './AdminSidebar';  // Import AdminSidebar
+import AdminSidebar from './AdminSidebar';
+import AdminNavbar from './AdminNavbar';
 
 const AdminClients = () => {
     const recordsCollectionRef = collection(db, "clients");
@@ -93,18 +94,22 @@ const AdminClients = () => {
     };
 
     return (
-        <AdminSidebar>
-            <div className='p-4 mx-4'>
-                {showModal && <CreateClient hideModal={hideModal} editData={editData} />}
-                <h1 className='mt-5 text-2xl text-blue-600'>All Clients</h1>
-                <div className='mt-10'>
-                    <div className='my-3 flex justify-end mr-4'>
-                        <Button variant="outlined" size="small" onClick={() => { setEditData(null); setShowModal(true) }}>Add Client</Button>
+        <div style={{ display: 'flex', minHeight: '100vh' }}>
+            <AdminSidebar />
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <AdminNavbar isAuthenticated={true} />
+                <div className='p-4 mx-4'>
+                    {showModal && <CreateClient hideModal={hideModal} editData={editData} />}
+                    <h1 className='mt-5 text-2xl text-blue-600'>All Clients</h1>
+                    <div className='mt-10'>
+                        <div className='my-3 flex justify-end mr-4'>
+                            <Button variant="outlined" size="small" onClick={() => { setEditData(null); setShowModal(true) }}>Add Client</Button>
+                        </div>
+                        {!loading && <DataGridTable data={records} columns={recordColumns} />}
                     </div>
-                    {!loading && <DataGridTable data={records} columns={recordColumns} />}
                 </div>
             </div>
-        </AdminSidebar>
+        </div>
     );
 };
 

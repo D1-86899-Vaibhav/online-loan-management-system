@@ -1,6 +1,7 @@
 import React from 'react';
 import { Typography, Box, Link } from '@mui/material';
-import AdminSidebar from "./AdminSidebar";
+import AdminSidebar from './AdminSidebar';
+import AdminNavbar from './AdminNavbar';
 
 const AdminContact = () => {
     const contactDetails = [
@@ -13,74 +14,78 @@ const AdminContact = () => {
     ];
 
     return (
-        <AdminSidebar>
-            <Box
-                sx={{
-                    minHeight: '80vh',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    px: 2,
-                }}
-            >
+        <div style={{ display: 'flex', minHeight: '100vh' }}>
+            <AdminSidebar />
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <AdminNavbar isAuthenticated={true} />
                 <Box
                     sx={{
-                        width: '100%',
-                        maxWidth: 600,
-                        backgroundColor: 'rgba(255, 255, 255, 0.5)',
-                        backdropFilter: 'blur(10px)',
-                        borderRadius: 2,
-                        boxShadow: 3,
-                        p: 4,
+                        minHeight: '80vh',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        px: 2,
                     }}
                 >
-                    <Typography
-                        variant="h4"
-                        component="h1"
-                        align="center"
-                        gutterBottom
-                        sx={{ fontWeight: 'bold', color: 'primary.main' }}
+                    <Box
+                        sx={{
+                            width: '100%',
+                            maxWidth: 600,
+                            backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                            backdropFilter: 'blur(10px)',
+                            borderRadius: 2,
+                            boxShadow: 3,
+                            p: 4,
+                        }}
                     >
-                        Contact Us
-                    </Typography>
-                    <Box>
-                        {contactDetails.map((detail, index) => (
-                            <Box
-                                key={index}
-                                sx={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    mb: 2,
-                                }}
-                            >
-                                <Typography variant="h6" sx={{ fontWeight: 500, color: 'text.secondary' }}>
-                                    {detail.label}:
-                                </Typography>
-                                <Link
-                                    href={detail.link}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
+                        <Typography
+                            variant="h4"
+                            component="h1"
+                            align="center"
+                            gutterBottom
+                            sx={{ fontWeight: 'bold', color: 'primary.main' }}
+                        >
+                            Contact Us
+                        </Typography>
+                        <Box>
+                            {contactDetails.map((detail, index) => (
+                                <Box
+                                    key={index}
                                     sx={{
-                                        fontSize: '1rem',
-                                        color: 'primary.main',
-                                        fontWeight: 'medium',
-                                        textDecoration: 'none',
-                                        '&:hover': {
-                                            textDecoration: 'underline',
-                                        },
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        mb: 2,
                                     }}
                                 >
-                                    {detail.value}
-                                </Link>
-                            </Box>
-                        ))}
+                                    <Typography variant="h6" sx={{ fontWeight: 500, color: 'text.secondary' }}>
+                                        {detail.label}:
+                                    </Typography>
+                                    <Link
+                                        href={detail.link}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        sx={{
+                                            fontSize: '1rem',
+                                            color: 'primary.main',
+                                            fontWeight: 'medium',
+                                            textDecoration: 'none',
+                                            '&:hover': {
+                                                textDecoration: 'underline',
+                                            },
+                                        }}
+                                    >
+                                        {detail.value}
+                                    </Link>
+                                </Box>
+                            ))}
+                        </Box>
                     </Box>
                 </Box>
-            </Box>
-        </AdminSidebar>
+            </div>
+        </div>
     );
 };
 
