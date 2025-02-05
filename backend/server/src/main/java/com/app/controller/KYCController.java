@@ -10,6 +10,7 @@ import com.app.service.KycService;
 
 @RestController
 @RequestMapping("/kyc")
+@CrossOrigin(origins = "http://localhost:3000")
 public class KYCController {
     @Autowired
     private KycService kycService;

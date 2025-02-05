@@ -19,6 +19,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/transactions")
+@CrossOrigin(origins = "http://localhost:3000")
 public class TransactionController {
     @Autowired
     private TransactionHistoryService transactionService;
@@ -36,6 +37,7 @@ public class TransactionController {
 
         return transactionService.getTransactionHistoryByUserId(userId);
     }
+  
     @PostMapping
     public ApiResponse createTransaction(@RequestBody TransactionEntity transaction, HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
@@ -47,7 +49,4 @@ public class TransactionController {
         // Set user ID in the transaction
         //transaction.setUser(userId);
         //transaction.setUser(userId);
-
-        return transactionService.recordTransaction(transaction);
-    }
 }
