@@ -11,6 +11,7 @@ const AdminNavbar = ({ isAuthenticated }) => {
     setAnchorEl(event.currentTarget);
   };
 
+
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
@@ -62,7 +63,7 @@ const AdminNavbar = ({ isAuthenticated }) => {
 
                 {/* Logout */}
                 <button
-                  onClick={handleLogout}
+                 
                   className="relative px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg overflow-hidden group flex items-center space-x-2"
                 >
                   <Logout fontSize="small" />
@@ -73,7 +74,7 @@ const AdminNavbar = ({ isAuthenticated }) => {
             </>
           ) : (
             <Link
-              to="/admin-login"
+              to="/login"  onClick={handleLogout}
               className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg flex items-center space-x-2 hover:bg-blue-700 transition duration-300"
             >
               <AccountCircle fontSize="small" />

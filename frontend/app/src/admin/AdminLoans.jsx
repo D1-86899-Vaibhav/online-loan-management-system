@@ -11,6 +11,9 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import { confirmAlert } from "react-confirm-alert";
 import "react-confirm-alert/src/react-confirm-alert.css";
+import { Box, Card, CircularProgress } from '@mui/material';
+import AdminSidebar from './AdminSidebar';
+import AdminNavbar from './AdminNavbar';
 
 const AdminLoans = () => {
   const recordsCollectionRef = collection(db, "loans");
@@ -133,33 +136,52 @@ const AdminLoans = () => {
   };
 
   return (
-    <AdminLayout>
-      <div className="p-4">
-        {showModal && (
-          <CreateLoan
-            hideModal={hideModal}
-            editData={editData}
-            clientEmails={clientEmails}
-          />
-        )}
-        <h1 className="text-2xl font-semibold text-blue-600 mt-5">All Loans</h1>
-        <div className="mt-10">
-          <div className="flex justify-end mb-4">
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={() => {
-                setEditData(null);
-                setShowModal(true);
-              }}
-            >
-              Add Loan Account
-            </Button>
-          </div>
-          {!loading && <DataGridTable data={records} columns={recordColumns} />}
-        </div>
-      </div>
-    </AdminLayout>
+    <Box className="min-h-screen flex flex-col">
+      {/* Navbar */}
+      <AdminNavbar isAuthenticated={true} />
+
+      <Box className="flex flex-row flex-grow">
+        {/* Sidebar */}
+        <Box className="w-1/5 bg-gray-100 p-4">
+          <AdminSidebar />
+        </Box>
+
+        {/* Main Content */}
+        <Box className="w-4/5 p-6">
+          <Card className="p-6 shadow-lg">
+            {showModal && (
+              <CreateLoan
+                hideModal={hideModal}
+                editData={editData}
+                clientEmails={clientEmails}
+              />
+            )}
+            <h1 className="text-2xl font-semibold text-blue-600 mt-5">All Loans</h1>
+            <div className="mt-10">
+              <div className="flex justify-end mb-4">
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={() => {
+                    setEditData(null);
+                    setShowModal(true);
+                  }}
+                >
+                  Add Loan Account
+                </Button>
+              </div>
+              {!loading ? (
+                <DataGridTable data={records} columns={recordColumns} />
+              ) : (
+                <Box className="flex justify-center items-center h-40">
+                  <CircularProgress />
+                </Box>
+              )}
+            </div>
+          </Card>
+        </Box>
+      </Box>
+    </Box>
   );
 };
 

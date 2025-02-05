@@ -17,6 +17,8 @@ import {
 import UserSidebar from './UserSidebar';
 import Navbar from './Navbar';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const UserProfile = () => {
   const [userDetails, setUserDetails] = useState({
@@ -62,6 +64,7 @@ const UserProfile = () => {
     e.preventDefault();
     setUserDetails(formValues);
     setIsEditing(false);
+    toast.success('Profile updated successfully!');
   };
 
   const handlePasswordSubmit = (e) => {
@@ -69,8 +72,9 @@ const UserProfile = () => {
     if (passwordForm.newPassword === passwordForm.confirmPassword) {
       // Proceed with password change logic
       setIsChangingPassword(false);
+      toast.success('Password changed successfully!');
     } else {
-      alert('Passwords do not match!');
+      toast.error('Passwords do not match!');
     }
   };
 
@@ -88,6 +92,7 @@ const UserProfile = () => {
   return (
     <Box display="flex" minHeight="100vh" flexDirection="column">
       <Navbar />
+      <ToastContainer />
       <Box display="flex" flex={1}>
         <Box width={{ xs: '100%', md: '20%' }} minHeight="100vh">
           <UserSidebar />
@@ -187,7 +192,7 @@ const UserProfile = () => {
                     </Typography>
                     <Divider sx={{ mb: 2 }} />
                     <Grid container spacing={2}>
-                      <Grid item xs={12} sm={4}>
+                      <Grid item xs={12} sm={6}>
                         <TextField
                           label="Full Name"
                           variant="outlined"
@@ -198,7 +203,7 @@ const UserProfile = () => {
                           required
                         />
                       </Grid>
-                      <Grid item xs={12} sm={4}>
+                      <Grid item xs={12} sm={6}>
                         <TextField
                           label="Date of Birth"
                           variant="outlined"
@@ -211,7 +216,7 @@ const UserProfile = () => {
                           required
                         />
                       </Grid>
-                      <Grid item xs={12} sm={4}>
+                      <Grid item xs={12} sm={6}>
                         <TextField
                           label="Mobile Number"
                           variant="outlined"
@@ -223,7 +228,7 @@ const UserProfile = () => {
                           inputProps={{ maxLength: 13 }}
                         />
                       </Grid>
-                      <Grid item xs={12} sm={4}>
+                      <Grid item xs={12} sm={6}>
                         <FormControl fullWidth>
                           <InputLabel>Gender</InputLabel>
                           <Select
@@ -354,7 +359,7 @@ const UserProfile = () => {
                 {isChangingPassword && (
                   <form onSubmit={handlePasswordSubmit}>
                     <Typography variant="h6" gutterBottom>
-                      
+                      Change Password
                     </Typography>
                     <Grid container spacing={2}>
                       <Grid item xs={12} sm={4}>

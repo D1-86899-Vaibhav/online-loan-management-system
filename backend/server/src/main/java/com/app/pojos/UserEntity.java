@@ -50,7 +50,7 @@ public class UserEntity {
     @PrePersist
     private void setDefaultRole() {
         if (role == null) {
-            role = UserRole.ROLE_CUSTOMER;
+            role = UserRole.ROLE_USER;
         }
     }
 }

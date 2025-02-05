@@ -21,6 +21,7 @@ import com.app.dto.AuthRequest;
 import com.app.dto.AuthResp;
 import com.app.dto.UserDTO;
 import com.app.pojos.UserEntity;
+import com.app.security.CustomUserDetailsImpl;
 import com.app.security.JwtUtils;
 import com.app.service.UserService;
 
@@ -62,15 +63,31 @@ public class UserController {
     @Operation(description = "User login")
     public ResponseEntity<?> userSignIn(@RequestBody @Valid AuthRequest dto) {
         System.out.println("in login " + dto);
+        
         // Create authentication token using supplied email and password.
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword());
+
         // Authenticate the token using Spring Security.
         Authentication authToken = authenticationManager.authenticate(authenticationToken);
-        // Generate and return the JWT.
+
+        // Extract the authenticated user from Principal and cast it to CustomUserDetailsImpl
+        CustomUserDetailsImpl customUserDetails = (CustomUserDetailsImpl) authToken.getPrincipal();
+        
+        // Get the UserEntity from CustomUserDetailsImpl
+        UserEntity user = customUserDetails.getUserEntity();
+
+        // Generate JWT token
+        String token = jwtUtils.generateJwtToken(authToken);
+
+        // Return response with token and user role
         return ResponseEntity.status(HttpStatus.OK)
-                .body(new AuthResp("Successful Auth!", jwtUtils.generateJwtToken(authToken)));
+                .body(new AuthResp("Successful Auth!", token, user.getRole().name()));
     }
+
+    
+    
+    
     @PutMapping("/profile")
     public ResponseEntity<?> updateProfile(@RequestBody @Valid UserDTO user) {
         System.out.println("update user " + user);

@@ -1,31 +1,66 @@
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import axios from 'axios';
 
 export default function Login() {
-  const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [pass, setPass] = useState('');
+    const navigate = useNavigate();
+    const [email, setEmail] = useState('');
+    const [pass, setPass] = useState('');
 
-  // Replace with your actual API endpoint
-  const API_URL = 'http://localhost:8080/users/login';
+    const API_URL = 'http://localhost:8080/users/login';
 
-  const onLogin = async (e) => {
-    e.preventDefault();
+    const onLogin = async (e) => {
+        e.preventDefault();
 
-    if (email.trim() === '') {
-      toast.error("Please Enter a Valid Email!");
-      return;
-    }
-    if (pass.trim() === '') {
-      toast.error("Please Enter the Password!");
-      return;
-    }
+        if (email.trim() === '') {
+            toast.error("Please Enter a Valid Email!");
+            return;
+        }
+        if (pass.trim() === '') {
+            toast.error("Please Enter the Password!");
+            return;
+        }
 
-    const payload = {
-      email,
-      password: pass,
+        const payload = { email, password: pass };
+
+        try {
+            toast.loading("Logging in...", { id: "loginToast" });
+
+            // Make API call using axios
+            const response = await axios.post(API_URL, payload);
+
+            toast.dismiss("loginToast");
+
+            if (response.status === 200) {
+                const { token, role } = response.data; // Extract token & role from response
+
+                // Store token and role in sessionStorage
+                sessionStorage.setItem('authToken', token);
+                sessionStorage.setItem('userRole', role);
+
+                toast.success("Login Successful!");
+
+                // Redirect based on user role
+                if (role === 'ROLE_ADMIN') {
+                    navigate('/AdminDashboard');  // Admin dashboard
+                } else {
+                    navigate('/dashboard');  // User dashboard
+                }
+            }
+        } catch (error) {
+            toast.dismiss("loginToast");
+
+            // Handle error gracefully
+            if (error.response) {
+                toast.error(error.response.data.message || "Login failed.");
+            } else {
+                toast.error("An error occurred. Please try again.");
+            }
+
+            console.error("Login error:", error);
+        }
     };
 
     try {
