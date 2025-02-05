@@ -172,7 +172,7 @@ export default function App() {
         }
       />
 
-      {/* Logout Route (accessible publicly if needed, or you can wrap it with ProtectedRoute as well) */}
+      {/* Logout Route */}
       <Route path="logout" element={<Logout />} />
 
       {/* Catch-all route */}
