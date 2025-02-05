@@ -20,6 +20,7 @@ const Navbar = ({ isAuthenticated }) => {
   };
 
   const handleLogout = () => {
+    
     console.log("Logging out...");
   };
 

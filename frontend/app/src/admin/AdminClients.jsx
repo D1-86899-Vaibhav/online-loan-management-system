@@ -12,6 +12,7 @@ import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
 import AdminSidebar from './AdminSidebar';
 import AdminNavbar from './AdminNavbar';
+import { Box, Card, CircularProgress } from '@mui/material';
 
 const AdminClients = () => {
     const recordsCollectionRef = collection(db, "clients");
@@ -90,26 +91,43 @@ const AdminClients = () => {
             setRecords(records.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
         } catch (error) {
             console.error("Error fetching users:", error);
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
-        <div style={{ display: 'flex', minHeight: '100vh' }}>
-            <AdminSidebar />
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                <AdminNavbar isAuthenticated={true} />
-                <div className='p-4 mx-4'>
-                    {showModal && <CreateClient hideModal={hideModal} editData={editData} />}
-                    <h1 className='mt-5 text-2xl text-blue-600'>All Clients</h1>
-                    <div className='mt-10'>
-                        <div className='my-3 flex justify-end mr-4'>
-                            <Button variant="outlined" size="small" onClick={() => { setEditData(null); setShowModal(true) }}>Add Client</Button>
+        <Box className="min-h-screen flex flex-col">
+            {/* Navbar */}
+            <AdminNavbar isAuthenticated={true} />
+
+            <Box className="flex flex-row flex-grow">
+                {/* Sidebar */}
+                <Box className="w-1/5 bg-gray-100 p-4">
+                    <AdminSidebar />
+                </Box>
+
+                {/* Main Content */}
+                <Box className="w-4/5 p-6">
+                    <Card className="p-6 shadow-lg">
+                        {showModal && <CreateClient hideModal={hideModal} editData={editData} />}
+                        <h1 className='mt-5 text-2xl text-blue-600'>All Clients</h1>
+                        <div className='mt-10'>
+                            <div className='my-3 flex justify-end mr-4'>
+                                <Button variant="outlined" size="small" onClick={() => { setEditData(null); setShowModal(true) }}>Add Client</Button>
+                            </div>
+                            {!loading ? (
+                                <DataGridTable data={records} columns={recordColumns} />
+                            ) : (
+                                <Box className="flex justify-center items-center h-40">
+                                    <CircularProgress />
+                                </Box>
+                            )}
                         </div>
-                        {!loading && <DataGridTable data={records} columns={recordColumns} />}
-                    </div>
-                </div>
-            </div>
-        </div>
+                    </Card>
+                </Box>
+            </Box>
+        </Box>
     );
 };
 
