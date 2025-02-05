@@ -20,6 +20,9 @@ const Navbar = ({ isAuthenticated }) => {
   };
 
   const handleLogout = () => {
+    
+    console.log("Logging out...");
+
     // Clear sessionStorage when logging out
     sessionStorage.removeItem('authToken');
     sessionStorage.removeItem('userRole');
@@ -29,6 +32,7 @@ const Navbar = ({ isAuthenticated }) => {
 
     // Redirect user to the login page (or homepage if you prefer)
     navigate('/login');
+
   };
 
   return (

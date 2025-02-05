@@ -1,16 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import AdminSidebar from './AdminSidebar';
-import DataGridTable from '../components/DataGridTable';
+import React, { useEffect, useState } from "react";
+import { Box, Card, Button, CircularProgress } from "@mui/material";
+import AdminSidebar from "./AdminSidebar";
+import AdminNavbar from "./AdminNavbar";
+import DataGridTable from "../components/DataGridTable";
 import { collection, getDocs, deleteDoc, doc, getDoc } from "firebase/firestore";
-import { db } from '../firebase';
-import Button from '@mui/material/Button';
-import CreateEmi from '../components/modal/createEmi';
-import columns from '../components/columns/EmiColumns';
-import { GridActionsCellItem } from '@mui/x-data-grid';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/DeleteOutlined';
-import { confirmAlert } from 'react-confirm-alert';
-import 'react-confirm-alert/src/react-confirm-alert.css';
+import { db } from "../firebase";
+import CreateEmi from "../components/modal/createEmi";
+import columns from "../components/columns/EmiColumns";
+import { GridActionsCellItem } from "@mui/x-data-grid";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/DeleteOutlined";
+import { confirmAlert } from "react-confirm-alert";
+import "react-confirm-alert/src/react-confirm-alert.css";
 
 const AdminEmi = () => {
     const recordsCollectionRef = collection(db, "emis");
@@ -26,7 +27,7 @@ const AdminEmi = () => {
     const fetchLoanEmails = async () => {
         try {
             const loanDocs = await getDocs(loansCollectionRef);
-            const loans = loanDocs.docs.map(doc => ({ loanId: doc.id }));
+            const loans = loanDocs.docs.map((doc) => ({ loanId: doc.id }));
             setLoanEmails(loans);
         } catch (error) {
             console.error("Error fetching loan emails:", error.message);
@@ -37,7 +38,7 @@ const AdminEmi = () => {
     const fetchEmis = async () => {
         try {
             const emiDocs = await getDocs(recordsCollectionRef);
-            const emiData = emiDocs.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            const emiData = emiDocs.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
             setRecords(emiData);
         } catch (error) {
             console.error("Error fetching EMI records:", error.message);
@@ -49,24 +50,14 @@ const AdminEmi = () => {
     // Add actions column dynamically
     const initializeColumns = () => {
         const actionColumn = {
-            field: 'actions',
-            type: 'actions',
-            headerName: 'Actions',
+            field: "actions",
+            type: "actions",
+            headerName: "Actions",
             width: 100,
-            cellClassName: 'actions',
+            cellClassName: "actions",
             getActions: ({ id }) => [
-                <GridActionsCellItem
-                    icon={<EditIcon />}
-                    label="Edit"
-                    onClick={() => handleEditClick(id)}
-                    color="inherit"
-                />,
-                <GridActionsCellItem
-                    icon={<DeleteIcon />}
-                    label="Delete"
-                    onClick={() => handleDeleteClick(id)}
-                    color="inherit"
-                />,
+                <GridActionsCellItem icon={<EditIcon />} label="Edit" onClick={() => handleEditClick(id)} color="inherit" />,
+                <GridActionsCellItem icon={<DeleteIcon />} label="Delete" onClick={() => handleDeleteClick(id)} color="inherit" />,
             ],
         };
         setRecordColumns([...columns, actionColumn]);
@@ -95,11 +86,11 @@ const AdminEmi = () => {
 
     const handleDeleteClick = (id) => {
         confirmAlert({
-            title: 'Confirm Deletion',
-            message: 'Are you sure you want to delete this record?',
+            title: "Confirm Deletion",
+            message: "Are you sure you want to delete this record?",
             buttons: [
-                { label: 'Yes', onClick: () => handleDelete(id) },
-                { label: 'No' },
+                { label: "Yes", onClick: () => handleDelete(id) },
+                { label: "No" },
             ],
         });
     };
@@ -108,47 +99,51 @@ const AdminEmi = () => {
         try {
             const recordDocRef = doc(recordsCollectionRef, id);
             await deleteDoc(recordDocRef);
-            setRecords((prevRecords) => prevRecords.filter(record => record.id !== id));
+            setRecords((prevRecords) => prevRecords.filter((record) => record.id !== id));
         } catch (error) {
             console.error("Error deleting record:", error.message);
         }
     };
 
     return (
-        <div className="flex min-h-screen">
-            {/* Sidebar */}
-            <div className="w-1/5">
-                <AdminSidebar />
-            </div>
+        <Box className="min-h-screen flex flex-col">
+            {/* Navbar */}
+            <AdminNavbar isAuthenticated={true} />
 
-            {/* Main Content */}
-            <div className="w-4/5 p-4">
-                {showModal && (
-                    <CreateEmi
-                        hideModal={() => setShowModal(false)}
-                        editData={editData}
-                        loanEmails={loanEmails}
-                    />
-                )}
-                <h1 className="mt-5 text-2xl text-blue-600">All EMIs</h1>
-                <div className="mt-10">
-                    <div className="my-3 flex justify-end mr-4">
-                        <Button
-                            variant="outlined"
-                            size="small"
-                            onClick={() => { setEditData(null); setShowModal(true); }}
-                        >
-                            Add EMI
-                        </Button>
-                    </div>
-                    {!loading ? (
-                        <DataGridTable data={records} columns={recordColumns} />
-                    ) : (
-                        <p>Loading...</p>
-                    )}
-                </div>
-            </div>
-        </div>
+            <Box className="flex flex-row flex-grow">
+                {/* Sidebar */}
+                <Box className="w-1/5 bg-gray-100 p-4">
+                    <AdminSidebar />
+                </Box>
+
+                {/* Main Content */}
+                <Box className="w-4/5 p-6">
+                    <Card className="p-6 shadow-lg">
+                        {showModal && (
+                            <CreateEmi hideModal={() => setShowModal(false)} editData={editData} loanEmails={loanEmails} />
+                        )}
+
+                        <h1 className="text-2xl font-bold text-blue-600 mb-4">All EMIs</h1>
+
+                        {/* Add EMI Button */}
+                        <div className="flex justify-end mb-4">
+                            <Button variant="contained" color="primary" onClick={() => { setEditData(null); setShowModal(true); }}>
+                                Add EMI
+                            </Button>
+                        </div>
+
+                        {/* Data Grid Table */}
+                        {!loading ? (
+                            <DataGridTable data={records} columns={recordColumns} />
+                        ) : (
+                            <Box className="flex justify-center items-center h-40">
+                                <CircularProgress />
+                            </Box>
+                        )}
+                    </Card>
+                </Box>
+            </Box>
+        </Box>
     );
 };
 
