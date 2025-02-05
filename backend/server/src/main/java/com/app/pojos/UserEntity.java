@@ -53,4 +53,5 @@ public class UserEntity {
             role = UserRole.ROLE_USER;
         }
     }
+    
 }
