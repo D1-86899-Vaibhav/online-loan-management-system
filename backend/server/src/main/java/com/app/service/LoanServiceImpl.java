@@ -1,12 +1,20 @@
 package com.app.service;
 
 import com.app.dto.ApiResponse;
+import com.app.dto.LoanDetailsResp;
+import com.app.dto.LoanSummaryResp;
 import com.app.pojos.LoanEntity;
+import com.app.pojos.LoanStatus;
 import com.app.repository.LoanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -18,27 +26,38 @@ public class LoanServiceImpl implements LoanService {
 	@Autowired
 	private LoanRepository loanRepository;
 
-	@Override
-	public List<LoanEntity> getLoansByUserId(Long userId) {
-		return loanRepository.findByUserId(userId);
-	}
+	public List<LoanSummaryResp> getLoanSummaryByUserId(Long userId) {
+        // Fetch existing summaries from the repository
+        List<LoanSummaryResp> summaries = loanRepository.findLoanSummaryByUserId(userId);
+
+        // Convert the list to a map for easy lookup
+        Map<String, LoanSummaryResp> summaryMap = new HashMap<>();
+        for (LoanSummaryResp summary : summaries) {
+            summaryMap.put(summary.getStatus(), summary);
+        }
+
+        // Create a list to hold the final results
+        List<LoanSummaryResp> finalSummaries = new ArrayList<>();
+
+        // Loop through all possible statuses
+        for (LoanStatus status : LoanStatus.values()) {
+            LoanSummaryResp summary = summaryMap.get(status.name());
+            if (summary == null) {
+                // Create a new summary with zero count and zero totalAmount
+                summary = new LoanSummaryResp(status, 0L, 0.0);
+            }
+            finalSummaries.add(summary);
+        }
+
+        return finalSummaries;
+    }
 
 	@Override
-	public ApiResponse createLoan(LoanEntity loan) {
-		LoanEntity savedLoan = loanRepository.save(loan);
-		return new ApiResponse("Loan created with ID " + savedLoan.getId());
+	public List<LoanDetailsResp> getLoansByUserId(Long userId) {
+		return loanRepository.findLoanDetailsByUserId(userId);
 	}
+	
+	
+	
 
-	@Override
-	public Map<String, Object> getLoanStatusSummary(Long userId) {
-		List<LoanEntity> loans = loanRepository.findByUserId(userId);
-
-		Map<String, Long> countByStatus = loans.stream()
-				.collect(Collectors.groupingBy(loan -> loan.getStatus().name(), Collectors.counting()));
-
-		Map<String, Double> totalAmountByStatus = loans.stream().collect(Collectors
-				.groupingBy(loan -> loan.getStatus().name(), Collectors.summingDouble(LoanEntity::getLoanAmount)));
-
-		return Map.of("countByStatus", countByStatus, "totalAmountByStatus", totalAmountByStatus);
-	}
 }

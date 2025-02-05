@@ -1,12 +1,11 @@
 package com.app.pojos;
 
-import java.util.List;
-
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "users")
@@ -15,47 +14,43 @@ import lombok.ToString;
 @Setter
 @ToString(callSuper = true, exclude = { "password" })
 public class UserEntity {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "user_id")
-	private Long id;
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
+    private Long id;
 
-	@Column(name = "first_name", length = 20)
-	private String firstName;
+    @Column(name = "first_name", length = 20)
+    private String firstName;
 
-	@Column(name = "last_name", length = 20)
-	private String lastName;
+    @Column(name = "last_name", length = 20)
+    private String lastName;
 
-	@Column(length = 100, unique = true)
-	private String email;
+    @Column(length = 100, unique = true)
+    private String email;
 
-	@Column(length = 500, nullable = false)
-	private String password;
+    @Column(length = 500, nullable = false)
+    private String password;
 
-	@Column(length = 15, nullable = false, name = "phone_number")
-	private String phone;
+    @Column(length = 15, nullable = false, name = "phone_number")
+    private String phone;
 
-	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "user")
-	@JoinColumn(name = "wallet_id", referencedColumnName = "wallet_id")
-	private WalletEntity wallet;
+    // If you do not need to navigate from WalletEntity back to UserEntity,
+    // you can use a unidirectional relationship (and remove the user reference in WalletEntity).
+    // Otherwise, if a bidirectional link is required, use @JsonIgnoreProperties here.
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "wallet_id")
+    @JsonIgnoreProperties("user") // When serializing a user, ignore the 'user' field in WalletEntity.
+    private WalletEntity wallet;
 
-	@OneToMany(mappedBy = "user")
-	private List<LoanApplication> loanApplications;
+    @Enumerated(EnumType.STRING)
+    @Column(length = 30)
+    private UserRole role;
 
-	@OneToMany(mappedBy = "user")
-	private List<LoanEntity> loans;
-
-	@OneToMany(mappedBy = "user")
-	private List<TransactionEntity> transactions;
-
-	@Enumerated(EnumType.STRING)
-	@Column(length = 30)
-	private UserRole role;
-
-	@PrePersist
-	private void setDefaultRole() {
-		if (role == null) {
-			role = UserRole.ROLE_CUSTOMER;
-		}
-	}
+    @PrePersist
+    private void setDefaultRole() {
+        if (role == null) {
+            role = UserRole.ROLE_CUSTOMER;
+        }
+    }
 }
