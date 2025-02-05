@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Typography, Button, Box, TextField } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import { ToastContainer, toast } from "react-toastify";
@@ -10,11 +10,9 @@ import TableContainer from "@mui/material/TableContainer";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import FormControl from "@mui/material/FormControl";
-import Container from "@mui/material/Container";
-import Card from "@mui/material/Card";
-import AdminSidebar from "./AdminSidebar";
+import AdminLayout from "./AdminLayout";
 
-export default function AdminCalculator() {
+const AdminCalculator = () => {
   const [amount, setAmount] = useState(0);
   const [interest, setInterest] = useState(0);
   const [time, setTime] = useState(0);
@@ -63,97 +61,89 @@ export default function AdminCalculator() {
   };
 
   return (
-    <AdminSidebar>
+    <AdminLayout>
       <ToastContainer />
-      <Container className="mt-10">
-        <Card>
-          <div style={{ overflowY: "auto", padding: "40px" }}>
-            <Typography variant="h5" align="center">
-              Loan Calculator
-            </Typography>
-            <Box sx={{ m: 2 }} />
-            <Grid container spacing={2}>
-              <Grid item md={6} xs={12}>
-                <Box sx={{ m: 2 }} />
-                <TextField
-                  label="Enter loan Amount"
-                  type="number"
-                  variant="outlined"
-                  name="loan_amount"
-                  onChange={handlePrincipalchange}
-                  value={principal}
-                  sx={{ minWidth: "92%" }}
-                />
-                <Box sx={{ m: 2 }} />
-                <TextField
-                  label="Enter interest rate"
-                  variant="outlined"
-                  type="number"
-                  name="interest_rate"
-                  onChange={handleInterestchange}
-                  value={interest}
-                  sx={{ minWidth: "92%" }}
-                />
-                <Box sx={{ m: 2 }} />
-                <TextField
-                  label="Enter loan period in month"
-                  variant="outlined"
-                  type="number"
-                  name="loan_period_in_month"
-                  onChange={handleTimechange}
-                  value={time}
-                  sx={{ minWidth: "92%" }}
-                />
-                <Box
-                  m={1}
-                  display="flex"
-                  justifyContent="center"
-                  alignItems="center"
-                >
-                  <FormControl
-                    size="large"
-                    align="center"
-                    style={{ marginTop: "10px" }}
-                  >
-                    <Button
-                      variant="outlined"
-                      size="large"
-                      onClick={calculateLoan}
-                    >
-                      Calculate
-                    </Button>
-                  </FormControl>
-                </Box>
-              </Grid>
-              <Grid
-                item
-                md={6}
-                xs={12}
-                alignItems="center"
-                justifyContent="center"
-              >
-                <Box sx={{ m: 2 }} />
-                <TableContainer component={Paper}>
-                  <Table aria-label="simple table">
-                    <TableBody>
-                      <TableRow>
-                        <TableCell align="center">
-                          <Typography variant="p">Loan EMI</Typography>
-                          <Box sx={{ m: 1 }} />
-                          <Typography variant="h6" className="font-bold">
-                            ₹ {emi}
-                          </Typography>
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </Grid>
-            </Grid>
-            <Box sx={{ m: 4 }} />
-          </div>
-        </Card>
-      </Container>
-    </AdminSidebar>
+      <Typography variant="h5" align="center">
+        Loan Calculator
+      </Typography>
+      <Box sx={{ m: 2 }} />
+      <Grid container spacing={2}>
+        <Grid item md={6} xs={12}>
+          <Box sx={{ m: 2 }} />
+          <TextField
+            label="Enter loan Amount"
+            type="number"
+            variant="outlined"
+            name="loan_amount"
+            onChange={handlePrincipalchange}
+            value={principal}
+            sx={{ minWidth: "92%" }}
+          />
+          <Box sx={{ m: 2 }} />
+          <TextField
+            label="Enter interest rate"
+            variant="outlined"
+            type="number"
+            name="interest_rate"
+            onChange={handleInterestchange}
+            value={interest}
+            sx={{ minWidth: "92%" }}
+          />
+          <Box sx={{ m: 2 }} />
+          <TextField
+            label="Enter loan period in month"
+            variant="outlined"
+            type="number"
+            name="loan_period_in_month"
+            onChange={handleTimechange}
+            value={time}
+            sx={{ minWidth: "92%" }}
+          />
+          <Box
+            m={1}
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+          >
+            <FormControl
+              size="large"
+              align="center"
+              style={{ marginTop: "10px" }}
+            >
+              <Button variant="outlined" size="large" onClick={calculateLoan}>
+                Calculate
+              </Button>
+            </FormControl>
+          </Box>
+        </Grid>
+        <Grid
+          item
+          md={6}
+          xs={12}
+          alignItems="center"
+          justifyContent="center"
+        >
+          <Box sx={{ m: 2 }} />
+          <TableContainer component={Paper}>
+            <Table aria-label="simple table">
+              <TableBody>
+                <TableRow>
+                  <TableCell align="center">
+                    <Typography variant="p">Loan EMI</Typography>
+                    <Box sx={{ m: 1 }} />
+                    <Typography variant="h6" className="font-bold">
+                      ₹ {emi}
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Grid>
+      </Grid>
+      <Box sx={{ m: 4 }} />
+    </AdminLayout>
   );
-}
+};
+
+export default AdminCalculator;

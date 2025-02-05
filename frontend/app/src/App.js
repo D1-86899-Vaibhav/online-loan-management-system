@@ -21,7 +21,7 @@ import AdminDashboard from './admin/AdminDashboard';
 import AdminClients from './admin/AdminClients';
 import AdminLoans from './admin/AdminLoans';
 import AdminEMI from './admin/AdminEMI';
-
+import AdminLogout from './admin/AdminLogout';
 // User Routes
 import Dashboard from './user/Dashboard';
 import LoanDetails from './user/LoanDetails';
@@ -56,7 +56,7 @@ export default function App() {
       <Route path="AdminCalculator" element={<AdminCalculator/>} /> 
       <Route path="AdminUsers" element={<AdminUsers/>} /> 
       <Route path="AdminContact" element={<AdminContact/>} /> 
-
+      <Route path="logout" element={<AdminLogout />} />
 
 
       {/* User Routes */}
