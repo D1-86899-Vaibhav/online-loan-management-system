@@ -22,7 +22,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const UserProfile = () => {
   const [userDetails, setUserDetails] = useState({
-    name: 'Amol Dangi',
+    name: 'Amol',
     email: 'amol.dangi@example.com',
     phone: '+91-123-456-7890',
     gender: 'Male',
@@ -98,8 +98,8 @@ const UserProfile = () => {
           <UserSidebar />
         </Box>
         <Box width={{ xs: '100%', md: '80%' }} p={4}>
-          <Typography variant="h4" color="primary" gutterBottom>
-            User Profile
+          <Typography variant="h5" color="primary" gutterBottom>
+            USER PROFILE
           </Typography>
 
           <Card sx={{ p: 3, maxWidth: 900, margin: '0 auto' }}>
@@ -138,9 +138,9 @@ const UserProfile = () => {
                     </IconButton>
                   )}
                 </Box>
-                <Typography variant="h5" color="primary">
-                  {userDetails.name}
-                </Typography>
+                {/* <Typography variant="h6" color="primary">
+                   {userDetails.name}
+                </Typography> */}
                 {!isEditing && (
                   <Button
                     variant="contained"
@@ -157,25 +157,43 @@ const UserProfile = () => {
               <Grid item xs={12} md={8}>
                 {!isEditing ? (
                   <>
-                    <Typography variant="h5" gutterBottom>
-                      Personal Information
+                    <Typography variant="h6" gutterBottom
+                      sx={{
+
+                        color: "#1565c0", // A deep blue for better visibility
+                        fontWeight: "bold",
+
+
+                      }}
+
+
+
+
+                    >
+                      PERSONAL INFORMATION
                     </Typography>
                     <Divider sx={{ mb: 2 }} />
                     <DetailItem label="Full Name" value={userDetails.name} />
                     <DetailItem label="Date of Birth" value={userDetails.dob} />
                     <DetailItem label="Mobile Number" value={userDetails.phone} />
                     <DetailItem label="Gender" value={userDetails.gender} />
-                    <Typography variant="h5" gutterBottom sx={{ mt: 4 }}>
+                    {/* <Typography variant="h5" gutterBottom sx={{ mt: 4 }}>
                       Account Details
-                    </Typography>
-                    <Divider sx={{ mb: 2 }} />
+                    </Typography> */}
+                    {/* <Divider sx={{ mb: 2 }} /> */}
                     <DetailItem label="Email Address" value={userDetails.email} />
-                    <DetailItem label="Last Login" value={userDetails.lastLogin} />
-                    <DetailItem label="Registration Method" value={userDetails.regMethod} />
+
 
                     {/* Change Password Section */}
-                    <Typography variant="h5" gutterBottom sx={{ mt: 4 }}>
-                      Change Password
+                    <Typography variant="h6" gutterBottom
+                      sx={{
+
+                        color: "#1565c0", // A deep blue for better visibility
+                        fontWeight: "bold",
+
+
+                      }}>
+                      CHNAGE PASSWORD
                     </Typography>
                     <Button
                       variant="outlined"
@@ -188,7 +206,7 @@ const UserProfile = () => {
                 ) : (
                   <form onSubmit={handleSubmit}>
                     <Typography variant="h5" gutterBottom>
-                      Edit Personal Information
+                      EDIT PERSONAL INFORMATION
                     </Typography>
                     <Divider sx={{ mb: 2 }} />
                     <Grid container spacing={2}>
@@ -336,22 +354,15 @@ const UserProfile = () => {
                         />
                       </Grid>
                     </Grid>
-                    <Box display="flex" justifyContent="space-between" mt={3}>
-                      <Button
-                        variant="contained"
-                        color="success"
-                        type="submit"
-                      >
+                    <Box display="flex" gap={2} mt={3}>
+                      <Button variant="contained" color="success" type="submit">
                         Save
                       </Button>
-                      <Button
-                        variant="contained"
-                        color="error"
-                        onClick={() => setIsEditing(false)}
-                      >
+                      <Button variant="contained" color="error" onClick={() => setIsEditing(false)}>
                         Cancel
                       </Button>
                     </Box>
+
                   </form>
                 )}
 
@@ -399,12 +410,8 @@ const UserProfile = () => {
                         />
                       </Grid>
                     </Grid>
-                    <Box display="flex" justifyContent="space-between" mt={3}>
-                      <Button
-                        variant="contained"
-                        color="success"
-                        type="submit"
-                      >
+                    <Box display="flex" gap={2} mt={3}>
+                      <Button variant="contained" color="success" type="submit">
                         Change Password
                       </Button>
                       <Button
@@ -415,6 +422,7 @@ const UserProfile = () => {
                         Cancel
                       </Button>
                     </Box>
+
                   </form>
                 )}
               </Grid>

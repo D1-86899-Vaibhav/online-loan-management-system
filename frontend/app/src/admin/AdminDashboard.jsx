@@ -14,8 +14,10 @@ import CreditScoreIcon from '@mui/icons-material/CreditScore';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import { Box } from '@mui/material';
+import axios from 'axios';
 
 const AdminDashboard = () => {
+  const [registeredUsersCount, setRegisteredUsersCount] = useState(0);
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
   const [clientsCount, setClientsCount] = useState(0);
@@ -29,6 +31,12 @@ const AdminDashboard = () => {
       try {
         const clientsSnapshot = await getDocs(collection(db, 'clients'));
         setClientsCount(clientsSnapshot.size);
+
+        const response = await axios.get('http://localhost:8080/api/users/AllUsers/count');
+        setRegisteredUsersCount(response.data); // Set the registered users count
+
+       
+
 
         const loanAccountsSnapshot = await getDocs(collection(db, 'loans'));
         setLoanAccountsCount(loanAccountsSnapshot.size);
@@ -88,8 +96,8 @@ const AdminDashboard = () => {
                       <CreditScoreIcon className="text-blue-500" />
                     </div>
                     <div className="ml-5 mt-6">
-                      <div className="font-semibold text-xl">{loanAccountsCount}</div>
-                      <div className="text-xs text-slate-500 font-semibold">Loan Accounts</div>
+                      <div className="font-semibold text-xl">{registeredUsersCount}</div>
+                      <div className="text-xs text-slate-500 font-semibold">User Accounts</div>
                     </div>
                   </div>
                 </div>
@@ -131,9 +139,11 @@ const AdminDashboard = () => {
                 <div className={`rounded-lg flex justify-center p-2 shadow-md ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
                   <TwoSimplePieChart client={clientsCount} loan={loanAccountsCount} emi={emiAccountsCount} />
                 </div>
-                <div className={`rounded-lg flex justify-center p-2 shadow-md ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
+                
+                {/* <div className={`rounded-lg flex justify-center p-2 shadow-md ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
                   <PieChartWithPaddingAngle client={clientsCount} loan={loanAccountsCount} emi={emiAccountsCount} />
-                </div>
+                </div> */}
+
               </div>
             </div>
 
