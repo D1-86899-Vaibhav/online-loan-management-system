@@ -29,12 +29,12 @@ const columns = [
             </span>
         ),
     },
-    {
-        field: 'creditScore',
-        headerName: 'Credit Score',
-        width: 150,
-        editable: true,
-    },
+    // {
+    //     field: 'creditScore',
+    //     headerName: 'Credit Score',
+    //     width: 150,
+    //     editable: true,
+    // },
     {
         field: 'dob',
         headerName: 'DOB',
