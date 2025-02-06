@@ -19,7 +19,7 @@ public class LoanDetailsResp {
 	 private Long id;
 	    private Double loanAmount;
 	    private Double emiAmount;
-	    private String duration;
+	    private Integer duration;
 	    private LocalDate startDate;
 	    private LocalDate endDate;
 	    private Integer totalEMI;
@@ -30,7 +30,7 @@ public class LoanDetailsResp {
 	    private String status;
 	    
 	    // Constructor matching the query
-	    public LoanDetailsResp(Long id, Double loanAmount, Double emiAmount, String duration,
+	    public LoanDetailsResp(Long id, Double loanAmount, Double emiAmount, Integer duration,
 	                           LocalDate startDate, LocalDate endDate, Integer totalEmi,
 	                           Integer paidEmi, Integer remainingEmi, LocalDate lastEmiDate,
 	                           LocalDate nextEmiDate, LoanStatus status) {

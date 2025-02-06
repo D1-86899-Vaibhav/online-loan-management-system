@@ -31,7 +31,7 @@ public class SecurityConfiguration {
                     .permitAll()
                 .requestMatchers(HttpMethod.OPTIONS).permitAll()
                 // Wallet endpoints: Adjust permission as needed.
-                .requestMatchers("/users/wallet/withdraw-funds","/transactions","/users/wallet/add-funds","/loans/summary","/loans/details").hasRole("USER")
+                .requestMatchers("/users/wallet/withdraw-funds","/transactions","/users/wallet/add-funds","/loans/summary","/loans/details","/loan-applications/apply").hasRole("USER")
                 .requestMatchers("/products/add", "/products/delete").hasRole("ADMIN")
                 .anyRequest().authenticated())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

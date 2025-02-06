@@ -26,9 +26,25 @@ public class LoanServiceImpl implements LoanService {
 	@Autowired
 	private LoanRepository loanRepository;
 
+	/**
+     * Creates and saves a new loan record.
+     * This method can be used to create a pending loan when a loan application is submitted.
+     *
+     * @param loanEntity the loan record to be created
+     * @return the saved LoanEntity
+     */
+    @Override
+    public LoanEntity createLoan(LoanEntity loanEntity) {
+        return loanRepository.save(loanEntity);
+    }
+	
+	
 	public List<LoanSummaryResp> getLoanSummaryByUserId(Long userId) {
         // Fetch existing summaries from the repository
-        List<LoanSummaryResp> summaries = loanRepository.findLoanSummaryByUserId(userId);
+		List<Object[]> results = loanRepository.findLoanSummaryByUserId(userId);
+		List<LoanSummaryResp> summaries = results.stream()
+		    .map(obj -> new LoanSummaryResp((String) obj[0], ((Number) obj[1]).longValue(), ((Number) obj[2]).doubleValue()))
+		    .collect(Collectors.toList());
 
         // Convert the list to a map for easy lookup
         Map<String, LoanSummaryResp> summaryMap = new HashMap<>();
