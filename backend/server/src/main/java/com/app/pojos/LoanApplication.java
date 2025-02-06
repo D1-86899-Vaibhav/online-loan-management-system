@@ -19,38 +19,6 @@ public class LoanApplication {
     @JoinColumn(name = "user_id", nullable = true)
     private UserEntity user;
 
-    // Personal Information
-    @Column(name = "full_name")
-    private String fullName;
-
-    @Column(name = "email")
-    private String email;
-
-    @Column(name = "phone")
-    private String phone;
-
-    @Column(name = "date_of_birth")
-    private LocalDate dateOfBirth;
-
-    @Column(name = "gender")
-    private String gender;
-
-    @Column(name = "marital_status")
-    private String maritalStatus;
-
-    // Address details
-    @Column(name = "address")
-    private String address;
-
-    @Column(name = "city")
-    private String city;
-
-    @Column(name = "state")
-    private String state;
-
-    @Column(name = "zip_code")
-    private String zipCode;
-
     // Loan Details
     @Column(name = "loan_amount")
     private Double loanAmount;
@@ -58,12 +26,16 @@ public class LoanApplication {
     @Column(name = "loan_purpose")
     private String loanPurpose;
 
-    @Column(name = "monthly_income")
-    private Double monthlyIncome;
 
-    @Column(name = "employment_status")
-    private String employmentStatus;
 
-    @Column(name = "loan_term")
-    private String loanTerm;
+    @Column(name = "loan_period")
+    private Integer loanPeriod;
+
+    @Column(name = "interest_rate")
+    private Double interestRate;
+
+    // Application Status
+    @Enumerated(EnumType.STRING)
+    @Column(name = "application_status", nullable = false)
+    private LoanApplicationStatus applicationStatus = LoanApplicationStatus.PENDING;
 }

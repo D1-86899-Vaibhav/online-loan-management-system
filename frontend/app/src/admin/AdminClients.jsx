@@ -13,6 +13,7 @@ import 'react-confirm-alert/src/react-confirm-alert.css';
 import AdminSidebar from './AdminSidebar';
 import AdminNavbar from './AdminNavbar';
 import { Box, Card, CircularProgress } from '@mui/material';
+import { updateDoc } from "firebase/firestore";
 
 const AdminClients = () => {
     const recordsCollectionRef = collection(db, "clients");
@@ -22,6 +23,25 @@ const AdminClients = () => {
     const [loading, setLoading] = useState(true);
     const [recordColumns, setRecordColumns] = useState(columns);
 
+    // useEffect(() => {
+    //     const hasActionColumn = columns.some((col) => col.field === 'actions');
+    //     if (!hasActionColumn) {
+    //         const actionColumn = {
+    //             field: 'actions',
+    //             type: 'actions',
+    //             headerName: 'Actions',
+    //             width: 100,
+    //             cellClassName: 'actions',
+    //             getActions: ({ id }) => [
+    //                 <GridActionsCellItem icon={<EditIcon />} label="Edit" onClick={() => handleEditClick(id)} color="inherit" />,
+    //                 <GridActionsCellItem icon={<DeleteIcon />} label="Delete" onClick={() => handleDeleteClick(id)} color="inherit" />,
+    //             ],
+    //         };
+    //         setRecordColumns([...columns, actionColumn]);
+    //     }
+    //     setLoading(false);
+    // }, []);
+
     useEffect(() => {
         const hasActionColumn = columns.some((col) => col.field === 'actions');
         if (!hasActionColumn) {
@@ -29,11 +49,35 @@ const AdminClients = () => {
                 field: 'actions',
                 type: 'actions',
                 headerName: 'Actions',
-                width: 100,
+                width: 250, // Increase the width of the actions column
                 cellClassName: 'actions',
                 getActions: ({ id }) => [
-                    <GridActionsCellItem icon={<EditIcon />} label="Edit" onClick={() => handleEditClick(id)} color="inherit" />,
-                    <GridActionsCellItem icon={<DeleteIcon />} label="Delete" onClick={() => handleDeleteClick(id)} color="inherit" />,
+                    // Approve Button with Tailwind classes
+                    <GridActionsCellItem
+                        icon={
+                            <button
+                                className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md"
+                                onClick={() => handleApproveClick(id)}
+                            >
+                                Approve
+                            </button>
+                        }
+                        label="Approve"
+                        color="inherit"
+                    />,
+                    // Reject Button with Tailwind classes
+                    <GridActionsCellItem
+                        icon={
+                            <button
+                                className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md"
+                                onClick={() => handleRejectClick(id)}
+                            >
+                                Reject
+                            </button>
+                        }
+                        label="Reject"
+                        color="inherit"
+                    />,
                 ],
             };
             setRecordColumns([...columns, actionColumn]);
@@ -41,41 +85,65 @@ const AdminClients = () => {
         setLoading(false);
     }, []);
 
-    const handleEditClick = async (id) => {
+
+    // const handleEditClick = async (id) => {
+    //     try {
+    //         const recordDocRef = doc(recordsCollectionRef, id);
+    //         const recordDoc = await getDoc(recordDocRef);
+    //         if (recordDoc.exists()) {
+    //             setEditData({ id: recordDoc.id, ...recordDoc.data() });
+    //             setShowModal(true);
+    //         } else {
+    //             console.log("No such document found!");
+    //         }
+    //     } catch (error) {
+    //         console.error("Error fetching record:", error);
+    //     }
+    // };
+
+    // const handleDeleteClick = async (id) => {
+    //     confirmAlert({
+    //         title: 'Confirm to delete',
+    //         message: 'Are you sure you want to delete this client?',
+    //         buttons: [
+    //             { label: 'Yes', onClick: () => handleDelete(id) },
+    //             { label: 'No', onClick: () => {} }
+    //         ]
+    //     });
+    // };
+
+    // const handleDelete = async (id) => {
+    //     try {
+    //         const recordDocRef = doc(recordsCollectionRef, id);
+    //         await deleteDoc(recordDocRef);
+    //         setRecords((prevRecords) => prevRecords.filter(record => record.id !== id));
+    //     } catch (error) {
+    //         console.error("Error deleting record:", error);
+    //     }
+    // };
+
+    const handleApproveClick = async (id) => {
         try {
             const recordDocRef = doc(recordsCollectionRef, id);
-            const recordDoc = await getDoc(recordDocRef);
-            if (recordDoc.exists()) {
-                setEditData({ id: recordDoc.id, ...recordDoc.data() });
-                setShowModal(true);
-            } else {
-                console.log("No such document found!");
-            }
+            await updateDoc(recordDocRef, { status: 'Approved' }); // Update client status to Approved
+            alert('Client Approved');
+            getUsers(); // Refresh the table data
         } catch (error) {
-            console.error("Error fetching record:", error);
+            console.error("Error approving client:", error);
         }
     };
-
-    const handleDeleteClick = async (id) => {
-        confirmAlert({
-            title: 'Confirm to delete',
-            message: 'Are you sure you want to delete this client?',
-            buttons: [
-                { label: 'Yes', onClick: () => handleDelete(id) },
-                { label: 'No', onClick: () => {} }
-            ]
-        });
-    };
-
-    const handleDelete = async (id) => {
+    
+    const handleRejectClick = async (id) => {
         try {
             const recordDocRef = doc(recordsCollectionRef, id);
-            await deleteDoc(recordDocRef);
-            setRecords((prevRecords) => prevRecords.filter(record => record.id !== id));
+            await updateDoc(recordDocRef, { status: 'Rejected' }); // Update client status to Rejected
+            alert('Client Rejected');
+            getUsers(); // Refresh the table data
         } catch (error) {
-            console.error("Error deleting record:", error);
+            console.error("Error rejecting client:", error);
         }
     };
+    
 
     const hideModal = () => {
         setShowModal(false);
