@@ -13,6 +13,6 @@ public interface LoanService {
 
 	public List<LoanSummaryResp> getLoanSummaryByUserId(Long userId);
 	public List<LoanDetailsResp> getLoansByUserId(Long userId);
-
+	public LoanEntity createLoan(LoanEntity loanEntity);
 //    List<Loan> getLoansByUserId(Long userId);
 }

@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
   Box,
   Card,
@@ -6,8 +7,8 @@ import {
   TextField,
   Button,
   Grid,
-  InputLabel,
   FormControl,
+  InputLabel,
   Select,
   MenuItem,
 } from "@mui/material";
@@ -18,84 +19,144 @@ import Navbar from "./Navbar";
 
 const LoanApplicationForm = () => {
   const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    phone: "",
     loanAmount: "",
     loanPurpose: "",
-    monthlyIncome: "",
-    employmentStatus: "",
-    loanTerm: "",
-    address: "",
-    city: "",
-    state: "",
-    zipCode: "",
-    dateOfBirth: "",
-    gender: "",
-    maritalStatus: "",
+    loanPeriod: "",
+    interestRate: "",
   });
+
+  const [emiCalculation, setEmiCalculation] = useState(null);
+  const [loanTermOptions, setLoanTermOptions] = useState([]);
+  const [loanDescription, setLoanDescription] = useState("");
+
+  useEffect(() => {
+    if (formData.loanAmount && formData.loanPeriod && formData.interestRate) {
+      calculateEMI();
+    }
+  }, [formData.loanAmount, formData.loanPeriod, formData.interestRate]);
+
+  useEffect(() => {
+    if (formData.loanPurpose) {
+      updateLoanDetails(formData.loanPurpose);
+    }
+  }, [formData.loanPurpose]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const updateLoanDetails = (loanPurpose) => {
+    let interestRate = 0;
+
+    switch (loanPurpose) {
+      case "Personal Loan":
+        interestRate = 17;
+        break;
+      case "Home Loan":
+        interestRate = 7.5;
+        break;
+      case "Car Loan":
+        interestRate = 9.5;
+        break;
+      case "Education Loan":
+        interestRate = 8.5;
+        break;
+      case "Business Loan":
+        interestRate = 13;
+        break;
+      case "Gold Loan":
+        interestRate = 10.5;
+        break;
+      case "Agriculture Loan":
+        interestRate = 7;
+        break;
+      default:
+        break;
+    }
+
+    const termsArr = [12, 24, 36, 48, 60]; // Loan terms in months
+    setLoanTermOptions(termsArr);
+
+    setFormData((prevData) => ({
+      ...prevData,
+      interestRate,
+      loanPeriod: termsArr[0] || "",
+    }));
+  };
+
+  const calculateEMI = () => {
+    const principal = parseFloat(formData.loanAmount);
+    const tenure = parseFloat(formData.loanPeriod);
+    const rate = parseFloat(formData.interestRate) / 100 / 12;
+
+    if (principal > 0 && tenure > 0 && rate > 0) {
+      const emi = (principal * rate * Math.pow(1 + rate, tenure)) / (Math.pow(1 + rate, tenure) - 1);
+      setEmiCalculation(emi.toFixed(2));
+
+      const totalPayment = emi * tenure;
+      const totalInterest = totalPayment - principal;
+      setLoanDescription(
+        `Loan Amount: ₹${principal.toLocaleString("en-IN")}\nInterest Rate: ${formData.interestRate}%\nTotal Interest: ₹${totalInterest.toFixed(
+          2
+        ).toLocaleString("en-IN")}\nTotal Repayment: ₹${totalPayment.toFixed(2).toLocaleString("en-IN")}\nMonthly EMI: ₹${emi.toFixed(2).toLocaleString("en-IN")}`
+      );
+    } else {
+      setEmiCalculation(null);
+      setLoanDescription("");
+    }
   };
 
   const validateForm = () => {
-    const { fullName, email, phone, loanAmount, dateOfBirth, gender, address, city, state, zipCode } = formData;
+    const { loanAmount, loanPeriod, interestRate } = formData;
 
-    if (!fullName.trim()) {
-      toast.error("Full Name is required!");
-      return false;
-    }
-    if (!email.trim() || !/^\S+@\S+\.\S+$/.test(email)) {
-      toast.error("Enter a valid email address!");
-      return false;
-    }
-    if (!phone.trim() || !/^\d{10}$/.test(phone)) {
-      toast.error("Enter a valid 10-digit phone number!");
-      return false;
-    }
-    if (!dateOfBirth) {
-      toast.error("Date of Birth is required!");
-      return false;
-    }
-    if (!gender) {
-      toast.error("Please select your gender!");
-      return false;
-    }
-    if (!address.trim()) {
-      toast.error("Address is required!");
-      return false;
-    }
-    if (!city.trim()) {
-      toast.error("City is required!");
-      return false;
-    }
-    if (!state.trim()) {
-      toast.error("State is required!");
-      return false;
-    }
-    if (!zipCode.trim() || !/^\d{5,6}$/.test(zipCode)) {
-      toast.error("Enter a valid ZIP Code!");
-      return false;
-    }
     if (!loanAmount || parseFloat(loanAmount) <= 0) {
       toast.error("Enter a valid loan amount!");
+      return false;
+    }
+    if (!loanPeriod) {
+      toast.error("Loan period is required!");
+      return false;
+    }
+    if (!interestRate) {
+      toast.error("Interest rate is required!");
       return false;
     }
 
     return true;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-      toast.success("Application submitted successfully!");
-      console.log(formData);
-      // Handle form submission (e.g., send data to server)
+      try {
+        const token = sessionStorage.getItem("authToken");
+        const userRole = sessionStorage.getItem("userRole");
+
+        if (!token) {
+          toast.error("No auth token found. Please log in first.");
+          return;
+        }
+
+        if (userRole !== "ROLE_USER") {
+          toast.error("You are not authorized to apply for a loan.");
+          return;
+        }
+
+        const response = await axios.post("http://localhost:8080/loan-applications/apply", formData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.status === 200) {
+          toast.success("Application submitted successfully!");
+        } else {
+          toast.error("Failed to submit application. Please try again.");
+        }
+      } catch (error) {
+        toast.error("Error submitting application. Please try again.");
+      }
     }
   };
 
@@ -107,7 +168,6 @@ const LoanApplicationForm = () => {
         <Box width="20%" minHeight="100vh">
           <UserSidebar />
         </Box>
-
         <Box width="80%" p={4}>
           <Card sx={{ p: 4, maxWidth: 900, margin: "0 auto" }}>
             <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold", textAlign: "center" }}>
@@ -115,73 +175,66 @@ const LoanApplicationForm = () => {
             </Typography>
             <form onSubmit={handleSubmit}>
               <Grid container spacing={3}>
-                <Grid item xs={12}>
-                  <Typography variant="h6" sx={{ mb: 2, color: "primary.main" }}>
-                    Personal Information
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField fullWidth label="Full Name" name="fullName" value={formData.fullName} onChange={handleChange} />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField fullWidth label="Email Address" name="email" value={formData.email} onChange={handleChange} />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField fullWidth label="Phone Number" name="phone" value={formData.phone} onChange={handleChange} />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField fullWidth label="Date of Birth" name="dateOfBirth" type="date" value={formData.dateOfBirth} onChange={handleChange} InputLabelProps={{ shrink: true }} />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth>
-                    <InputLabel>Gender</InputLabel>
-                    <Select name="gender" value={formData.gender} onChange={handleChange}>
-                      <MenuItem value="Male">Male</MenuItem>
-                      <MenuItem value="Female">Female</MenuItem>
-                      <MenuItem value="Other">Other</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-
-                <Grid item xs={12}>
-                  <Typography variant="h6" sx={{ mb: 2, color: "primary.main" }}>
-                    Address Details
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField fullWidth label="Address" name="address" value={formData.address} onChange={handleChange} />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField fullWidth label="City" name="city" value={formData.city} onChange={handleChange} />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField fullWidth label="State" name="state" value={formData.state} onChange={handleChange} />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField fullWidth label="ZIP Code" name="zipCode" value={formData.zipCode} onChange={handleChange} />
-                </Grid>
-
-                <Grid item xs={12}>
-                  <Typography variant="h6" sx={{ mb: 2, color: "primary.main" }}>
-                    Loan Details
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField fullWidth label="Loan Amount" name="loanAmount" type="number" value={formData.loanAmount} onChange={handleChange} />
-                </Grid>
                 <Grid item xs={12} sm={6}>
                   <FormControl fullWidth>
                     <InputLabel>Loan Purpose</InputLabel>
                     <Select name="loanPurpose" value={formData.loanPurpose} onChange={handleChange}>
-                      <MenuItem value="Home Purchase">Home Purchase</MenuItem>
-                      <MenuItem value="Car Purchase">Car Purchase</MenuItem>
-                      <MenuItem value="Education">Education</MenuItem>
-                      <MenuItem value="Debt Consolidation">Debt Consolidation</MenuItem>
-                      <MenuItem value="Others">Others</MenuItem>
+                      <MenuItem value="Personal Loan">Personal Loan</MenuItem>
+                      <MenuItem value="Home Loan">Home Loan</MenuItem>
+                      <MenuItem value="Car Loan">Car Loan</MenuItem>
+                      <MenuItem value="Education Loan">Education Loan</MenuItem>
+                      <MenuItem value="Business Loan">Business Loan</MenuItem>
+                      <MenuItem value="Gold Loan">Gold Loan</MenuItem>
+                      <MenuItem value="Agriculture Loan">Agriculture Loan</MenuItem>
                     </Select>
                   </FormControl>
                 </Grid>
-
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Loan Amount (₹)"
+                    name="loanAmount"
+                    type="number"
+                    value={formData.loanAmount}
+                    onChange={handleChange}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth>
+                    <InputLabel>Loan Period (Months)</InputLabel>
+                    <Select name="loanPeriod" value={formData.loanPeriod} onChange={handleChange}>
+                      {loanTermOptions.map((term) => (
+                        <MenuItem key={term} value={term}>
+                          {term} months
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Interest Rate (%)"
+                    name="interestRate"
+                    value={formData.interestRate}
+                    disabled
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField fullWidth label="Monthly EMI (₹)" value={emiCalculation || "0.00"} disabled />
+                </Grid>
+                {loanDescription && (
+                  <Grid item xs={12}>
+                    <Box sx={{ backgroundColor: "#f4f4f9", padding: 2, borderRadius: 2, boxShadow: 2 }}>
+                      <Typography variant="body1" sx={{ mb: 1, fontWeight: "bold", color: "green" }}>
+                        Loan Breakdown:
+                      </Typography>
+                      <Typography variant="body2" sx={{ whiteSpace: "pre-wrap", color: "#333" }}>
+                        {loanDescription}
+                      </Typography>
+                    </Box>
+                  </Grid>
+                )}
                 <Grid item xs={12}>
                   <center>
                     <Button variant="contained" color="primary" type="submit" size="large">

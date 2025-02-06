@@ -28,8 +28,8 @@ public class LoanEntity {
     private Double emiAmount;
 
     // Duration as a text (e.g., "1 year")
-    @Column(name = "duration", nullable = false)
-    private String duration;
+    @Column(name = "duration_months", nullable = false)
+    private Integer duration;
 
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
@@ -46,13 +46,13 @@ public class LoanEntity {
     @Column(name = "remaining_emi", nullable = false)
     private Integer remainingEmi;
 
-    @Column(name = "last_emi_date", nullable = false)
+    @Column(name = "last_emi_date")
     private LocalDate lastEmiDate;
 
-    @Column(name = "next_emi_date", nullable = false)
+    @Column(name = "next_emi_date")
     private LocalDate nextEmiDate;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private LoanStatus status;
+    private LoanStatus status = LoanStatus.PENDING;
 }

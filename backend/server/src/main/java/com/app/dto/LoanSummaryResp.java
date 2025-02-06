@@ -19,4 +19,9 @@ public class LoanSummaryResp {
 	    this.count = count;
 	    this.totalAmount = totalAmount;
 	}
+	public LoanSummaryResp(String status, Long count, Double totalAmount) {
+	    this.status = status; // Convert enum to String if needed
+	    this.count = count;
+	    this.totalAmount = totalAmount;
+	}
 }

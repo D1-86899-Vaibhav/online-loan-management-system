@@ -1,8 +1,10 @@
 package com.app.service;
 
 import com.app.pojos.LoanApplication;
+import java.util.List;
 
 public interface LoanApplicationService {
-
-	  public LoanApplication submitLoanApplication(LoanApplication loanApplication);
+    LoanApplication submitLoanApplication(LoanApplication loanApplication);
+    List<LoanApplication> getAllLoanApplications();
+    LoanApplication getLoanApplicationById(Long id);
 }

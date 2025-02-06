@@ -97,7 +97,9 @@ public class JwtUtils {
             throw new IllegalArgumentException("Invalid type for user_id in JWT token: " + userId.getClass().getName());
         }
     }
-
+    public String getUserRoleFromClaims(Claims claims) {
+        return claims.get("authorities", String.class);
+    }
     public Authentication populateAuthenticationTokenFromJWT(String jwt) {
         Claims payloadClaims = validateJwtToken(jwt);
         if (payloadClaims == null) {
