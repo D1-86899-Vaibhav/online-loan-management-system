@@ -30,8 +30,10 @@ public class SecurityConfiguration {
                 .requestMatchers("/users/register", "/users/login", "/v*/api-doc*/**", "/swagger-ui/**")
                     .permitAll()
                 .requestMatchers(HttpMethod.OPTIONS).permitAll()
+                .requestMatchers("/api/users/AllUsers").permitAll() // Allow access to this endpoint
                 // Wallet endpoints: Adjust permission as needed.
-                .requestMatchers("/users/wallet/withdraw-funds","/transactions","/users/wallet/add-funds","/loans/summary","/loans/details").hasRole("USER")
+                .requestMatchers("/api/users/AllUsers/count").permitAll()
+                .requestMatchers("/users/wallet/withdraw-funds", "/transactions", "/users/wallet/add-funds", "/loans/summary", "/loans/details").hasRole("USER")
                 .requestMatchers("/products/add", "/products/delete").hasRole("ADMIN")
                 .anyRequest().authenticated())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

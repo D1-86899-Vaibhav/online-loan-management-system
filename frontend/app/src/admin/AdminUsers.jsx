@@ -1,16 +1,14 @@
 import React, { useEffect, useState } from "react";
 import DataGridTable from "../components/DataGridTable";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../firebase";
 import columns from "../components/columns/UserColumns";
 import AdminSidebar from './AdminSidebar'; // Import the sidebar
 import AdminNavbar from './AdminNavbar'; // Import the navbar
 import { Box, Card, CircularProgress } from '@mui/material';
 
 const AdminUsers = () => {
-  const usersCollectionRef = collection(db, "users");
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true); // Loading state
+  const [error, setError] = useState(null); // Error state for handling fetch errors
 
   useEffect(() => {
     getUsers();
@@ -18,16 +16,20 @@ const AdminUsers = () => {
 
   const getUsers = async () => {
     try {
-      const records = await getDocs(usersCollectionRef);
-      const usersData = records.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setUsers(usersData);
+      const response = await fetch("http://localhost:8080/api/users/AllUsers");
+      
+      // Check if the response is OK (status code 200)
+      if (!response.ok) {
+        throw new Error("Failed to fetch users");
+      }
+
+      const usersData = await response.json(); // Parse the JSON response
+      setUsers(usersData); // Set the users data
     } catch (error) {
       console.error("Error fetching users:", error);
+      setError("Failed to load users. Please try again later.");
     } finally {
-      setLoading(false); // End loading
+      setLoading(false); // End loading state
     }
   };
 
@@ -47,6 +49,7 @@ const AdminUsers = () => {
           <Card className="p-6 shadow-lg">
             <h1 className="text-2xl font-semibold text-blue-600 mt-5">All Users</h1>
             <div className="mt-10">
+              {error && <Box className="text-red-500 text-center">{error}</Box>}
               {!loading ? (
                 <DataGridTable data={users} columns={columns} />
               ) : (

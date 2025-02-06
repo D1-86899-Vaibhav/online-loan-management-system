@@ -7,13 +7,16 @@ export default function PieChartWithPaddingAngle({ client, loan, emi }) {
     const [data, setData] = useState([]);
 
     useEffect(() => {
-
+        console.log("Client:", client);
+        console.log("Loan:", loan);
+        console.log("EMI:", emi);
+    
         const formattedData = [
-            { label: 'Clients', value: client },
-            { label: 'Loans', value: loan },
-            { label: 'EMI', value: emi },
+            { label: 'Clients', value: client || 0 },
+            { label: 'Loans', value: loan || 0 },
+            { label: 'EMI', value: emi || 0 },
         ];
-
+    
         setData(formattedData);
     }, [client, loan, emi]);
 
