@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import longFormatters from "date-fns/_lib/format/longFormatters";
+import axios from 'axios'; // Import Axios
 
 import {
   Box,
@@ -19,13 +20,15 @@ import {
   Divider,
 } from '@mui/material';
 import { useDropzone } from 'react-dropzone';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import UserSidebar from './UserSidebar';
 import Navbar from './Navbar';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { format } from 'date-fns'; // Import format from date-fns for date formatting
+
 
 const FileUpload = ({ label, file, onDrop, loading, error, helperText }) => {
   const { getRootProps, getInputProps } = useDropzone({
@@ -74,49 +77,59 @@ const KYCForm = () => {
     motherName: '',
     maritalStatus: '',
     permanentAddress: {
+      houseName: '',
       street: '',
       city: '',
       state: '',
-      zipCode: '',
+      pinCode: '',
     },
     correspondenceAddress: {
+      houseName: '',
       street: '',
       city: '',
       state: '',
-      zipCode: '',
+      pinCode: '',
     },
     phone: '',
     email: '',
     panNumber: '',
+    panCardImage: null,
     aadhaarNumber: '',
-    passportNumber: '',
-    voterIdNumber: '',
-    drivingLicenseNumber: '',
-    aadhaarCardImage: null,
-    utilityBillImage: null,
-    rentalAgreementImage: null,
-    passportImage: null,
+    addressProofDocumentType: '',
+    addressProofDocumentNumber: '',
+    addressProofDocumentImage: null,
     annualIncome: '',
     sourceOfIncome: '',
     occupation: '',
     employerName: '',
-    tin: '',
+    incomeProofType: '',
+    incomeProofImage: null,
+    bankName: '',
     bankAccountNumber: '',
     ifscCode: '',
     accountType: '',
+    otherSourceOfIncome: '',
+    otherOccupation: '',
   });
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loadingFiles, setLoadingFiles] = useState({
-    aadhaarCard: false,
-    utilityBill: false,
-    rentalAgreement: false,
-    passport: false,
+    panCard: false,
+    addressProofDocument: false,
+    incomeProof: false,
   });
 
+  const addressProofDocumentOptions = ['Aadhaar Card', 'Passport', 'Voter ID', 'Rental Agreement', 'Utility Bill'];
+  const sourceOfIncomeOptions = ['Salary', 'Business', 'Investments', 'Pension', 'Rent', 'Agriculture', 'Others'];
+  const occupationOptions = ['Salaried', 'Self-Employed', 'Business', 'Professional', 'Student', 'Homemaker', 'Retired', 'Others'];
+  const incomeProofOptions = ['Salary Slip', 'Bank Statement', 'ITR Acknowledgement', 'Form 16', 'Others'];
+
+  const API_BASE_URL = 'http://localhost:8080'; // Backend API base URL
+
+
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {  // Make handleSubmit async
     e.preventDefault();
     setIsSubmitting(true);
 
@@ -128,24 +141,96 @@ const KYCForm = () => {
     if (!formData.fatherName && !formData.motherName)
       newErrors.parentName = 'Father’s or Mother’s Name is required';
     if (!formData.maritalStatus) newErrors.maritalStatus = 'Marital Status is required';
-    if (!formData.permanentAddress.street || !formData.permanentAddress.city || !formData.permanentAddress.state || !formData.permanentAddress.zipCode)
+    if (!formData.permanentAddress.houseName || !formData.permanentAddress.street || !formData.permanentAddress.city || !formData.permanentAddress.state || !formData.permanentAddress.pinCode)
       newErrors.permanentAddress = 'Complete Permanent Address is required';
     if (!formData.phone || formData.phone.length !== 10) newErrors.phone = 'Valid Phone Number is required';
     if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = 'Valid Email is required';
     if (!formData.panNumber || formData.panNumber.length !== 10) newErrors.panNumber = 'Valid PAN Number is required';
+    if (!formData.panCardImage) newErrors.panCardImage = 'Upload PAN Card Image is required';
     if (!formData.aadhaarNumber || formData.aadhaarNumber.length !== 12) newErrors.aadhaarNumber = 'Valid Aadhaar Number is required';
     if (!formData.annualIncome) newErrors.annualIncome = 'Annual Income is required';
     if (!formData.sourceOfIncome) newErrors.sourceOfIncome = 'Source of Income is required';
+    if (formData.sourceOfIncome === 'Others' && !formData.otherSourceOfIncome) newErrors.otherSourceOfIncome = 'Please specify your Source of Income';
+    if (!formData.occupation) newErrors.occupation = 'Occupation is required';
+    if (formData.occupation === 'Salaried' && !formData.employerName) newErrors.employerName = 'Employer Name is required for Salaried occupation';
+    if (formData.occupation === 'Others' && !formData.otherOccupation) newErrors.otherOccupation = 'Please specify your Occupation';
+    if (!formData.bankName) newErrors.bankName = 'Bank Name is required';
     if (!formData.bankAccountNumber) newErrors.bankAccountNumber = 'Bank Account Number is required';
     if (!formData.ifscCode || formData.ifscCode.length !== 11) newErrors.ifscCode = 'Valid IFSC Code is required';
+    if (!formData.addressProofDocumentType && !formData.addressProofDocumentNumber) {
+      if (!newErrors.addressProof) newErrors.addressProof = "Please provide Address Proof details.";
+      else newErrors.addressProof += " Please provide Address Proof details.";
+    } else if (formData.addressProofDocumentType && !formData.addressProofDocumentNumber) {
+        if (!newErrors.addressProof) newErrors.addressProof = "Please enter the Address Proof document number.";
+        else newErrors.addressProof += " Please enter the Address Proof document number.";
+    } else if (!formData.addressProofDocumentType && formData.addressProofDocumentNumber) {
+        if (!newErrors.addressProof) newErrors.addressProof = "Please select the Address Proof document type.";
+        else newErrors.addressProof += " Please select the Address Proof document type.";
+    } else if (formData.addressProofDocumentType && formData.addressProofDocumentNumber && !formData.addressProofDocumentImage) {
+        if (!newErrors.addressProof) newErrors.addressProof = "Please upload the Address Proof document image.";
+        else newErrors.addressProof += " Please upload the Address Proof document image.";
+    }
+     if (formData.incomeProofType && !formData.incomeProofImage) {
+        if (!newErrors.incomeProof) newErrors.incomeProof = "Please upload the Income Proof document image.";
+        else newErrors.incomeProof += " Please upload the Income Proof document image.";
+    }
+
 
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {
-      // Simulate API call
-      setTimeout(() => {
-        setIsSubmitting(false);
-        toast.success('KYC Submitted Successfully!');
+      try {
+        const form = new FormData();
+        form.append('firstName', formData.firstName);
+        form.append('lastName', formData.lastName);
+        if (formData.dob) { // Format date only if it exists
+          form.append('dob', format(formData.dob, 'yyyy-MM-dd')); // Format date
+        }
+        form.append('gender', formData.gender);
+        form.append('fatherName', formData.fatherName);
+        form.append('motherName', formData.motherName);
+        form.append('maritalStatus', formData.maritalStatus);
+        form.append('permanentStreet', formData.permanentAddress.street);
+        form.append('permanentCity', formData.permanentAddress.city);
+        form.append('permanentState', formData.permanentAddress.state);
+        form.append('permanentZipCode', formData.permanentAddress.pinCode);
+        form.append('correspondenceStreet', formData.correspondenceAddress.street);
+        form.append('correspondenceCity', formData.correspondenceAddress.city);
+        form.append('correspondenceState', formData.correspondenceAddress.state);
+        form.append('correspondenceZipCode', formData.correspondenceAddress.pinCode);
+        form.append('phone', formData.phone);
+        form.append('email', formData.email);
+        form.append('panNumber', formData.panNumber);
+        form.append('panCardImageFile', formData.panCardImage); // Use 'panCardImageFile' to match backend
+        form.append('aadhaarNumber', formData.aadhaarNumber);
+        form.append('addressProofDocumentType', formData.addressProofDocumentType);
+        form.append('addressProofDocumentNumber', formData.addressProofDocumentNumber);
+        form.append('addressProofDocumentImageFile', formData.addressProofDocumentImage); // Use 'addressProofDocumentImageFile'
+        form.append('annualIncome', formData.annualIncome);
+        form.append('sourceOfIncome', formData.sourceOfIncome);
+        form.append('occupation', formData.occupation);
+        form.append('employerName', formData.employerName);
+        form.append('incomeProofType', formData.incomeProofType);
+        form.append('incomeProofImageFile', formData.incomeProofImage); // Use 'incomeProofImageFile'
+        form.append('bankName', formData.bankName);
+        form.append('bankAccountNumber', formData.bankAccountNumber);
+        form.append('ifscCode', formData.ifscCode);
+        form.append('accountType', formData.accountType);
+        form.append('otherSourceOfIncome', formData.otherSourceOfIncome);
+        form.append('otherOccupation', formData.otherOccupation);
+        form.append('userId', 123); // Assuming a fixed userId for now, adjust as needed
+
+        const response = await axios.post(`${API_BASE_URL}/kyc`, form, {
+          headers: {
+            'Content-Type': 'multipart/form-data', // Explicitly set header if needed (usually Axios does it)
+          },
+        });
+
+        console.log('KYC submitted successfully', response.data);
+        toast.success('KYC Submitted Successfully!', {
+          position: "top-right",
+          autoClose: 3000,
+        });
         // Clear form fields after successful submission
         setFormData({
           firstName: '',
@@ -156,42 +241,64 @@ const KYCForm = () => {
           motherName: '',
           maritalStatus: '',
           permanentAddress: {
+            houseName: '',
             street: '',
             city: '',
             state: '',
-            zipCode: '',
+            pinCode: '',
           },
           correspondenceAddress: {
+            houseName: '',
             street: '',
             city: '',
             state: '',
-            zipCode: '',
+            pinCode: '',
           },
           phone: '',
           email: '',
           panNumber: '',
+          panCardImage: null,
           aadhaarNumber: '',
-          passportNumber: '',
-          voterIdNumber: '',
-          drivingLicenseNumber: '',
-          aadhaarCardImage: null,
-          utilityBillImage: null,
-          rentalAgreementImage: null,
-          passportImage: null,
+          addressProofDocumentType: '',
+          addressProofDocumentNumber: '',
+          addressProofDocumentImage: null,
           annualIncome: '',
           sourceOfIncome: '',
           occupation: '',
           employerName: '',
-          tin: '',
+          incomeProofType: '',
+          incomeProofImage: null,
+          bankName: '',
           bankAccountNumber: '',
           ifscCode: '',
           accountType: '',
+          otherSourceOfIncome: '',
+          otherOccupation: '',
         });
-        setErrors({}); // Clear errors
-      }, 2000);
+        setErrors({});
+
+
+      } catch (error) {
+        console.error('Error submitting KYC:', error);
+        toast.error('Error submitting KYC. Please try again.', {
+          position: "top-right",
+          autoClose: 3000,
+        });
+        // Handle error response if needed (e.g., display specific error messages from backend)
+      } finally {
+        setIsSubmitting(false); //  setIsSubmitting(false) should be in finally block
+      }
+
+
     } else {
       setIsSubmitting(false);
-      toast.error('Please fix the errors and try again.');
+      // Display errors in toast notifications
+      Object.values(newErrors).forEach(errorMessage => {
+        toast.error(errorMessage, {
+          position:  "top-right",
+          autoClose: 3000,
+        });
+      });
     }
   };
 
@@ -228,45 +335,51 @@ const KYCForm = () => {
       motherName: '',
       maritalStatus: '',
       permanentAddress: {
+        houseName: '',
         street: '',
         city: '',
         state: '',
-        zipCode: '',
+        pinCode: '',
       },
       correspondenceAddress: {
+        houseName: '',
         street: '',
         city: '',
         state: '',
-        zipCode: '',
+        pinCode: '',
       },
       phone: '',
       email: '',
       panNumber: '',
+      panCardImage: null,
       aadhaarNumber: '',
-      passportNumber: '',
-      voterIdNumber: '',
-      drivingLicenseNumber: '',
-      aadhaarCardImage: null,
-      utilityBillImage: null,
-      rentalAgreementImage: null,
-      passportImage: null,
+      addressProofDocumentType: '',
+      addressProofDocumentNumber: '',
+      addressProofDocumentImage: null,
       annualIncome: '',
       sourceOfIncome: '',
       occupation: '',
       employerName: '',
-      tin: '',
+      incomeProofType: '',
+      incomeProofImage: null,
+      bankName: '',
       bankAccountNumber: '',
       ifscCode: '',
       accountType: '',
+      otherSourceOfIncome: '',
+      otherOccupation: '',
     });
     setErrors({});
     setLoadingFiles({
-      aadhaarCard: false,
-      utilityBill: false,
-      rentalAgreement: false,
-      passport: false,
+      panCard: false,
+      addressProofDocument: false,
+      incomeProof: false,
     });
   };
+
+  const currentAddressProofDocumentLabel = formData.addressProofDocumentType ? `Upload ${formData.addressProofDocumentType} Image` : "Upload Address Proof Document Image";
+  const currentIncomeProofDocumentLabel = formData.incomeProofType ? `Upload ${formData.incomeProofType} Image` : "Upload Income Proof Document Image";
+
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -291,6 +404,7 @@ const KYCForm = () => {
                 <Typography variant="h6" gutterBottom sx={{ mt: 2, color: 'primary.main' }}>
                   Personal Information
                 </Typography>
+                {/* Personal Information Fields */}
                 <Grid container spacing={3}>
                   <Grid item xs={12} sm={6}>
                     <TextField
@@ -299,8 +413,6 @@ const KYCForm = () => {
                       value={formData.firstName}
                       onChange={handleChange}
                       fullWidth
-                      error={!!errors.firstName}
-                      helperText={errors.firstName}
                       required
                     />
                   </Grid>
@@ -311,8 +423,6 @@ const KYCForm = () => {
                       value={formData.lastName}
                       onChange={handleChange}
                       fullWidth
-                      error={!!errors.lastName}
-                      helperText={errors.lastName}
                       required
                     />
                   </Grid>
@@ -325,28 +435,25 @@ const KYCForm = () => {
                         <TextField
                           {...params}
                           fullWidth
-                          error={!!errors.dob}
-                          helperText={errors.dob}
                           required
+                          {...params.inputProps}
                         />
                       )}
                     />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <FormControl fullWidth>
+                    <FormControl fullWidth >
                       <InputLabel>Gender</InputLabel>
                       <Select
                         name="gender"
                         value={formData.gender}
                         onChange={handleChange}
-                        error={!!errors.gender}
                         required
                       >
                         <MenuItem value="Male">Male</MenuItem>
                         <MenuItem value="Female">Female</MenuItem>
                         <MenuItem value="Other">Other</MenuItem>
                       </Select>
-                      {errors.gender && <FormHelperText error>{errors.gender}</FormHelperText>}
                     </FormControl>
                   </Grid>
                   <Grid item xs={12} sm={6}>
@@ -356,8 +463,6 @@ const KYCForm = () => {
                       value={formData.fatherName}
                       onChange={handleChange}
                       fullWidth
-                      error={!!errors.parentName}
-                      helperText={errors.parentName}
                     />
                   </Grid>
                   <Grid item xs={12} sm={6}>
@@ -367,8 +472,6 @@ const KYCForm = () => {
                       value={formData.motherName}
                       onChange={handleChange}
                       fullWidth
-                      error={!!errors.parentName}
-                      helperText={errors.parentName}
                     />
                   </Grid>
                   <Grid item xs={12} sm={6}>
@@ -378,7 +481,6 @@ const KYCForm = () => {
                         name="maritalStatus"
                         value={formData.maritalStatus}
                         onChange={handleChange}
-                        error={!!errors.maritalStatus}
                         required
                       >
                         <MenuItem value="Single">Single</MenuItem>
@@ -386,20 +488,31 @@ const KYCForm = () => {
                         <MenuItem value="Divorced">Divorced</MenuItem>
                         <MenuItem value="Widowed">Widowed</MenuItem>
                       </Select>
-                      {errors.maritalStatus && <FormHelperText error>{errors.maritalStatus}</FormHelperText>}
                     </FormControl>
                   </Grid>
                 </Grid>
+
 
                 {/* Contact Details */}
                 <Typography variant="h6" gutterBottom sx={{ mt: 4, color: 'primary.main' }}>
                   Contact Details
                 </Typography>
+                {/* Contact Details Fields */}
                 <Grid container spacing={3}>
                   <Grid item xs={12}>
-                    <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold' }}>
                       Permanent Address
                     </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      label="House Name"
+                      name="permanentAddress.houseName"
+                      value={formData.permanentAddress.houseName}
+                      onChange={handleChange}
+                      fullWidth
+                      required
+                    />
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <TextField
@@ -408,8 +521,6 @@ const KYCForm = () => {
                       value={formData.permanentAddress.street}
                       onChange={handleChange}
                       fullWidth
-                      error={!!errors.permanentAddress}
-                      helperText={errors.permanentAddress && !formData.permanentAddress.street && 'Street is required'}
                       required
                     />
                   </Grid>
@@ -420,8 +531,6 @@ const KYCForm = () => {
                       value={formData.permanentAddress.city}
                       onChange={handleChange}
                       fullWidth
-                      error={!!errors.permanentAddress}
-                      helperText={errors.permanentAddress && !formData.permanentAddress.city && 'City is required'}
                       required
                     />
                   </Grid>
@@ -432,20 +541,16 @@ const KYCForm = () => {
                       value={formData.permanentAddress.state}
                       onChange={handleChange}
                       fullWidth
-                      error={!!errors.permanentAddress}
-                      helperText={errors.permanentAddress && !formData.permanentAddress.state && 'State is required'}
                       required
                     />
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <TextField
-                      label="ZIP Code"
-                      name="permanentAddress.zipCode"
-                      value={formData.permanentAddress.zipCode}
+                      label="PIN Code"
+                      name="permanentAddress.pinCode"
+                      value={formData.permanentAddress.pinCode}
                       onChange={handleChange}
                       fullWidth
-                      error={!!errors.permanentAddress}
-                      helperText={errors.permanentAddress && !formData.permanentAddress.zipCode && 'ZIP Code is required'}
                       required
                     />
                   </Grid>
@@ -471,9 +576,18 @@ const KYCForm = () => {
                   {!formData.correspondenceAddress.sameAsPermanent && (
                     <>
                       <Grid item xs={12}>
-                        <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                        <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold' }}>
                           Correspondence Address
                         </Typography>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          label="House Name"
+                          name="correspondenceAddress.houseName"
+                          value={formData.correspondenceAddress.houseName}
+                          onChange={handleChange}
+                          fullWidth
+                        />
                       </Grid>
                       <Grid item xs={12} sm={6}>
                         <TextField
@@ -504,15 +618,23 @@ const KYCForm = () => {
                       </Grid>
                       <Grid item xs={12} sm={6}>
                         <TextField
-                          label="ZIP Code"
-                          name="correspondenceAddress.zipCode"
-                          value={formData.correspondenceAddress.zipCode}
+                          label="PIN Code"
+                          name="correspondenceAddress.pinCode"
+                          value={formData.correspondenceAddress.pinCode}
                           onChange={handleChange}
                           fullWidth
                         />
                       </Grid>
                     </>
                   )}
+                  <Grid item xs={12}>
+                    <Divider sx={{ my: 2 }} />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold' }}>
+                      Contact Information
+                    </Typography>
+                  </Grid>
                   <Grid item xs={12} sm={6}>
                     <TextField
                       label="Phone Number"
@@ -520,8 +642,6 @@ const KYCForm = () => {
                       value={formData.phone}
                       onChange={handleChange}
                       fullWidth
-                      error={!!errors.phone}
-                      helperText={errors.phone}
                       required
                     />
                   </Grid>
@@ -532,17 +652,17 @@ const KYCForm = () => {
                       value={formData.email}
                       onChange={handleChange}
                       fullWidth
-                      error={!!errors.email}
-                      helperText={errors.email}
                       required
                     />
                   </Grid>
                 </Grid>
 
-                {/* Identity Proof */}
+
+                {/* Identity and Address Proof */}
                 <Typography variant="h6" gutterBottom sx={{ mt: 4, color: 'primary.main' }}>
-                  Identity Proof
+                  Identity and Address Proof
                 </Typography>
+                {/* Identity and Address Proof Fields */}
                 <Grid container spacing={3}>
                   <Grid item xs={12} sm={6}>
                     <TextField
@@ -551,162 +671,204 @@ const KYCForm = () => {
                       value={formData.panNumber}
                       onChange={handleChange}
                       fullWidth
-                      error={!!errors.panNumber}
-                      helperText={errors.panNumber}
                       required
                     />
                   </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      label="Aadhaar Number"
-                      name="aadhaarNumber"
-                      value={formData.aadhaarNumber}
-                      onChange={handleChange}
-                      fullWidth
-                      error={!!errors.aadhaarNumber}
-                      helperText={errors.aadhaarNumber}
-                      required
+                   <Grid item xs={12} sm={6}>
+                    <FileUpload
+                      label="Upload PAN Card Image"
+                      name="panCardImage"
+                      file={formData.panCardImage}
+                      onDrop={(files) => handleFileDrop('panCard', files)}
+                      loading={loadingFiles.panCard}
+                      error={!!errors.panCardImage}
+                      helperText={errors.panCardImage}
                     />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField
-                      label="Passport Number"
-                      name="passportNumber"
-                      value={formData.passportNumber}
-                      onChange={handleChange}
-                      fullWidth
-                    />
+                    <FormControl fullWidth>
+                      <InputLabel>Address Proof Document</InputLabel>
+                      <Select
+                        name="addressProofDocumentType"
+                        value={formData.addressProofDocumentType}
+                        onChange={handleChange}
+                        required
+                      >
+                        <MenuItem value="">None</MenuItem>
+                        {addressProofDocumentOptions.map((option) => (
+                          <MenuItem key={option} value={option}>{option}</MenuItem>
+                        ))}
+                      </Select>
+                      {errors.addressProof && <FormHelperText error>{errors.addressProof}</FormHelperText>}
+                    </FormControl>
                   </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      label="Voter ID Number"
-                      name="voterIdNumber"
-                      value={formData.voterIdNumber}
-                      onChange={handleChange}
-                      fullWidth
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      label="Driving License Number"
-                      name="drivingLicenseNumber"
-                      value={formData.drivingLicenseNumber}
-                      onChange={handleChange}
-                      fullWidth
-                    />
-                  </Grid>
+
+                  {formData.addressProofDocumentType && (
+                    <>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          label={`${formData.addressProofDocumentType} Number`}
+                          name="addressProofDocumentNumber"
+                          value={formData.addressProofDocumentNumber}
+                          onChange={handleChange}
+                          fullWidth
+                          required
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <FileUpload
+                          label={currentAddressProofDocumentLabel}
+                          file={formData.addressProofDocumentImage}
+                          onDrop={(files) => handleFileDrop('addressProofDocument', files)}
+                          loading={loadingFiles.addressProofDocument}
+                          error={!!errors.addressProof}
+                          helperText={errors.addressProof}
+                        />
+                      </Grid>
+                    </>
+                  )}
                 </Grid>
 
-                {/* Address Proof */}
-                <Typography variant="h6" gutterBottom sx={{ mt: 4, color: 'primary.main' }}>
-                  Address Proof
-                </Typography>
-                <Grid container spacing={3}>
-                  <Grid item xs={12} sm={6}>
-                    <FileUpload
-                      label="Upload Aadhaar Card"
-                      file={formData.aadhaarCardImage}
-                      onDrop={(files) => handleFileDrop('aadhaarCard', files)}
-                      loading={loadingFiles.aadhaarCard}
-                      error={!!errors.aadhaarCardImage}
-                      helperText={errors.aadhaarCardImage}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <FileUpload
-                      label="Upload Utility Bill"
-                      file={formData.utilityBillImage}
-                      onDrop={(files) => handleFileDrop('utilityBill', files)}
-                      loading={loadingFiles.utilityBill}
-                      error={!!errors.utilityBillImage}
-                      helperText={errors.utilityBillImage}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <FileUpload
-                      label="Upload Rental Agreement"
-                      file={formData.rentalAgreementImage}
-                      onDrop={(files) => handleFileDrop('rentalAgreement', files)}
-                      loading={loadingFiles.rentalAgreement}
-                      error={!!errors.rentalAgreementImage}
-                      helperText={errors.rentalAgreementImage}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <FileUpload
-                      label="Upload Passport"
-                      file={formData.passportImage}
-                      onDrop={(files) => handleFileDrop('passport', files)}
-                      loading={loadingFiles.passport}
-                      error={!!errors.passportImage}
-                      helperText={errors.passportImage}
-                    />
-                  </Grid>
-                </Grid>
 
                 {/* Financial Information */}
                 <Typography variant="h6" gutterBottom sx={{ mt: 4, color: 'primary.main' }}>
                   Financial Information
                 </Typography>
+                {/* Financial Information Fields */}
                 <Grid container spacing={3}>
                   <Grid item xs={12} sm={6}>
+                    <FormControl fullWidth required>
+                      <InputLabel>Source of Income</InputLabel>
+                      <Select
+                        label="Source of Income"
+                        name="sourceOfIncome"
+                        value={formData.sourceOfIncome}
+                        onChange={handleChange}
+                      >
+                        {sourceOfIncomeOptions.map((option) => (
+                          <MenuItem key={option} value={option}>{option}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  {formData.sourceOfIncome === 'Others' && (
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        label="Specify Other Source of Income"
+                        name="otherSourceOfIncome"
+                        value={formData.otherSourceOfIncome}
+                        onChange={handleChange}
+                        fullWidth
+                        required
+                      />
+                    </Grid>
+                  )}
+
+
+                  <Grid item xs={12} sm={6}>
+                    <FormControl fullWidth required>
+                      <InputLabel>Occupation</InputLabel>
+                      <Select
+                        label="Occupation"
+                        name="occupation"
+                        value={formData.occupation}
+                        onChange={handleChange}
+                      >
+                        {occupationOptions.map((option) => (
+                          <MenuItem key={option} value={option}>{option}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  {formData.occupation === 'Others' && (
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        label="Specify Other Occupation"
+                        name="otherOccupation"
+                        value={formData.otherOccupation}
+                        onChange={handleChange}
+                        fullWidth
+                        required
+                      />
+                    </Grid>
+                  )}
+
+
+                  {formData.occupation === 'Salaried' && (
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        label="Employer Name"
+                        name="employerName"
+                        value={formData.employerName}
+                        onChange={handleChange}
+                        fullWidth
+                        required
+                      />
+                    </Grid>
+                  )}
+
+                  <Grid item xs={12} sm={6}>
                     <TextField
-                      label="Annual Income"
+                      label="Annual Income (in Rupees)"
                       name="annualIncome"
                       value={formData.annualIncome}
                       onChange={handleChange}
                       fullWidth
-                      error={!!errors.annualIncome}
-                      helperText={errors.annualIncome}
                       required
                     />
                   </Grid>
+
                   <Grid item xs={12} sm={6}>
-                    <TextField
-                      label="Source of Income"
-                      name="sourceOfIncome"
-                      value={formData.sourceOfIncome}
-                      onChange={handleChange}
-                      fullWidth
-                      error={!!errors.sourceOfIncome}
-                      helperText={errors.sourceOfIncome}
-                      required
-                    />
+                    <FormControl fullWidth>
+                      <InputLabel>Income Proof Document</InputLabel>
+                      <Select
+                        label="Income Proof Document"
+                        name="incomeProofType"
+                        value={formData.incomeProofType}
+                        onChange={handleChange}
+                      >
+                        <MenuItem value="">None</MenuItem>
+                        {incomeProofOptions.map((option) => (
+                          <MenuItem key={option} value={option}>{option}</MenuItem>
+                        ))}
+                      </Select>
+                      {errors.incomeProof && <FormHelperText error>{errors.incomeProof}</FormHelperText>}
+                    </FormControl>
                   </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      label="Occupation"
-                      name="occupation"
-                      value={formData.occupation}
-                      onChange={handleChange}
-                      fullWidth
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      label="Employer Name"
-                      name="employerName"
-                      value={formData.employerName}
-                      onChange={handleChange}
-                      fullWidth
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      label="Taxpayer Identification Number (TIN)"
-                      name="tin"
-                      value={formData.tin}
-                      onChange={handleChange}
-                      fullWidth
-                    />
-                  </Grid>
+
+
+                  {formData.incomeProofType && (
+                    <Grid item xs={12} sm={6}>
+                      <FileUpload
+                        label={currentIncomeProofDocumentLabel}
+                        name="incomeProofImage"
+                        file={formData.incomeProofImage}
+                        onDrop={(files) => handleFileDrop('incomeProof', files)}
+                        loading={loadingFiles.incomeProof}
+                        error={!!errors.incomeProof}
+                        helperText={errors.incomeProof}
+                      />
+                    </Grid>
+                  )}
+
                 </Grid>
 
                 {/* Banking Details */}
                 <Typography variant="h6" gutterBottom sx={{ mt: 4, color: 'primary.main' }}>
                   Banking Details
                 </Typography>
+                {/* Banking Details Fields */}
                 <Grid container spacing={3}>
+                   <Grid item xs={12} sm={6}>
+                    <TextField
+                      label="Bank Name"
+                      name="bankName"
+                      value={formData.bankName}
+                      onChange={handleChange}
+                      fullWidth
+                      required
+                    />
+                  </Grid>
                   <Grid item xs={12} sm={6}>
                     <TextField
                       label="Bank Account Number"
@@ -714,8 +876,6 @@ const KYCForm = () => {
                       value={formData.bankAccountNumber}
                       onChange={handleChange}
                       fullWidth
-                      error={!!errors.bankAccountNumber}
-                      helperText={errors.bankAccountNumber}
                       required
                     />
                   </Grid>
@@ -726,8 +886,6 @@ const KYCForm = () => {
                       value={formData.ifscCode}
                       onChange={handleChange}
                       fullWidth
-                      error={!!errors.ifscCode}
-                      helperText={errors.ifscCode}
                       required
                     />
                   </Grid>

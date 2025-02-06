@@ -38,7 +38,7 @@ public class KycEntity {
 
     @Column(name = "gender")
     private String gender;
-    
+
     @Column(name = "father_name")
     private String fatherName;
 
@@ -93,7 +93,7 @@ public class KycEntity {
 
     @Column(name = "voter_id_number")
     private String voterIdNumber;
-    
+
     @Column(name = "driving_license_number")
     private String drivingLicenseNumber;
 
@@ -123,9 +123,6 @@ public class KycEntity {
     @Column(name = "employer_name")
     private String employerName;
 
-    @Column(name = "tin")
-    private String tin;
-
     // Banking Details
     @Column(name = "bank_account_number")
     private String bankAccountNumber;
@@ -135,4 +132,17 @@ public class KycEntity {
 
     @Column(name = "account_type")
     private String accountType;
+
+    // KYC Status
+    @Enumerated(EnumType.STRING) // Store the Enum as String in the database
+    @Column(name = "kyc_status")
+    private KYCStatus kycStatus;
+
+    // Default value in constructor (optional, but good practice to set initial status)
+    @PrePersist // Before entity is persisted (saved for the first time)
+    public void prePersist() {
+        if (this.kycStatus == null) {
+            this.kycStatus = KYCStatus.NOT_VERIFIED; // Default status when a new KYC is created
+        }
+    }
 }
