@@ -32,9 +32,16 @@ import { format } from 'date-fns'; // Import format from date-fns for date forma
 
 const FileUpload = ({ label, file, onDrop, loading, error, helperText }) => {
   const { getRootProps, getInputProps } = useDropzone({
-    accept: '.pdf,.doc,.docx,.jpg,.jpeg,.png',
+    accept: {
+      'application/pdf': ['.pdf'],
+      'application/msword': ['.doc'],
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+      'image/jpeg': ['.jpg', '.jpeg'],
+      'image/png': ['.png']
+    },
     onDrop,
   });
+
 
   return (
     <Box>
@@ -427,19 +434,12 @@ const KYCForm = () => {
                     />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <DatePicker
-                      label="Date of Birth"
-                      value={formData.dob}
-                      onChange={(date) => setFormData({ ...formData, dob: date })}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          fullWidth
-                          required
-                          {...params.inputProps}
-                        />
-                      )}
-                    />
+                  <DatePicker
+                    label="Date of Birth"
+                    value={formData.dob}
+                    onChange={(date) => setFormData({ ...formData, dob: date })}
+                    textField={<TextField fullWidth required />} // Directly use the TextField component
+                  />
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <FormControl fullWidth >
@@ -558,7 +558,7 @@ const KYCForm = () => {
                     <FormControlLabel
                       control={
                         <Checkbox
-                          checked={formData.correspondenceAddress.sameAsPermanent}
+                        checked={formData.correspondenceAddress.sameAsPermanent || false} // Controlled state
                           onChange={(e) =>
                             setFormData((prev) => ({
                               ...prev,
