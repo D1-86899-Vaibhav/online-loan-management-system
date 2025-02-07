@@ -1,40 +1,24 @@
 import React, { useState } from "react";
-import { AppBar, Toolbar, IconButton, Badge, Menu, MenuItem, Typography, Box } from "@mui/material";
-import { Notifications, AccountCircle } from "@mui/icons-material";
+import { IconButton, Badge, Menu, MenuItem, Tooltip } from "@mui/material";
+import { Notifications, AccountCircle, Logout } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
-import { Logout as LogoutIcon } from "@mui/icons-material";
-import { Tooltip } from "@mui/material";
-import toast from 'react-hot-toast';
 
 const Navbar = ({ isAuthenticated }) => {
   const [anchorEl, setAnchorEl] = useState(null);
-  const [notifications] = useState(3); // Example notification count
+  const [notifications] = useState(5); // Example notification count
   const navigate = useNavigate();
 
+  // Handle opening notification menu
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
+  // Handle closing notification menu
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
 
-  const handleLogout = () => {
-    
-    console.log("Logging out...");
-
-    // Clear sessionStorage when logging out
-    sessionStorage.removeItem('authToken');
-    sessionStorage.removeItem('userRole');
-    
-    // Optionally, show a toast message (if using toast)
-    toast.success("Logged out successfully!");
-
-    // Redirect user to the login page (or homepage if you prefer)
-    navigate('/login');
-
-  };
-
+  
   return (
     <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md shadow-sm">
       <div className="container mx-auto p-4 flex flex-col md:flex-row justify-between items-center">
@@ -45,14 +29,14 @@ const Navbar = ({ isAuthenticated }) => {
             alt="Logo"
             className="w-10 h-10"
           />
-          <h1 className="text-2xl font-bold text-blue-600">Easy Loan!</h1>
+          <h1 className="text-2xl font-bold text-blue-600">Easy Loan - User</h1>
         </div>
 
         {/* Buttons and Icons */}
         <div className="flex space-x-4 mt-4 md:mt-0 items-center">
-          {isAuthenticated ? (
+          {isAuthenticated && (
             <>
-              {/* Notifications Icon */}
+              {/* Notifications */}
               <div className="relative">
                 <IconButton color="primary" onClick={handleMenuOpen}>
                   <Badge badgeContent={notifications} color="error">
@@ -61,29 +45,29 @@ const Navbar = ({ isAuthenticated }) => {
                 </IconButton>
                 {/* Notification Menu */}
                 <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
-                  <MenuItem onClick={handleMenuClose}>Notification 1</MenuItem>
-                  <MenuItem onClick={handleMenuClose}>Notification 2</MenuItem>
-                  <MenuItem onClick={handleMenuClose}>Notification 3</MenuItem>
+                  <MenuItem onClick={handleMenuClose}>New Loan Request</MenuItem>
+                  <MenuItem onClick={handleMenuClose}>EMI Payment Due</MenuItem>
                 </Menu>
               </div>
 
-              {/* User Profile and Logout */}
-              <div className="flex items-center space-x-2 cursor-pointer" onClick={handleLogout}>
-                <AccountCircle fontSize="large" className="text-blue-600" />
-                <span className="text-blue-600 font-semibold">Logout</span>
+              {/* User Profile & Logout */}
+              <div className="flex items-center space-x-4">
+                {/* Profile Link */}
+                <Link to="/user-profile" className="text-blue-600 flex items-center space-x-2">
+                  <Tooltip title="User Profile" arrow>
+                    <AccountCircle fontSize="large" />
+                  </Tooltip>
+                </Link>
+
+                {/* Logout Button */}
+                <button
+                  onClick={() => navigate("/logout")} // Redirects to Logout component
+                  className="relative px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg flex items-center space-x-2 hover:bg-blue-700 transition duration-300"
+                >
+                  <Logout fontSize="small" />
+                  <span>Logout</span>
+                </button>
               </div>
-            </>
-          ) : (
-            <>
-              {/* Login Button */}
-              <Link
-                to="/login"
-                className="relative px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg overflow-hidden group flex items-center space-x-2"
-              >
-                <LogoutIcon fontSize="small" />
-                <span className="relative z-10">Logout</span>
-                <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition duration-300"></div>
-              </Link>
             </>
           )}
         </div>

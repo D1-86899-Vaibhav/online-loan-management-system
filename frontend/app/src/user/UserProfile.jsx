@@ -167,7 +167,7 @@ const UserProfile = () => {
 
   return (
     <Box display="flex" minHeight="100vh" flexDirection="column">
-      <Navbar />
+      <Navbar isAuthenticated={true} />
       <ToastContainer />
       <Box display="flex" flex={1}>
         <Box width={{ xs: '100%', md: '20%' }} minHeight="100vh">
