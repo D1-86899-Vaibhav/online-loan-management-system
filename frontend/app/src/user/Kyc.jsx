@@ -392,7 +392,7 @@ const KYCForm = () => {
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <Box display="flex" minHeight="100vh" flexDirection="column">
         {/* Navbar Component */}
-        <Navbar />
+        <Navbar isAuthenticated={true} />
 
         <Box display="flex" flex={1}>
           {/* Sidebar */}

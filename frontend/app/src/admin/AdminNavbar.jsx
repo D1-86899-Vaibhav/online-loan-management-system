@@ -1,23 +1,19 @@
 import React, { useState } from "react";
 import { IconButton, Badge, Menu, MenuItem, Tooltip } from "@mui/material";
 import { Notifications, AccountCircle, Logout } from "@mui/icons-material";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const AdminNavbar = ({ isAuthenticated }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [notifications] = useState(5); // Example notification count
+  const navigate = useNavigate();
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
-
   const handleMenuClose = () => {
     setAnchorEl(null);
-  };
-
-  const handleLogout = () => {
-    console.log("Admin Logging out...");
   };
 
   return (
@@ -63,22 +59,21 @@ const AdminNavbar = ({ isAuthenticated }) => {
 
                 {/* Logout */}
                 <button
-                 
-                  className="relative px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg overflow-hidden group flex items-center space-x-2"
+                  onClick={() => navigate("/logout")} // Redirects to Logout component
+                  className="relative px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg flex items-center space-x-2 hover:bg-blue-700 transition duration-300"
                 >
                   <Logout fontSize="small" />
-                  <span className="relative z-10">Logout</span>
-                  <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition duration-300"></div>
+                  <span>Logout</span>
                 </button>
               </div>
             </>
           ) : (
             <Link
-              to="/login"  onClick={handleLogout}
+              to="/login"
               className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg flex items-center space-x-2 hover:bg-blue-700 transition duration-300"
             >
               <AccountCircle fontSize="small" />
-              <span>Logout</span>
+              <span>Login</span>
             </Link>
           )}
         </div>
