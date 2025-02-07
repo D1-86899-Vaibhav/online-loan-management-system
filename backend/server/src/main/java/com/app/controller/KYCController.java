@@ -9,12 +9,13 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.app.dto.ApiResponse;
+import com.app.dto.KycDetailsUpdateRequest;
 import com.app.pojos.KycEntity;
 import com.app.service.KycService;
 
 @RestController
 @RequestMapping("/kyc")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "*")
 public class KYCController {
 
     @Autowired
@@ -30,6 +31,17 @@ public class KYCController {
         }
     }
 
+    @PutMapping("/update/{id}")
+    public ResponseEntity<KycEntity> updateKycDetails(
+        @PathVariable Long id, 
+        @RequestBody KycDetailsUpdateRequest request) {
+        
+    	KycEntity updatedDetails = kycService.updateKycDetails(id, request);
+        return ResponseEntity.ok(updatedDetails);
+    }
+  
+    
+    
     @PostMapping(consumes = { "multipart/form-data" })
     public ResponseEntity<ApiResponse> createKYC(
             @RequestParam("userId") Long userId,

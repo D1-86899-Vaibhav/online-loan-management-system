@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import {
   Box,
   Card,
@@ -9,35 +10,32 @@ import {
   Avatar,
   Divider,
   IconButton,
-  MenuItem,
-  Select,
-  InputLabel,
   FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
-import UserSidebar from './UserSidebar';
-import Navbar from './Navbar';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import UserSidebar from './UserSidebar';
+import Navbar from './Navbar';
 
 const UserProfile = () => {
   const [userDetails, setUserDetails] = useState({
-    name: 'Amol',
-    email: 'amol.dangi@example.com',
-    phone: '+91-123-456-7890',
-    gender: 'Male',
-    address: 'United States',
-    avatarUrl: 'https://via.placeholder.com/150',
-    dob: '10 Aug, 1980',
-    joiningDate: '15 Sep, 2021',
-    lastLogin: '12 Jan, 2025',
-    regMethod: 'Email',
-    state: '',
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
     city: '',
+    avatarUrl: 'https://via.placeholder.com/150',
+    gender: '',
+    dob: '',
+    state: '',
     zipCode: '',
-    adharNo: 'XXXX-XXXX-XXXX',
-    panNo: 'AAAAA1234A',
-    bankAccountNo: '1234567890123456',
+    adharNo: '',
+    panNo: '',
+    bankAccountNo: '',
   });
 
   const [isEditing, setIsEditing] = useState(false);
@@ -45,10 +43,52 @@ const UserProfile = () => {
 
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [passwordForm, setPasswordForm] = useState({
+    email: '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
   });
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        localStorage.setItem("userId", "1");
+        const userId = localStorage.getItem("userId");
+        console.log("User  ID from localStorage:", userId);
+        if (!userId) {
+          console.error("No userId found in localStorage");
+          return;
+        }
+
+        const response = await axios.get(`http://localhost:8080/kyc/user/${userId}`);
+        const apiData = response.data;
+
+        // Map API response fields to userDetails state fields
+        const updatedUserDetails = {
+          firstName: apiData.firstName || '',
+          lastName: apiData.lastName || '',
+          email: apiData.email || '',
+          phone: apiData.phone || '',
+          city: apiData.correspondenceCity || '',
+          avatarUrl: 'https://via.placeholder.com/150',
+          gender: apiData.gender || '',
+          dob: apiData.dob || '',
+          state: apiData.correspondenceState || '',
+          zipCode: apiData.correspondenceZipCode || '',
+          adharNo: apiData.aadhaarNumber || '',
+          panNo: apiData.panNumber || '',
+          bankAccountNo: apiData.bankAccountNumber || '',
+        };
+
+        setUserDetails(updatedUserDetails);
+        setFormValues(updatedUserDetails); // Initialize formValues with the same data
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -60,21 +100,58 @@ const UserProfile = () => {
     setPasswordForm({ ...passwordForm, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handlePasswordSubmit = async (e) => {
     e.preventDefault();
-    setUserDetails(formValues);
-    setIsEditing(false);
-    toast.success('Profile updated successfully!');
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast.error('Passwords do not match!');
+      return;
+    }
+
+    try {
+      const response = await axios.post('http://localhost:8080/kyc/user/change-password', passwordForm, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.status === 200) {
+        setIsChangingPassword(false);
+        toast.success('Password changed successfully!');
+      } else {
+        toast.error('Failed to change password. Please try again.');
+      }
+    } catch (error) {
+      console.error("Error changing password:", error);
+      toast.error('An error occurred while changing the password.');
+    }
   };
 
-  const handlePasswordSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (passwordForm.newPassword === passwordForm.confirmPassword) {
-      // Proceed with password change logic
-      setIsChangingPassword(false);
-      toast.success('Password changed successfully!');
-    } else {
-      toast.error('Passwords do not match!');
+    try {
+      const userId = localStorage.getItem("userId");
+      if (!userId) {
+        console.error("No userId found in localStorage");
+        return;
+      }
+
+      // Update the user details on the server
+      const response = await axios.put(`http://localhost:8080/kyc/user/${userId}`, formValues, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.status === 200) {
+        setUserDetails(formValues); // Update local state with the updated data
+        setIsEditing(false);
+        toast.success('Profile updated successfully!');
+      } else {
+        toast.error('Failed to update profile. Please try again.');
+      }
+    } catch (error) {
+      console.error("Error occurred:", error);
+      toast.error('An error occurred while updating the profile.');
     }
   };
 
@@ -91,7 +168,7 @@ const UserProfile = () => {
 
   return (
     <Box display="flex" minHeight="100vh" flexDirection="column">
-      <Navbar />
+      <Navbar isAuthenticated={true} />
       <ToastContainer />
       <Box display="flex" flex={1}>
         <Box width={{ xs: '100%', md: '20%' }} minHeight="100vh">
@@ -104,15 +181,14 @@ const UserProfile = () => {
 
           <Card sx={{ p: 3, maxWidth: 900, margin: '0 auto' }}>
             <Grid container spacing={4}>
-              {/* Profile Picture and Basic Info */}
               <Grid item xs={12} md={4} textAlign="center">
                 <Box sx={{ position: 'relative', display: 'inline-block' }}>
                   <Avatar
                     src={userDetails.avatarUrl}
-                    alt={userDetails.name}
+                    alt={userDetails.firstName}
                     sx={{ width: 150, height: 150, mb: 2 }}
                   />
-                  {!isEditing && (
+                  {isEditing && (
                     <IconButton
                       color="primary"
                       aria-label="upload picture"
@@ -138,9 +214,6 @@ const UserProfile = () => {
                     </IconButton>
                   )}
                 </Box>
-                {/* <Typography variant="h6" color="primary">
-                   {userDetails.name}
-                </Typography> */}
                 {!isEditing && (
                   <Button
                     variant="contained"
@@ -148,52 +221,27 @@ const UserProfile = () => {
                     onClick={() => setIsEditing(true)}
                     sx={{ mt: 2 }}
                   >
-                    Update Profile
+                    Edit Profile
                   </Button>
                 )}
               </Grid>
 
-              {/* Detailed Information */}
               <Grid item xs={12} md={8}>
                 {!isEditing ? (
                   <>
-                    <Typography variant="h6" gutterBottom
-                      sx={{
-
-                        color: "#1565c0", // A deep blue for better visibility
-                        fontWeight: "bold",
-
-
-                      }}
-
-
-
-
-                    >
+                    <Typography variant="h6" gutterBottom sx={{ color: '#1565c0', fontWeight: 'bold' }}>
                       PERSONAL INFORMATION
                     </Typography>
                     <Divider sx={{ mb: 2 }} />
-                    <DetailItem label="Full Name" value={userDetails.name} />
+                    <DetailItem label="Full Name" value={`${userDetails.firstName} ${userDetails.lastName}`} />
                     <DetailItem label="Date of Birth" value={userDetails.dob} />
-                    <DetailItem label="Mobile Number" value={userDetails.phone} />
+                    <DetailItem label="Phone Number" value={userDetails.phone} />
                     <DetailItem label="Gender" value={userDetails.gender} />
-                    {/* <Typography variant="h5" gutterBottom sx={{ mt: 4 }}>
-                      Account Details
-                    </Typography> */}
-                    {/* <Divider sx={{ mb: 2 }} /> */}
                     <DetailItem label="Email Address" value={userDetails.email} />
 
-
                     {/* Change Password Section */}
-                    <Typography variant="h6" gutterBottom
-                      sx={{
-
-                        color: "#1565c0", // A deep blue for better visibility
-                        fontWeight: "bold",
-
-
-                      }}>
-                      CHNAGE PASSWORD
+                    <Typography variant="h6" gutterBottom sx={{ color: '#1565c0', fontWeight: 'bold', mt: 4 }}>
+                      CHANGE PASSWORD
                     </Typography>
                     <Button
                       variant="outlined"
@@ -212,38 +260,57 @@ const UserProfile = () => {
                     <Grid container spacing={2}>
                       <Grid item xs={12} sm={6}>
                         <TextField
-                          label="Full Name"
+                          label="First Name"
                           variant="outlined"
                           fullWidth
-                          name="name"
-                          value={formValues.name}
+                          name="firstName"
+                          value={formValues.firstName}
                           onChange={handleChange}
                           required
                         />
                       </Grid>
                       <Grid item xs={12} sm={6}>
                         <TextField
-                          label="Date of Birth"
+                          label="Last Name"
                           variant="outlined"
                           fullWidth
-                          name="dob"
-                          value={formValues.dob}
+                          name="lastName"
+                          value={formValues.lastName}
                           onChange={handleChange}
-                          type="date"
-                          InputLabelProps={{ shrink: true }}
                           required
                         />
                       </Grid>
                       <Grid item xs={12} sm={6}>
                         <TextField
-                          label="Mobile Number"
+                          label="Email Address"
+                          variant="outlined"
+                          fullWidth
+                          name="email"
+                          value={formValues.email}
+                          onChange={handleChange}
+                          required
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          label="Phone Number"
                           variant="outlined"
                           fullWidth
                           name="phone"
                           value={formValues.phone}
                           onChange={handleChange}
                           required
-                          inputProps={{ maxLength: 13 }}
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          label="City"
+                          variant="outlined"
+                          fullWidth
+                          name="city"
+                          value={formValues.city}
+                          onChange={handleChange}
+                          required
                         />
                       </Grid>
                       <Grid item xs={12} sm={6}>
@@ -264,47 +331,24 @@ const UserProfile = () => {
                       </Grid>
                       <Grid item xs={12} sm={6}>
                         <TextField
-                          label="Email Address"
+                          label="Date of Birth"
                           variant="outlined"
                           fullWidth
-                          name="email"
-                          value={formValues.email}
+                          name="dob"
+                          value={formValues.dob}
                           onChange={handleChange}
+                          type="date"
+                          InputLabelProps={{ shrink: true }}
                           required
                         />
                       </Grid>
                       <Grid item xs={12} sm={6}>
                         <TextField
-                          label="Country"
+                          label="State"
                           variant="outlined"
                           fullWidth
-                          name="address"
-                          value={formValues.address}
-                          onChange={handleChange}
-                          required
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <FormControl fullWidth>
-                          <InputLabel>State</InputLabel>
-                          <Select
-                            name="state"
-                            value={formValues.state}
-                            onChange={handleChange}
-                            label="State"
-                          >
-                            <MenuItem value="State1">State1</MenuItem>
-                            <MenuItem value="State2">State2</MenuItem>
-                          </Select>
-                        </FormControl>
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <TextField
-                          label="City"
-                          variant="outlined"
-                          fullWidth
-                          name="city"
-                          value={formValues.city}
+                          name="state"
+                          value={formValues.state}
                           onChange={handleChange}
                           required
                         />
@@ -362,7 +406,6 @@ const UserProfile = () => {
                         Cancel
                       </Button>
                     </Box>
-
                   </form>
                 )}
 
@@ -373,6 +416,17 @@ const UserProfile = () => {
                       Change Password
                     </Typography>
                     <Grid container spacing={2}>
+                      <Grid item xs={12} sm={4}>
+                        <TextField
+                          label="Email"
+                          variant="outlined"
+                          fullWidth
+                          name="email"
+                          value={passwordForm.email}
+                          onChange={handlePasswordChange}
+                          required
+                        />
+                      </Grid>
                       <Grid item xs={12} sm={4}>
                         <TextField
                           label="Current Password"
@@ -422,7 +476,6 @@ const UserProfile = () => {
                         Cancel
                       </Button>
                     </Box>
-
                   </form>
                 )}
               </Grid>

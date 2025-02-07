@@ -119,7 +119,7 @@ const PayEmi = () => {
   return (
     <Box display="flex" minHeight="100vh" flexDirection="column">
       {/* Navbar */}
-      <Navbar />
+      <Navbar isAuthenticated={true} />
 
       <Box display="flex" flex={1}>
         {/* Sidebar */}

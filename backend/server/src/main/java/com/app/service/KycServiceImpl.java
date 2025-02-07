@@ -1,6 +1,7 @@
 package com.app.service;
 
 import com.app.dto.ApiResponse;
+import com.app.dto.KycDetailsUpdateRequest;
 import com.app.pojos.KycEntity;
 import com.app.repository.KycRepository;
 import jakarta.annotation.PostConstruct; // Correct import for @PostConstruct
@@ -15,6 +16,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -125,4 +129,33 @@ public class KycServiceImpl implements KycService {
         return lowerFilename.endsWith(".pdf") || lowerFilename.endsWith(".doc") || lowerFilename.endsWith(".docx") || lowerFilename.endsWith(".jpg") || lowerFilename.endsWith(".jpeg") || lowerFilename.endsWith(".png");
         // Add more types if needed and consider more robust validation (MIME type checking, etc.)
     }
+    @Override
+    public KycEntity updateKycDetails(Long id, KycDetailsUpdateRequest request) {
+        Optional<KycEntity> optionalKycDetails = kycRepository.findById(id);
+
+        if (optionalKycDetails.isPresent()) {
+            KycEntity kycDetails = optionalKycDetails.get();
+
+            kycDetails.setFirstName(request.getFirstName());
+            kycDetails.setLastName(request.getLastName());
+            kycDetails.setEmail(request.getEmail());
+            kycDetails.setPhone(request.getPhone());
+            kycDetails.setGender(request.getGender());
+            kycDetails.setCorrespondenceCity(request.getCorrespondenceCity());
+            kycDetails.setCorrespondenceState(request.getCorrespondenceState());
+            kycDetails.setCorrespondenceZipCode(request.getCorrespondenceZipCode());
+
+            // Convert Date to LocalDate before setting it
+            Date dateOfBirth = request.getDateOfBirth();
+            if (dateOfBirth != null) {
+                LocalDate dob = dateOfBirth.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                kycDetails.setDob(dob);
+            }
+
+            return kycRepository.save(kycDetails);
+        } else {
+            throw new RuntimeException("KYC Details not found with ID: " + id);
+        }
+    }
+
 }

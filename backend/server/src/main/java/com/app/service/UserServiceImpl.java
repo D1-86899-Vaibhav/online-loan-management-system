@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.app.dto.ApiResponse;
+import com.app.dto.PasswordChangeRequest;
 import com.app.dto.UserDTO;
 import com.app.pojos.UserEntity;
 import com.app.pojos.WalletEntity;
@@ -77,4 +78,23 @@ public class UserServiceImpl implements UserService {
 		UserEntity updatedUser = userRepository.save(existingUser);
 		return new ApiResponse("User updated with ID " + updatedUser.getId());
 	}
+
+	@Override
+	public void changePassword(PasswordChangeRequest changePasswordRequest) {
+        UserEntity user = userRepository.findByEmail(changePasswordRequest.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!passwordEncoder.matches(changePasswordRequest.getCurrentPassword(), user.getPassword())) {
+            throw new RuntimeException("Current password is incorrect");
+        }
+
+        if (changePasswordRequest.getNewPassword().equals(changePasswordRequest.getCurrentPassword())) {
+            throw new RuntimeException("New password cannot be the same as the current password");
+        }
+
+        user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
+        userRepository.save(user);
+    }
+
+	 
 }
