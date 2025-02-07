@@ -81,7 +81,7 @@ const Navbar = ({ isAuthenticated }) => {
                 className="relative px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg overflow-hidden group flex items-center space-x-2"
               >
                 <LogoutIcon fontSize="small" />
-                <span className="relative z-10">Login</span>
+                <span className="relative z-10">Logout</span>
                 <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition duration-300"></div>
               </Link>
             </>
