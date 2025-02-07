@@ -47,7 +47,7 @@ public class SecurityConfiguration {
 
                 .requestMatchers("/wallet/withdraw-funds","/wallet/add-funds","/wallet/balance", "/transactions", "/loans/summary", "/loans/details","/loan-applications/apply").hasRole("USER")
                 
-                .requestMatchers("/products/add", "/products/delete").hasRole("ADMIN")
+                .requestMatchers("/loans/**").hasRole("ADMIN")
                 .anyRequest().authenticated())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 

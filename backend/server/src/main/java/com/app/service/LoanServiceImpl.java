@@ -1,6 +1,6 @@
 package com.app.service;
 
-import com.app.dto.ApiResponse;
+import com.app.dto.CreditFundsRequest;
 import com.app.dto.LoanDetailsResp;
 import com.app.dto.LoanSummaryResp;
 import com.app.pojos.LoanEntity;
@@ -10,13 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,6 +24,10 @@ public class LoanServiceImpl implements LoanService {
 	@Autowired
 	private LoanRepository loanRepository;
 
+	
+
+    @Autowired
+    private WalletService walletService;
 	/**
      * Creates and saves a new loan record.
      * This method can be used to create a pending loan when a loan application is submitted.
@@ -75,5 +77,49 @@ public class LoanServiceImpl implements LoanService {
 	
 	
 	
+	
+	//ADMIN SIDE
+	public LoanDetailsResp updateLoanStatus(Long loanId, String action) {
+        Optional<LoanEntity> optionalLoan = loanRepository.findById(loanId);
+        if (optionalLoan.isPresent()) {
+            LoanEntity loan = optionalLoan.get();
+            System.out.println(loan);
+            if (action.equalsIgnoreCase("approve")) {
+                loan.setStatus(LoanStatus.APPROVED);
+                loan.setNextEmiDate(loan.getStartDate()); 
+                loan.setEndDate(loan.getStartDate().plusMonths(loan.getDuration()));
+             // Transfer the loan amount to the user's wallet and record the transaction
+                CreditFundsRequest creditFundsRequest = new CreditFundsRequest(loan.getLoanAmount());
+                walletService.creditFunds(loan.getUser().getId(), creditFundsRequest);
+                
+            } else if (action.equalsIgnoreCase("reject")) {
+                loan.setStatus(LoanStatus.REJECTED);
+            } else {
+                throw new IllegalArgumentException("Invalid action: " + action);
+            }
+            LoanEntity updatedLoan = loanRepository.save(loan);
+
+            // Map the updated loan entity to the LoanDetailsResp DTO with only necessary fields
+            LoanDetailsResp loanDetailsResp = new LoanDetailsResp();
+            loanDetailsResp.setId(updatedLoan.getId());
+            loanDetailsResp.setLoanAmount(updatedLoan.getLoanAmount());
+            loanDetailsResp.setEmiAmount(updatedLoan.getEmiAmount());
+            loanDetailsResp.setStartDate(updatedLoan.getStartDate());
+            loanDetailsResp.setEndDate(updatedLoan.getEndDate());
+            loanDetailsResp.setNextEMIDate(updatedLoan.getNextEmiDate());
+            loanDetailsResp.setStatus(updatedLoan.getStatus().toString());
+
+            return loanDetailsResp;
+        } else {
+            throw new RuntimeException("Loan not found");
+        }
+    }
+
+
+	 // New method: Get all loans (for admin)
+    @Override
+    public List<LoanDetailsResp> getAllLoanDetails() {
+        return loanRepository.findAllLoanDetails();
+    }
 
 }
