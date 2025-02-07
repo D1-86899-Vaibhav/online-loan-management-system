@@ -4,8 +4,16 @@ import com.app.custom_exceptions.ApiException;
 import com.app.dto.AddFundsRequest;
 import com.app.dto.ApiResponse;
 import com.app.dto.WithdrawFundsRequest;
+import com.app.pojos.TransactionEntity;
+import com.app.pojos.TransactionStatus;
+import com.app.pojos.UserEntity;
 import com.app.pojos.WalletEntity;
+import com.app.repository.TransactionRepository;
+import com.app.repository.UserRepository;
 import com.app.repository.WalletRepository;
+
+import java.time.LocalDateTime;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,38 +22,88 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class WalletServiceImpl implements WalletService {
 
-    @Autowired
-    private WalletRepository walletRepository;
+	@Autowired
+	private WalletRepository walletRepository;
 
-    @Override
-    public void addFunds(Long userId, AddFundsRequest request) {
-        WalletEntity wallet = walletRepository.findByUserId(userId)
-                .orElseThrow(() -> new ApiException("Wallet not found for user ID " + userId));
-        wallet.setBalance(wallet.getBalance() + request.getAmount());
-        walletRepository.save(wallet);
-    }
+	@Autowired
+	private UserRepository userRepository;
 
-    @Override
-    public boolean withdrawFunds(Long userId, WithdrawFundsRequest request) {
-        WalletEntity wallet = walletRepository.findByUserId(userId)
-                .orElseThrow(() -> new ApiException("Wallet not found for user ID " + userId));
-        if (wallet.getBalance() >= request.getAmount()) {
-            wallet.setBalance(wallet.getBalance() - request.getAmount());
-            walletRepository.save(wallet);
-            return true;
-        }
-        return false;
-    }
+	@Autowired
+	private TransactionRepository transactionRepository;
 
-    @Override
-    public WalletEntity getWalletByUserId(Long userId) {
-        return walletRepository.findByUserId(userId)
-                .orElseThrow(() -> new ApiException("Wallet not found for user ID " + userId));
-    }
+	@Override
+	public void addFunds(Long userId, AddFundsRequest request) {
+		WalletEntity wallet = walletRepository.findByUserId(userId)
+				.orElseThrow(() -> new ApiException("Wallet not found for user ID " + userId));
+		wallet.setBalance(wallet.getBalance() + request.getAmount());// Record transaction
+		Double amount=request.getAmount();
+		System.out.println(amount);
+		UserEntity user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+		TransactionEntity transaction = new TransactionEntity(wallet, user, amount,
+				"Deposit", TransactionStatus.COMPLETED);
+		System.out.println(transaction);
+		transactionRepository.save(transaction);
 
-    @Override
-    public ApiResponse updateWallet(WalletEntity wallet) {
-        WalletEntity updatedWallet = walletRepository.save(wallet);
-        return new ApiResponse("Wallet updated with ID " + updatedWallet.getId());
-    }
+		walletRepository.save(wallet);
+	}
+
+	@Override
+
+	public boolean withdrawFunds(Long userId, WithdrawFundsRequest request) {
+		WalletEntity wallet = walletRepository.findByUserId(userId)
+				.orElseThrow(() -> new RuntimeException("Wallet not found"));
+		Double amount = request.getAmount();
+		if (wallet.getBalance().compareTo(amount) < 0) {
+			// Record failed transaction
+			UserEntity user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+			TransactionEntity transaction = new TransactionEntity(wallet, user, amount, "Withdraw", TransactionStatus.FAILED);
+			transactionRepository.save(transaction);
+			return false;
+		}
+		wallet.setBalance(wallet.getBalance() - (amount));
+
+		// Record transaction
+		UserEntity user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+		TransactionEntity transaction = new TransactionEntity(wallet, user, amount, "Withdraw",TransactionStatus.COMPLETED);
+		transactionRepository.save(transaction);
+
+		walletRepository.save(wallet);
+		return true;
+	}
+
+	public WalletEntity payEmi(Long userId, Double emiAmount) {
+		WalletEntity wallet = walletRepository.findByUserId(userId)
+				.orElseThrow(() -> new RuntimeException("Wallet not found"));
+		if (wallet.getBalance().compareTo(emiAmount) < 0) {
+			throw new RuntimeException("Insufficient balance");
+		}
+		wallet.setBalance(wallet.getBalance() - (emiAmount));
+
+		// Record transaction
+		UserEntity user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+		TransactionEntity transaction = new TransactionEntity(wallet, user, emiAmount, "Payment", TransactionStatus.COMPLETED);
+		transactionRepository.save(transaction);
+
+		return walletRepository.save(wallet);
+	}
+
+	@Override
+	public WalletEntity getWalletByUserId(Long userId) {
+		return walletRepository.findByUserId(userId)
+				.orElseThrow(() -> new ApiException("Wallet not found for user ID " + userId));
+	}
+
+	@Override
+	public ApiResponse updateWallet(WalletEntity wallet) {
+		WalletEntity updatedWallet = walletRepository.save(wallet);
+		return new ApiResponse("Wallet updated with ID " + updatedWallet.getId());
+	}
+	
+	@Override
+	public Double getBalance(Long userId) {
+	    WalletEntity wallet = walletRepository.findByUserId(userId)
+	            .orElseThrow(() -> new ApiException("Wallet not found for user ID " + userId));
+	    return wallet.getBalance();
+	}
+
 }
