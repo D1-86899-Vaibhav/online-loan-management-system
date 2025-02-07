@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.app.dto.ApiResponse;
 import com.app.dto.AuthRequest;
 import com.app.dto.AuthResp;
+import com.app.dto.PasswordChangeRequest;
 import com.app.dto.UserDTO;
 import com.app.pojos.UserEntity;
 import com.app.repository.WalletRepository;
@@ -97,4 +98,22 @@ public class UserController {
         ApiResponse response = userService.updateUser(user);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
+    
+    
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody PasswordChangeRequest changePasswordRequest) {
+        try {
+            userService.changePassword(changePasswordRequest);
+            return ResponseEntity.ok().body("Password changed successfully!");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    
+    
+    
+    
+    
+    
+    
 }
