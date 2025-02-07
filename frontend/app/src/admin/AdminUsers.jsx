@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import DataGridTable from "../components/DataGridTable";
-import columns from "../components/columns/UserColumns";
-import AdminSidebar from './AdminSidebar'; // Import the sidebar
-import AdminNavbar from './AdminNavbar'; // Import the navbar
-import { Box, Card, CircularProgress } from '@mui/material';
+import baseColumns from "../components/columns/UserColumns"; // renamed for clarity
+import AdminSidebar from "./AdminSidebar"; // Import the sidebar
+import AdminNavbar from "./AdminNavbar"; // Import the navbar
+import { Box, Card, CircularProgress } from "@mui/material";
+import { GridActionsCellItem } from "@mui/x-data-grid"; // Import for action buttons
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
@@ -17,7 +18,7 @@ const AdminUsers = () => {
   const getUsers = async () => {
     try {
       const response = await fetch("http://localhost:8080/api/users/AllUsers");
-      
+
       // Check if the response is OK (status code 200)
       if (!response.ok) {
         throw new Error("Failed to fetch users");
@@ -32,6 +33,52 @@ const AdminUsers = () => {
       setLoading(false); // End loading state
     }
   };
+
+  // Action handlers for Approve and Reject buttons
+  const handleApproveClick = (id) => {
+    // Add your logic to handle approval here.
+    console.log("Approve clicked for user:", id);
+    alert(`Approve clicked for user ${id}`);
+  };
+
+  const handleRejectClick = (id) => {
+    // Add your logic to handle rejection here.
+    console.log("Reject clicked for user:", id);
+    alert(`Reject clicked for user ${id}`);
+  };
+
+  // Extend the imported columns by appending the actions column
+  const columnsWithActions = [
+    ...baseColumns,
+    {
+      field: "actions",
+      headerName: "Actions",
+      width: 250, 
+      type: "actions",
+      getActions: (params) => [
+        <GridActionsCellItem
+          icon={
+            <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md">
+              Approve
+            </button>
+          }
+          label="Approve"
+          onClick={() => handleApproveClick(params.id)}
+          key="approve"
+        />,
+        <GridActionsCellItem
+          icon={
+            <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md">
+              Reject
+            </button>
+          }
+          label="Reject"
+          onClick={() => handleRejectClick(params.id)}
+          key="reject"
+        />
+      ]
+    }
+  ];
 
   return (
     <Box className="min-h-screen flex flex-col">
@@ -49,9 +96,11 @@ const AdminUsers = () => {
           <Card className="p-6 shadow-lg">
             <h1 className="text-2xl font-semibold text-blue-600 mt-5">All Users</h1>
             <div className="mt-10">
-              {error && <Box className="text-red-500 text-center">{error}</Box>}
+              {error && (
+                <Box className="text-red-500 text-center">{error}</Box>
+              )}
               {!loading ? (
-                <DataGridTable data={users} columns={columns} />
+                <DataGridTable data={users} columns={columnsWithActions} />
               ) : (
                 <Box className="flex justify-center items-center h-40">
                   <CircularProgress />

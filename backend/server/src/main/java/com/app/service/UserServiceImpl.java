@@ -80,6 +80,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+
 	public void changePassword(PasswordChangeRequest changePasswordRequest) {
         UserEntity user = userRepository.findByEmail(changePasswordRequest.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -97,4 +98,5 @@ public class UserServiceImpl implements UserService {
     }
 
 	 
+
 }
