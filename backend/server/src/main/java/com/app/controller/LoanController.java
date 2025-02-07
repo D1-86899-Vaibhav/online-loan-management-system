@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import com.app.dto.LoanActionRequest;
 import com.app.dto.LoanDetailsResp;
 import com.app.dto.LoanSummaryResp;
+import com.app.pojos.LoanEntity;
 import com.app.security.JwtUtils;
 import com.app.service.LoanService;
 
