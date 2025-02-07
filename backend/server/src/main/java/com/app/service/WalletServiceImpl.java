@@ -3,6 +3,7 @@ package com.app.service;
 import com.app.custom_exceptions.ApiException;
 import com.app.dto.AddFundsRequest;
 import com.app.dto.ApiResponse;
+import com.app.dto.CreditFundsRequest;
 import com.app.dto.LoanDetailsResp;
 import com.app.dto.WithdrawFundsRequest;
 import com.app.pojos.LoanEntity;
@@ -123,7 +124,17 @@ public class WalletServiceImpl implements WalletService {
 				.orElseThrow(() -> new ApiException("Wallet not found for user ID " + userId));
 		return wallet.getBalance();
 	}
-
+	@Override
+    public void creditFunds(Long userId, CreditFundsRequest request) {
+        WalletEntity wallet = walletRepository.findByUserId(userId)
+                .orElseThrow(() -> new ApiException("Wallet not found for user ID " + userId));
+        wallet.setBalance(wallet.getBalance() + request.getAmount());
+        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        TransactionEntity transaction = new TransactionEntity(wallet, user, request.getAmount(),
+                "Loan Credited", TransactionStatus.COMPLETED);
+        transactionRepository.save(transaction);
+        walletRepository.save(wallet);
+    }
 
 //	private LoanEntity convertToLoanEntity(LoanDetailsResp loanDetailsResp) {
 //	    LoanEntity loanEntity = new LoanEntity();
