@@ -1,5 +1,7 @@
 package com.app.pojos;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,6 +20,7 @@ public class WalletEntity {
     // Each user has a unique wallet
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @JsonIgnore
     private UserEntity user;
 
     @Column(name = "balance", nullable = false)

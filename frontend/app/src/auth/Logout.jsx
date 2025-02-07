@@ -19,3 +19,4 @@ export default function Logout() {
 
   return null;  // No UI is required, just handle logic and redirect
 }
+

@@ -10,4 +10,7 @@ public interface WalletService {
     ApiResponse updateWallet(WalletEntity wallet);
     void addFunds(Long userId, AddFundsRequest request);
     boolean withdrawFunds(Long userId, WithdrawFundsRequest request);
+
+	public WalletEntity payEmi(Long userId, Double emiAmount);
+	 public Double getBalance(Long userId);
 }
