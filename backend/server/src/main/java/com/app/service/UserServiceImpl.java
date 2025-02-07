@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.app.dto.ApiResponse;
+import com.app.dto.PasswordChangeRequest;
 import com.app.dto.UserDTO;
 import com.app.pojos.UserEntity;
 import com.app.pojos.WalletEntity;
@@ -76,5 +77,11 @@ public class UserServiceImpl implements UserService {
 
 		UserEntity updatedUser = userRepository.save(existingUser);
 		return new ApiResponse("User updated with ID " + updatedUser.getId());
+	}
+
+	@Override
+	public String changePassword(PasswordChangeRequest request) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

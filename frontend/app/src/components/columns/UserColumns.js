@@ -15,6 +15,7 @@ const columns = [
     },
     { field: 'phoneNumber', headerName: 'Phone Number', width: 180, editable: true },  // Corresponds to 'phoneNumber' from API response
     { field: 'walletId', headerName: 'Wallet ID', width: 180, editable: true },  // Corresponds to 'walletId' from API response
+    
 ];
 
 export default columns;
