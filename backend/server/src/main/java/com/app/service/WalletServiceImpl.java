@@ -124,6 +124,7 @@ public class WalletServiceImpl implements WalletService {
 		return wallet.getBalance();
 	}
 
+
 //	private LoanEntity convertToLoanEntity(LoanDetailsResp loanDetailsResp) {
 //	    LoanEntity loanEntity = new LoanEntity();
 //	    loanEntity.setId(loanDetailsResp.getId());

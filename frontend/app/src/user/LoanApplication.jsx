@@ -162,7 +162,7 @@ const LoanApplicationForm = () => {
 
   return (
     <Box display="flex" minHeight="100vh" flexDirection="column">
-      <Navbar />
+      <Navbar isAuthenticated={true} />
       <ToastContainer position="top-right" autoClose={3000} />
       <Box display="flex" flex={1}>
         <Box width="20%" minHeight="100vh">

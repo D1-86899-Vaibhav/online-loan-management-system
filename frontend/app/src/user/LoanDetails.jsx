@@ -133,7 +133,7 @@ const LoanDetails = () => {
     <Box display="flex" flexDirection="column">
       <Toaster />
       {/* Navbar */}
-      <Navbar />
+      <Navbar isAuthenticated={true} />
 
       <Box display="flex">
         {/* Sidebar */}

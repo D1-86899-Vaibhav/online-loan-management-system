@@ -3,12 +3,11 @@ package com.app.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import com.app.dto.LoanActionRequest;
 import com.app.dto.LoanDetailsResp;
 import com.app.dto.LoanSummaryResp;
-import com.app.pojos.TransactionEntity;
 import com.app.security.JwtUtils;
 import com.app.service.LoanService;
 
@@ -52,5 +51,39 @@ public class LoanController {
         return ResponseEntity.ok(loans);
     }
 
+	
+	//ADMIN SIDE
+	 @PostMapping("/{loanId}/updateStatus")
+	    public ResponseEntity<LoanDetailsResp> updateLoanStatus(@PathVariable Long loanId, @RequestBody LoanActionRequest loanActionRequest,HttpServletRequest request) {
+		  // Validate JWT token and optionally check for admin privileges
+	        String authHeader = request.getHeader("Authorization");
+	        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+	        }
+	        String token = authHeader.substring(7);
+	        jwtUtil.validateJwtToken(token);
+	        // Optionally, check the user's roles to ensure admin access
+		     LoanDetailsResp updatedLoan = loanService.updateLoanStatus(loanId, loanActionRequest.getAction());
+		     return ResponseEntity.ok(updatedLoan);
+	    }
+	
 
+	
+
+	 
+	// New endpoint for admin: Get all loans
+	    @GetMapping("/all")
+	    public ResponseEntity<List<LoanDetailsResp>> getAllLoans(HttpServletRequest request) {
+	        // Validate JWT token and optionally check for admin privileges
+	        String authHeader = request.getHeader("Authorization");
+	        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+	        }
+	        String token = authHeader.substring(7);
+	        jwtUtil.validateJwtToken(token);
+	        // Optionally, check the user's roles to ensure admin access
+
+	        List<LoanDetailsResp> loans = loanService.getAllLoanDetails();
+	        return ResponseEntity.ok(loans);
+	    }
 }

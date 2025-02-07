@@ -26,8 +26,10 @@ public interface LoanRepository extends JpaRepository<LoanEntity, Long> {
 			+ "l.totalEmi, l.paidEmi, l.remainingEmi, l.lastEmiDate, l.nextEmiDate, l.status) "
 			+ "FROM LoanEntity l WHERE l.user.id = :userId")
 	List<LoanDetailsResp> findLoanDetailsByUserId(@Param("userId") Long userId);
+
 	
 	
 	
 	  LoanEntity getReferenceById(Long userId);
+
 }
