@@ -39,7 +39,7 @@ public class SecurityConfiguration {
                 .requestMatchers("/api/users/AllUsers").permitAll() // Allow access to this endpoint
                 // Wallet endpoints: Adjust permission as needed.
                 .requestMatchers("/api/users/AllUsers/count").permitAll()
-
+                .requestMatchers("/users/change-password").permitAll()
                 .requestMatchers("/kyc/user/**").permitAll()
                 .requestMatchers("/kyc/update/**").permitAll()
                 .requestMatchers("/users/wallet/withdraw-funds", "/transactions", "/users/wallet/add-funds", "/loans/summary", "/loans/details").hasRole("USER")
