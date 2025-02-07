@@ -21,6 +21,7 @@ import com.app.dto.AuthRequest;
 import com.app.dto.AuthResp;
 import com.app.dto.UserDTO;
 import com.app.pojos.UserEntity;
+import com.app.repository.WalletRepository;
 import com.app.security.CustomUserDetailsImpl;
 import com.app.security.JwtUtils;
 import com.app.service.UserService;
@@ -43,6 +44,8 @@ public class UserController {
     @Autowired
     private JwtUtils jwtUtils;
     
+    @Autowired
+    private WalletRepository walletRepository;
     /*
      * User registration endpoint.
      * URL - /users/register
