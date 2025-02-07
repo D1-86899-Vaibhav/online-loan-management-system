@@ -1,10 +1,6 @@
 package com.app.service;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import com.app.dto.ApiResponse;
 import com.app.dto.LoanDetailsResp;
 import com.app.dto.LoanSummaryResp;
 import com.app.pojos.LoanEntity;
@@ -15,4 +11,10 @@ public interface LoanService {
 	public List<LoanDetailsResp> getLoansByUserId(Long userId);
 	public LoanEntity createLoan(LoanEntity loanEntity);
 //    List<Loan> getLoansByUserId(Long userId);
+	
+	
+// ADMIN SIDE
+
+	public LoanDetailsResp updateLoanStatus(Long loanId, String action) ;
+	public List<LoanDetailsResp> getAllLoanDetails();
 }

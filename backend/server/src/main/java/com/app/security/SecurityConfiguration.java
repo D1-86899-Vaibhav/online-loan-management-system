@@ -12,7 +12,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import com.app.security.CustomJWTAuthenticationFilter;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
@@ -35,7 +34,7 @@ public class SecurityConfiguration {
                 .requestMatchers("/api/users/AllUsers/count").permitAll()
                 .requestMatchers("/wallet/withdraw-funds","/wallet/add-funds","/wallet/balance", "/transactions", "/loans/summary", "/loans/details","/loan-applications/apply").hasRole("USER")
                 
-                .requestMatchers("/products/add", "/products/delete").hasRole("ADMIN")
+                .requestMatchers("/loans/**").hasRole("ADMIN")
                 .anyRequest().authenticated())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
