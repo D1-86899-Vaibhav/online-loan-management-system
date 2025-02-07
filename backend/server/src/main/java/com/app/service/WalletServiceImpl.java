@@ -3,11 +3,14 @@ package com.app.service;
 import com.app.custom_exceptions.ApiException;
 import com.app.dto.AddFundsRequest;
 import com.app.dto.ApiResponse;
+import com.app.dto.LoanDetailsResp;
 import com.app.dto.WithdrawFundsRequest;
+import com.app.pojos.LoanEntity;
 import com.app.pojos.TransactionEntity;
 import com.app.pojos.TransactionStatus;
 import com.app.pojos.UserEntity;
 import com.app.pojos.WalletEntity;
+import com.app.repository.LoanRepository;
 import com.app.repository.TransactionRepository;
 import com.app.repository.UserRepository;
 import com.app.repository.WalletRepository;
@@ -31,16 +34,19 @@ public class WalletServiceImpl implements WalletService {
 	@Autowired
 	private TransactionRepository transactionRepository;
 
+	@Autowired
+	private LoanRepository loanRepository;
+
 	@Override
 	public void addFunds(Long userId, AddFundsRequest request) {
 		WalletEntity wallet = walletRepository.findByUserId(userId)
 				.orElseThrow(() -> new ApiException("Wallet not found for user ID " + userId));
 		wallet.setBalance(wallet.getBalance() + request.getAmount());// Record transaction
-		Double amount=request.getAmount();
+		Double amount = request.getAmount();
 		System.out.println(amount);
 		UserEntity user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-		TransactionEntity transaction = new TransactionEntity(wallet, user, amount,
-				"Deposit", TransactionStatus.COMPLETED);
+		TransactionEntity transaction = new TransactionEntity(wallet, user, amount, "Deposit",
+				TransactionStatus.COMPLETED);
 		System.out.println(transaction);
 		transactionRepository.save(transaction);
 
@@ -56,7 +62,8 @@ public class WalletServiceImpl implements WalletService {
 		if (wallet.getBalance().compareTo(amount) < 0) {
 			// Record failed transaction
 			UserEntity user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-			TransactionEntity transaction = new TransactionEntity(wallet, user, amount, "Withdraw", TransactionStatus.FAILED);
+			TransactionEntity transaction = new TransactionEntity(wallet, user, amount, "Withdraw",
+					TransactionStatus.FAILED);
 			transactionRepository.save(transaction);
 			return false;
 		}
@@ -64,7 +71,8 @@ public class WalletServiceImpl implements WalletService {
 
 		// Record transaction
 		UserEntity user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-		TransactionEntity transaction = new TransactionEntity(wallet, user, amount, "Withdraw",TransactionStatus.COMPLETED);
+		TransactionEntity transaction = new TransactionEntity(wallet, user, amount, "Withdraw",
+				TransactionStatus.COMPLETED);
 		transactionRepository.save(transaction);
 
 		walletRepository.save(wallet);
@@ -72,20 +80,30 @@ public class WalletServiceImpl implements WalletService {
 	}
 
 	public WalletEntity payEmi(Long userId, Double emiAmount) {
-		WalletEntity wallet = walletRepository.findByUserId(userId)
-				.orElseThrow(() -> new RuntimeException("Wallet not found"));
-		if (wallet.getBalance().compareTo(emiAmount) < 0) {
-			throw new RuntimeException("Insufficient balance");
-		}
-		wallet.setBalance(wallet.getBalance() - (emiAmount));
+	    WalletEntity wallet = walletRepository.findByUserId(userId)
+	            .orElseThrow(() -> new RuntimeException("Wallet not found"));
 
-		// Record transaction
-		UserEntity user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-		TransactionEntity transaction = new TransactionEntity(wallet, user, emiAmount, "Payment", TransactionStatus.COMPLETED);
-		transactionRepository.save(transaction);
+	    if (wallet.getBalance().compareTo(emiAmount) < 0) {
+	        throw new RuntimeException("Insufficient balance");
+	    }
 
-		return walletRepository.save(wallet);
+	    wallet.setBalance(wallet.getBalance() - emiAmount);
+	    UserEntity user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+	    TransactionEntity transaction = new TransactionEntity(wallet, user, emiAmount, "Payment", TransactionStatus.COMPLETED);
+	    transactionRepository.save(transaction);
+
+	    LoanEntity loan = loanRepository.getReferenceById(userId);
+
+	    // Update the existing instance of LoanEntity
+	    loan.setPaidEmi(loan.getPaidEmi() + 1);
+	    loan.setRemainingEmi(loan.getRemainingEmi() - 1);
+	    loan.setEmiAmount(emiAmount); // Ensure this field is updated correctly
+	    // Update other necessary fields
+	    loanRepository.save(loan);
+
+	    return walletRepository.save(wallet);
 	}
+
 
 	@Override
 	public WalletEntity getWalletByUserId(Long userId) {
@@ -98,12 +116,24 @@ public class WalletServiceImpl implements WalletService {
 		WalletEntity updatedWallet = walletRepository.save(wallet);
 		return new ApiResponse("Wallet updated with ID " + updatedWallet.getId());
 	}
-	
+
 	@Override
 	public Double getBalance(Long userId) {
-	    WalletEntity wallet = walletRepository.findByUserId(userId)
-	            .orElseThrow(() -> new ApiException("Wallet not found for user ID " + userId));
-	    return wallet.getBalance();
+		WalletEntity wallet = walletRepository.findByUserId(userId)
+				.orElseThrow(() -> new ApiException("Wallet not found for user ID " + userId));
+		return wallet.getBalance();
 	}
+
+//	private LoanEntity convertToLoanEntity(LoanDetailsResp loanDetailsResp) {
+//	    LoanEntity loanEntity = new LoanEntity();
+//	    loanEntity.setId(loanDetailsResp.getId());
+//	    loanEntity.setPaidEmi(loanDetailsResp.getPaidEMI());
+//	    loanEntity.setRemainingEmi(loanDetailsResp.getRemainingEMI());
+//	    loanEntity.setDuration(loanDetailsResp.getDuration());
+//	    loanEntity.setEmiAmount(loanDetailsResp.getEmiAmount());
+//	    // Set other necessary fields
+//	    return loanEntity;
+//	}
+
 
 }
