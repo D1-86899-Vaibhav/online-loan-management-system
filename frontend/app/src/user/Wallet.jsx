@@ -116,7 +116,7 @@ const Wallet = () => {
       }}
     >
       {/* Navbar */}
-      <Navbar />
+      <Navbar isAuthenticated={true} />
 
       <Box display="flex" flex={1}>
         {/* Sidebar */}

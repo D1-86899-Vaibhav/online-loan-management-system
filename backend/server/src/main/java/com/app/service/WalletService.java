@@ -2,6 +2,7 @@ package com.app.service;
 
 import com.app.dto.AddFundsRequest;
 import com.app.dto.ApiResponse;
+import com.app.dto.CreditFundsRequest;
 import com.app.dto.WithdrawFundsRequest;
 import com.app.pojos.WalletEntity;
 
@@ -13,4 +14,6 @@ public interface WalletService {
 
 	public WalletEntity payEmi(Long userId, Double emiAmount);
 	 public Double getBalance(Long userId);
+	 
+	 void creditFunds(Long userId, CreditFundsRequest request);
 }

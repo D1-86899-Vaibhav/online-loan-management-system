@@ -80,8 +80,23 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public String changePassword(PasswordChangeRequest request) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+
+	public void changePassword(PasswordChangeRequest changePasswordRequest) {
+        UserEntity user = userRepository.findByEmail(changePasswordRequest.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!passwordEncoder.matches(changePasswordRequest.getCurrentPassword(), user.getPassword())) {
+            throw new RuntimeException("Current password is incorrect");
+        }
+
+        if (changePasswordRequest.getNewPassword().equals(changePasswordRequest.getCurrentPassword())) {
+            throw new RuntimeException("New password cannot be the same as the current password");
+        }
+
+        user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
+        userRepository.save(user);
+    }
+
+	 
+
 }

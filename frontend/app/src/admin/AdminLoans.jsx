@@ -1,184 +1,199 @@
-import React, { useEffect, useState } from "react";
-import AdminLayout from "./AdminLayout"; // Reusable layout component
-import DataGridTable from "../components/DataGridTable";
-import { collection, getDocs, deleteDoc, doc, getDoc } from "firebase/firestore";
-import { db } from "../firebase";
-import Button from "@mui/material/Button";
-import CreateLoan from "../components/modal/createLoan";
-import columns from "../components/columns/LoanColumns";
-import { GridActionsCellItem } from "@mui/x-data-grid";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/DeleteOutlined";
-import { confirmAlert } from "react-confirm-alert";
-import "react-confirm-alert/src/react-confirm-alert.css";
-import { Box, Card, CircularProgress } from '@mui/material';
+import React, { useState, useEffect, useCallback } from 'react';
+import { format } from 'date-fns';
 import AdminSidebar from './AdminSidebar';
 import AdminNavbar from './AdminNavbar';
+import {
+  Box,
+  Card,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Pagination,
+  CircularProgress,
+} from '@mui/material';
+import { green, yellow, red } from '@mui/material/colors';
+import toast, { Toaster } from 'react-hot-toast'; // For notifications
 
 const AdminLoans = () => {
-  const recordsCollectionRef = collection(db, "loans");
-  const clientsCollectionRef = collection(db, "clients");
-
-  const [records, setRecords] = useState([]);
-  const [editData, setEditData] = useState(null);
-  const [showModal, setShowModal] = useState(false);
+  const [loans, setLoans] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [recordColumns, setRecordColumns] = useState(columns);
-  const [clientEmails, setClientEmails] = useState([]);
+  const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5; // Number of loans per page
 
-  useEffect(() => {
-    // Fetch clients and add action columns only once when component mounts
-    const fetchInitialData = async () => {
-      try {
-        const clientsData = await getDocs(clientsCollectionRef);
-        const emails = clientsData.docs.map((doc) => ({ email: doc.id }));
-        setClientEmails(emails);
-
-        const hasActionColumn = columns.some((col) => col.field === "actions");
-        if (!hasActionColumn) {
-          const actionColumn = {
-            field: "actions",
-            type: "actions",
-            headerName: "Actions",
-            width: 100,
-            cellClassName: "actions",
-            getActions: ({ id }) => [
-              <GridActionsCellItem
-                icon={<EditIcon />}
-                label="Edit"
-                onClick={() => handleEditClick(id)}
-                color="inherit"
-              />,
-              <GridActionsCellItem
-                icon={<DeleteIcon />}
-                label="Delete"
-                onClick={() => handleDeleteClick(id)}
-                color="inherit"
-              />,
-            ],
-          };
-          setRecordColumns([...columns, actionColumn]);
-        }
-      } catch (error) {
-        console.error("Error fetching clients:", error);
-      } finally {
-        setLoading(false);
+  // Fetch loans from the admin endpoint using the JWT token
+  const fetchLoans = useCallback(async () => {
+    try {
+      setLoading(true);
+      const token = sessionStorage.getItem('authToken'); // Adjust based on your JWT storage
+      const response = await fetch('http://localhost:8080/loans/all', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        const errorMsg = await response.text();
+        throw new Error(errorMsg || 'Failed to fetch loans');
       }
-    };
+      const data = await response.json();
 
-    fetchInitialData();
+      // Format the API response data for display
+      const formattedData = data.map((loan) => ({
+        ...loan,
+        id: loan.id, // Correctly mapping id
+        loanAmountFormatted: loan.loanAmount.toLocaleString('en-IN', {
+          style: 'currency',
+          currency: 'INR',
+          minimumFractionDigits: 2,
+        }),
+        emiAmountFormatted: loan.emiAmount.toLocaleString('en-IN', {
+          style: 'currency',
+          currency: 'INR',
+          minimumFractionDigits: 2,
+        }),
+        startDateFormatted: format(new Date(loan.startDate), 'dd-MMM-yyyy'),
+        endDateFormatted: format(new Date(loan.endDate), 'dd-MMM-yyyy'),
+        nextEMIDateFormatted: loan.nextEMIDate
+          ? format(new Date(loan.nextEMIDate), 'dd-MMM-yyyy')
+          : 'N/A',
+        statusFormatted:
+          loan.status === 'APPROVED'
+            ? 'Active'
+            : loan.status === 'PENDING'
+            ? 'Pending'
+            : 'Closed',
+      }));
+
+      setLoans(formattedData);
+      setLoading(false);
+    } catch (err) {
+      console.error('Error fetching loans:', err);
+      setError(err.message || 'Error fetching loan details. Please try again later.');
+      toast.error(err.message || 'Error fetching loan details. Please try again later.');
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
-    // Fetch loans whenever modal state changes
-    getRecords();
-  }, [showModal]);
+    fetchLoans();
+  }, [fetchLoans]);
 
-  const getRecords = async () => {
-    try {
-      const recordsSnapshot = await getDocs(recordsCollectionRef);
-      const recordsData = recordsSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setRecords(recordsData);
-    } catch (error) {
-      console.error("Error fetching records:", error);
-    }
+  // Calculate pagination details
+  const totalPages = Math.ceil(loans.length / itemsPerPage);
+  const indexOfLastLoan = currentPage * itemsPerPage;
+  const indexOfFirstLoan = indexOfLastLoan - itemsPerPage;
+  const currentLoans = loans.slice(indexOfFirstLoan, indexOfLastLoan);
+
+  const handlePageChange = (event, pageNumber) => {
+    setCurrentPage(pageNumber);
   };
 
-  const handleEditClick = async (id) => {
-    try {
-      const recordDocRef = doc(recordsCollectionRef, id);
-      const recordDoc = await getDoc(recordDocRef);
-      if (recordDoc.exists()) {
-        const recordData = { id: recordDoc.id, ...recordDoc.data() };
-        setEditData(recordData);
-        setShowModal(true);
-      } else {
-        console.log("No such document found!");
-      }
-    } catch (error) {
-      console.error("Error fetching record:", error);
-    }
-  };
+  if (loading) {
+    return (
+      <Box display="flex" minHeight="100vh" justifyContent="center" alignItems="center">
+        <CircularProgress />
+        <Typography variant="h6" sx={{ mt: 2 }}>Loading Loan Details...</Typography>
+      </Box>
+    );
+  }
 
-  const handleDeleteClick = (id) => {
-    confirmAlert({
-      title: "Confirm to delete",
-      message: "Are you sure you want to delete this loan account?",
-      buttons: [
-        {
-          label: "Yes",
-          onClick: () => handleDelete(id),
-        },
-        {
-          label: "No",
-        },
-      ],
-    });
-  };
-
-  const handleDelete = async (id) => {
-    try {
-      const recordDocRef = doc(recordsCollectionRef, id);
-      await deleteDoc(recordDocRef);
-      setRecords((prevRecords) =>
-        prevRecords.filter((record) => record.id !== id)
-      );
-    } catch (error) {
-      console.error("Error deleting record:", error);
-    }
-  };
-
-  const hideModal = () => {
-    setShowModal(false);
-  };
+  if (error) {
+    return (
+      <Box display="flex" minHeight="100vh" justifyContent="center" alignItems="center">
+        <Toaster />
+        <Typography variant="h6" color="error">
+          {error}
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
-    <Box className="min-h-screen flex flex-col">
+    <Box display="flex" flexDirection="column">
+      <Toaster />
       {/* Navbar */}
-      <AdminNavbar isAuthenticated={true} />
+      <AdminNavbar />
 
-      <Box className="flex flex-row flex-grow">
+      <Box display="flex">
         {/* Sidebar */}
-        <Box className="w-1/5 bg-gray-100 p-4">
+        <Box width="20%">
           <AdminSidebar />
         </Box>
 
         {/* Main Content */}
-        <Box className="w-4/5 p-6">
-          <Card className="p-6 shadow-lg">
-            {showModal && (
-              <CreateLoan
-                hideModal={hideModal}
-                editData={editData}
-                clientEmails={clientEmails}
-              />
-            )}
-            <h1 className="text-2xl font-semibold text-blue-600 mt-5">All Loans</h1>
-            <div className="mt-10">
-              <div className="flex justify-end mb-4">
-                <Button
-                  variant="outlined"
-                  size="small"
-                  onClick={() => {
-                    setEditData(null);
-                    setShowModal(true);
-                  }}
-                >
-                  Add Loan Account
-                </Button>
-              </div>
-              {!loading ? (
-                <DataGridTable data={records} columns={recordColumns} />
-              ) : (
-                <Box className="flex justify-center items-center h-40">
-                  <CircularProgress />
-                </Box>
-              )}
-            </div>
+        <Box width="80%" p={4}>
+          <Card sx={{ mb: 4, boxShadow: 3 }}>
+            <Typography variant="h5" fontWeight="bold" gutterBottom sx={{ mt: 3, ml: 2 }}>
+              Loan Applications
+            </Typography>
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Loan ID</TableCell>
+                    <TableCell>User ID</TableCell> {/* Remove or adjust based on your data */}
+                    <TableCell>Loan Amount</TableCell>
+                    <TableCell>EMI Amount</TableCell>
+                    <TableCell>Start Date</TableCell>
+                    <TableCell>End Date</TableCell>
+                    <TableCell>Next EMI Date</TableCell>
+                    <TableCell>Status</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {currentLoans.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={8} align="center">
+                        No loan applications found.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    currentLoans.map((loan) => (
+                      <TableRow key={loan.id}>
+                        <TableCell>{loan.id}</TableCell>
+                        <TableCell>{loan.userId}</TableCell> {/* Remove or adjust based on your data */}
+                        <TableCell>{loan.loanAmountFormatted}</TableCell>
+                        <TableCell>{loan.emiAmountFormatted}</TableCell>
+                        <TableCell>{loan.startDateFormatted}</TableCell>
+                        <TableCell>{loan.endDateFormatted}</TableCell>
+                        <TableCell>{loan.nextEMIDateFormatted}</TableCell>
+                        <TableCell>
+                          <Typography
+                            sx={{
+                              color:
+                                loan.statusFormatted === 'Active'
+                                  ? green[600]
+                                  : loan.statusFormatted === 'Pending'
+                                  ? yellow[800]
+                                  : red[600],
+                            }}
+                          >
+                            {loan.statusFormatted}
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
           </Card>
+
+          {/* Render Pagination if there are records */}
+          {loans.length > 0 && (
+            <Pagination
+              count={totalPages}
+              page={currentPage}
+              onChange={handlePageChange}
+              sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}
+            />
+          )}
         </Box>
       </Box>
     </Box>

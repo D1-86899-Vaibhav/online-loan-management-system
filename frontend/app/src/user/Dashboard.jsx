@@ -122,7 +122,7 @@ const Dashboard = () => {
     <Box display="flex" minHeight="100vh" flexDirection="column">
       <Toaster />
       {/* Navbar Component */}
-      <Navbar />
+      <Navbar isAuthenticated={true}/>
 
       <Box display="flex" flex={1}>
         {/* Sidebar */}

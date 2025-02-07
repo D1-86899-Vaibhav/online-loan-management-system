@@ -7,7 +7,6 @@ import com.app.dto.UserDTO;
 public interface UserService {
     ApiResponse registerNewUser(UserDTO dto);
     ApiResponse updateUser(UserDTO dto);
-
-    public String changePassword(PasswordChangeRequest request);
+    public void changePassword(PasswordChangeRequest changePasswordRequest);
     
 }

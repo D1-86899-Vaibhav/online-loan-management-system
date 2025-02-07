@@ -43,6 +43,7 @@ const UserProfile = () => {
 
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [passwordForm, setPasswordForm] = useState({
+    email: '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
@@ -89,10 +90,6 @@ const UserProfile = () => {
     fetchUserData();
   }, []);
 
-
-
-
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormValues({ ...formValues, [name]: value });
@@ -102,55 +99,59 @@ const UserProfile = () => {
     const { name, value } = e.target;
     setPasswordForm({ ...passwordForm, [name]: value });
   };
-  const handleSubmit = async (e) => {
+
+  const handlePasswordSubmit = async (e) => {
     e.preventDefault();
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast.error('Passwords do not match!');
+      return;
+    }
+
     try {
-      localStorage.setItem("userId", "5");
-      const userId = localStorage.getItem("userId");
-      if (!userId) {
-        toast.error("User ID not found. Please log in again.");
-        return;
-      }
-  
-      const response = await axios.put(`http://localhost:8080/kyc/user/update/${userId}`, formValues, {
+      const response = await axios.post('http://localhost:8080/kyc/user/change-password', passwordForm, {
         headers: {
           "Content-Type": "application/json",
         },
       });
-  
+
       if (response.status === 200) {
-        setUserDetails(formValues); // Update UI with new details
-        setIsEditing(false);
-        toast.success("Profile updated successfully!");
+        setIsChangingPassword(false);
+        toast.success('Password changed successfully!');
       } else {
-        toast.error("Failed to update profile. Please try again.");
+        toast.error('Failed to change password. Please try again.');
       }
     } catch (error) {
-      console.error("Error updating profile:", error);
-      toast.error("An error occurred while updating the profile.");
+      console.error("Error changing password:", error);
+      toast.error('An error occurred while changing the password.');
     }
   };
-  
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   try {
-  //     setUserDetails(formValues); // Update local state with the updated data
-  //     setIsEditing(false);
-  //     toast.success('Profile updated successfully!');
-  //   } catch (error) {
-  //     console.error("Error occurred:", error);
-  //     toast.error('An error occurred while updating the profile.');
-  //   }
-  // };
 
-  const handlePasswordSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (passwordForm.newPassword === passwordForm.confirmPassword) {
-      // Proceed with password change logic
-      setIsChangingPassword(false);
-      toast.success('Password changed successfully!');
-    } else {
-      toast.error('Passwords do not match!');
+    try {
+      const userId = localStorage.getItem("userId");
+      if (!userId) {
+        console.error("No userId found in localStorage");
+        return;
+      }
+
+      // Update the user details on the server
+      const response = await axios.put(`http://localhost:8080/kyc/user/${userId}`, formValues, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.status === 200) {
+        setUserDetails(formValues); // Update local state with the updated data
+        setIsEditing(false);
+        toast.success('Profile updated successfully!');
+      } else {
+        toast.error('Failed to update profile. Please try again.');
+      }
+    } catch (error) {
+      console.error("Error occurred:", error);
+      toast.error('An error occurred while updating the profile.');
     }
   };
 
@@ -167,7 +168,7 @@ const UserProfile = () => {
 
   return (
     <Box display="flex" minHeight="100vh" flexDirection="column">
-      <Navbar />
+      <Navbar isAuthenticated={true} />
       <ToastContainer />
       <Box display="flex" flex={1}>
         <Box width={{ xs: '100%', md: '20%' }} minHeight="100vh">
@@ -237,15 +238,6 @@ const UserProfile = () => {
                     <DetailItem label="Phone Number" value={userDetails.phone} />
                     <DetailItem label="Gender" value={userDetails.gender} />
                     <DetailItem label="Email Address" value={userDetails.email} />
-
-                    {/* <DetailItem label="City" value={userDetails.city} /> */}
-
-
-                    {/* <DetailItem label="State" value={userDetails.state} />
-                    <DetailItem label="Zip Code" value={userDetails.zipCode} />
-                    <DetailItem label="Adhar No" value={userDetails.adharNo} />
-                    <DetailItem label="Pan No" value={userDetails.panNo} />
-                    <DetailItem label="Bank Account No" value={userDetails.bankAccountNo} /> */}
 
                     {/* Change Password Section */}
                     <Typography variant="h6" gutterBottom sx={{ color: '#1565c0', fontWeight: 'bold', mt: 4 }}>
@@ -424,6 +416,17 @@ const UserProfile = () => {
                       Change Password
                     </Typography>
                     <Grid container spacing={2}>
+                      <Grid item xs={12} sm={4}>
+                        <TextField
+                          label="Email"
+                          variant="outlined"
+                          fullWidth
+                          name="email"
+                          value={passwordForm.email}
+                          onChange={handlePasswordChange}
+                          required
+                        />
+                      </Grid>
                       <Grid item xs={12} sm={4}>
                         <TextField
                           label="Current Password"
