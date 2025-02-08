@@ -30,10 +30,11 @@ import com.app.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 
+@CrossOrigin(origins = "http://localhost:3000") 
 @RestController
 @RequestMapping("/users")
 
-@CrossOrigin(origins = "http://localhost:3000") // Specify React's URL
+// Specify React's URL
 public class UserController {
 
     @Autowired

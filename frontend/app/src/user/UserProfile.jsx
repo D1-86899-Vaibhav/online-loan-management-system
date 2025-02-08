@@ -108,7 +108,7 @@ const UserProfile = () => {
     }
 
     try {
-      const response = await axios.post('http://localhost:8080/kyc/user/change-password', passwordForm, {
+      const response = await axios.post('http://localhost:8080/users/change-password', passwordForm, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -136,7 +136,7 @@ const UserProfile = () => {
       }
 
       // Update the user details on the server
-      const response = await axios.put(`http://localhost:8080/kyc/user/${userId}`, formValues, {
+      const response = await axios.put(`http://localhost:8080/kyc/update/${userId}`, formValues, {
         headers: {
           "Content-Type": "application/json",
         },
