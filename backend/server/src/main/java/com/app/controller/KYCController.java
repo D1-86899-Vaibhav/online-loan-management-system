@@ -11,7 +11,11 @@ import org.springframework.web.multipart.MultipartFile;
 import com.app.dto.ApiResponse;
 import com.app.dto.KycDetailsUpdateRequest;
 import com.app.pojos.KycEntity;
+import com.app.security.JwtUtils;
 import com.app.service.KycService;
+
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/kyc")
@@ -20,9 +24,18 @@ public class KYCController {
 
     @Autowired
     private KycService kycService;
+    @Autowired
+    private JwtUtils jwtUtil;
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<?> getKYCByUserId(@PathVariable Long userId) {
+    @GetMapping("/user/profile")
+    public ResponseEntity<?> getKYCByUserId(HttpServletRequest request) {
+    	
+    	 String authHeader = request.getHeader("Authorization");
+         String token = authHeader.substring(7); // Remove "Bearer " prefix
+
+         Claims claims = jwtUtil.validateJwtToken(token);
+         Long userId = jwtUtil.getUserIdFromJwtToken(claims);
+    	
         KycEntity kyc = kycService.getKycRecordsByUserId(userId);
         if (kyc != null) {
             return ResponseEntity.ok(kyc);
@@ -31,12 +44,19 @@ public class KYCController {
         }
     }
 
-    @PutMapping("/update/{id}")
+    @PutMapping("/user/update")
     public ResponseEntity<KycEntity> updateKycDetails(
-        @PathVariable Long id, 
-        @RequestBody KycDetailsUpdateRequest request) {
+    		HttpServletRequest request,
+        @RequestBody KycDetailsUpdateRequest kycDetailsUpdateRequest) {
+    	
+
+   	 	String authHeader = request.getHeader("Authorization");
+        String token = authHeader.substring(7); // Remove "Bearer " prefix
+
+        Claims claims = jwtUtil.validateJwtToken(token);
+        Long userId = jwtUtil.getUserIdFromJwtToken(claims);
         
-    	KycEntity updatedDetails = kycService.updateKycDetails(id, request);
+    	KycEntity updatedDetails = kycService.updateKycDetails(userId, kycDetailsUpdateRequest);
         return ResponseEntity.ok(updatedDetails);
     }
   
