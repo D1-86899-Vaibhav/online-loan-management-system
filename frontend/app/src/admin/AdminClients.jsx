@@ -18,12 +18,46 @@ import {
 import { green, yellow, red } from '@mui/material/colors';
 import toast, { Toaster } from 'react-hot-toast'; // For notifications
 
+// Component for AdminWallet
+const AdminWallet = ({ balance }) => (
+  <Card sx={{ mb: 4, p: 2, boxShadow: 3 }}>
+    <Typography variant="h6">Wallet Balance: ₹{balance}</Typography>
+  </Card>
+);
+
 const AdminClients = () => {
   const [loans, setLoans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [walletBalance, setWalletBalance] = useState(0);
   const itemsPerPage = 2; // Number of loans per page
+
+  // Fetch wallet balance data
+  const fetchWalletBalance = useCallback(async () => {
+    try {
+      const token = sessionStorage.getItem('authToken');
+      if (!token) {
+        throw new Error('Authentication token is missing. Please log in.');
+      }
+      const response = await fetch('http://localhost:8080/wallet/balance', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        const errorMsg = await response.text();
+        throw new Error(errorMsg || 'Failed to fetch wallet balance');
+      }
+      const data = await response.json();
+      setWalletBalance(data);
+    } catch (err) {
+      console.error('Error fetching wallet balance:', err);
+      toast.error('Error fetching wallet balance!');
+    }
+  }, []);
 
   // Fetch loans from the admin endpoint using the JWT token
   const fetchLoans = useCallback(async () => {
@@ -81,8 +115,9 @@ const AdminClients = () => {
   }, []);
 
   useEffect(() => {
+    fetchWalletBalance();
     fetchLoans();
-  }, [fetchLoans]);
+  }, [fetchWalletBalance, fetchLoans]);
 
   // Calculate pagination details
   const totalPages = Math.ceil(loans.length / itemsPerPage);
@@ -153,6 +188,9 @@ const AdminClients = () => {
 
         {/* Main Content */}
         <Box width="80%" p={4}>
+          {/* Display Wallet Balance */}
+          <AdminWallet balance={walletBalance} />
+
           <Card sx={{ mb: 4, boxShadow: 3 }}>
             <Typography
               variant="h5"

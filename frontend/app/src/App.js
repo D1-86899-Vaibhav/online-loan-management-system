@@ -15,6 +15,8 @@ import AdminEMI from './admin/AdminEMI';
 import AdminCalculator from './admin/AdminCalculator';
 import AdminUsers from './admin/AdminUsers';
 import AdminContact from './admin/AdminContact';
+import AdminWallet from './admin/AdminWallet';
+
 
 // User Routes
 import Dashboard from './user/Dashboard';
@@ -101,6 +103,14 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+      <Route
+      path="AdminWallet"
+      element={
+        <ProtectedRoute requiredRole="ROLE_ADMIN">
+          <AdminWallet />
+        </ProtectedRoute>
+      }
+     />
       <Route
         path="admin-logout"
         element={
