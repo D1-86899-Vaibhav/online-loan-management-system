@@ -15,6 +15,6 @@ public interface LoanService {
 	
 // ADMIN SIDE
 
-	public LoanDetailsResp updateLoanStatus(Long loanId, String action) ;
+	public LoanDetailsResp updateLoanStatus(Long loanId, String action,Long adminId) ;
 	public List<LoanDetailsResp> getAllLoanDetails();
 }

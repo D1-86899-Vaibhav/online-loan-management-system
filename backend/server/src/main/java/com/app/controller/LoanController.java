@@ -62,9 +62,10 @@ public class LoanController {
 	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 	        }
 	        String token = authHeader.substring(7);
-	        jwtUtil.validateJwtToken(token);
+	        Claims claims = jwtUtil.validateJwtToken(token);
+	        Long adminId = jwtUtil.getUserIdFromJwtToken(claims); // Extract admin ID from JWT token
 	        // Optionally, check the user's roles to ensure admin access
-		     LoanDetailsResp updatedLoan = loanService.updateLoanStatus(loanId, loanActionRequest.getAction());
+		     LoanDetailsResp updatedLoan = loanService.updateLoanStatus(loanId, loanActionRequest.getAction(),adminId);
 		     return ResponseEntity.ok(updatedLoan);
 	    }
 	
