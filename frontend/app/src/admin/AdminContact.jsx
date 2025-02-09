@@ -5,12 +5,11 @@ import AdminNavbar from './AdminNavbar';
 
 const AdminContact = () => {
     const contactDetails = [
-        { label: 'Email', value: 'praveen@codingmstr.com', link: 'mailto:praveen@codingmstr.com' },
-        { label: 'Website', value: 'www.codingmstr.com', link: 'https://codingmstr.com' },
-        { label: 'WhatsApp', value: '+91-8789529215', link: 'https://wa.me/918789529215' },
-        { label: 'YouTube', value: 'youtube.com/@codingmstr', link: 'https://www.youtube.com/@codingmstr' },
-        { label: 'Instagram', value: 'instagram.com/codingmstr', link: 'https://www.instagram.com/codingmstr/' },
-        { label: 'GitHub', value: 'github.com/ipraveenkmr', link: 'https://github.com/ipraveenkmr' },
+        { label: 'Email', value: 'EasyLoan@gmail.com', link: 'mailto:EasyLoan@gmail.com' },
+        { label: 'Website', value: 'http://www.EasyLoan.com', link: 'http://www.EasyLoan.com' },
+        
+        { label: 'Instagram', value: 'instagram.com/EasyLoan', link: 'https://www.instagram.com/ganesh..pawar__?igsh=MXVwYXltdWZyanF4MQ==' },
+        { label: 'GitHub', value: 'github.com/EasyLoan', link: 'https://github.com/D1-86899-Vaibhav/online-loan-management-system.git' },
     ];
 
     return (
