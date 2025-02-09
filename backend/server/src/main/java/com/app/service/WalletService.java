@@ -15,5 +15,5 @@ public interface WalletService {
 	public WalletEntity payEmi(Long userId, Double emiAmount);
 	 public Double getBalance(Long userId);
 	 
-	 void creditFunds(Long userId, CreditFundsRequest request);
+	 void creditFunds(Long userId, CreditFundsRequest request,Long adminId);
 }
