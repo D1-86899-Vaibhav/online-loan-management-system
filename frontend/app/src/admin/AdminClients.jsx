@@ -21,8 +21,10 @@ import toast, { Toaster } from 'react-hot-toast'; // For notifications
 // Component for AdminWallet
 const AdminWallet = ({ balance }) => (
   <Card sx={{ mb: 4, p: 2, boxShadow: 3 }}>
-    <Typography variant="h6">Wallet Balance: ₹{balance}</Typography>
-  </Card>
+  <Typography variant="h6" color="primary">
+    Wallet Balance: <span style={{ color: 'black', fontWeight: 'bold' }}>₹{balance}</span>
+  </Typography>
+</Card>
 );
 
 const AdminClients = () => {

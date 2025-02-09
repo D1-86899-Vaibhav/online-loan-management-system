@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Box, Card, Typography, Button, TextField, Grid } from '@mui/material';
+import { Box, Card, Typography, Button, TextField, Grid, Container } from '@mui/material';
 import AdminNavbar from './AdminNavbar';
 import AdminSidebar from './AdminSidebar'; // Assuming you have a different sidebar for admin
 import { toast, ToastContainer } from 'react-toastify';
@@ -105,150 +105,117 @@ const AdminWallet = () => {
   };
 
   return (
-    <Box
-      display="flex"
-      flexDirection="column"
-      minHeight="100vh"
-      sx={{
-        backgroundColor: '#f4f4f4',
-        fontFamily: 'Arial, sans-serif',
-        margin: 0,
-      }}
-    >
+    <Box className="min-h-screen flex flex-col">
       {/* Navbar */}
       <AdminNavbar isAuthenticated={true} />
 
-      <Box display="flex" flex={1}>
+      <Box className="flex flex-row flex-grow">
         {/* Sidebar */}
-        <Box
-          width="20%"
-          minHeight="100vh"
-          sx={{
-            backgroundColor: '#fff',
-            boxShadow: '4px 0 6px rgba(0, 0, 0, 0.1)',
-          }}
-        >
+        <Box className="w-1/5 bg-gray-100 p-4">
           <AdminSidebar />
         </Box>
 
         {/* Main Content */}
-        <Box
-          width="80%"
-          p={3}
-          sx={{
-            backgroundColor: '#ffffff',
-            borderRadius: '10px',
-            boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
-            marginLeft: 2,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            mt: -35,
-          }}
-        >
-          <Typography variant="h4" color="primary" gutterBottom align="center">
-            Admin Wallet Management
-          </Typography>
-          <Typography variant="body1" color="textSecondary" align="center" gutterBottom>
-            Manage the admin wallet balance.
-          </Typography>
-
-          {/* Display current balance */}
-          <Card
-            sx={{
-              p: 3,
-              mb: 3,
-              textAlign: 'center',
-              width: '100%',
-              borderRadius: '8px',
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-            }}
-          >
-            <Typography variant="h5" color="textPrimary">
-              Current Balance: ₹{walletBalance}
+        <Container maxWidth="md" sx={{ mt: 5 }}>
+          <Card sx={{ p: 4, boxShadow: 3 }}>
+            <Typography variant="h4" color="primary" gutterBottom>
+             ADMIN WALLET MANAGEMENT
             </Typography>
-          </Card>
+            <Typography variant="body1" color="textSecondary" gutterBottom> 
+              Manage the admin wallet balance.
+            </Typography>
 
-          {/* Buttons to choose action */}
-          <Grid container spacing={2} justifyContent="center" sx={{ mb: 3 }}>
-            <Grid item>
-              <Button
-                variant="contained"
-                color="success"
-                onClick={() => setAction('add')}
-                sx={{
-                  fontSize: '16px',
-                  padding: '10px 20px',
-                  borderRadius: '5px',
-                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                }}
-              >
-                Add Funds
-              </Button>
-            </Grid>
-            <Grid item>
-              <Button
-                variant="contained"
-                color="error"
-                onClick={() => setAction('withdraw')}
-                sx={{
-                  fontSize: '16px',
-                  padding: '10px 20px',
-                  borderRadius: '5px',
-                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                }}
-              >
-                Withdraw Funds
-              </Button>
-            </Grid>
-          </Grid>
-
-          {/* Input field and submit button for the selected action */}
-          {action && (
+            {/* Display current balance */}
             <Card
               sx={{
-                p: 3,
-                mt: 3,
+                p: 2,
+                my: 3,
                 textAlign: 'center',
-                width: '100%',
-                borderRadius: '8px',
+                borderRadius: '3px',
                 boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                backgroundColor: '#f8f9fa',
+                border: '2px solid #1976d2', // Added border
               }}
             >
-              <TextField
-                label={`Enter amount to ${action}`}
-                variant="outlined"
-                type="number"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
+              <Typography variant="h5" color="textPrimary">
+                Current Balance: ₹{walletBalance}
+              </Typography>
+            </Card>
+
+            {/* Buttons to choose action */}
+            <Grid container spacing={2} justifyContent="center" sx={{ mb: 3 }}>
+              <Grid item>
+                <Button
+                  variant="contained"
+                  color="success"
+                  onClick={() => setAction('add')}
+                  sx={{
+                    fontSize: '16px',
+                    padding: '10px 20px',
+                    borderRadius: '6px',
+                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                  }}
+                >
+                  Add Funds
+                </Button>
+              </Grid>
+              <Grid item>
+                <Button
+                  variant="contained"
+                  color="error"
+                  onClick={() => setAction('withdraw')}
+                  sx={{
+                    fontSize: '16px',
+                    padding: '10px 20px',
+                    borderRadius: '6px',
+                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                  }}
+                >
+                  Withdraw Funds
+                </Button>
+              </Grid>
+            </Grid>
+
+            {/* Input field and submit button for the selected action */}
+            {action && (
+              <Card
                 sx={{
-                  mb: 2,
-                  maxWidth: 400,
-                  width: '100%',
+                  p: 3,
+                  mt: 3,
+                  textAlign: 'center',
+                  borderRadius: '8px',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                  backgroundColor: '#fff',
+                  border: '1px solid #1976d2', // Added border
                 }}
-              />
-              <Box>
+              >
+                <TextField
+                  label={`Enter amount to ${action}`}
+                  variant="outlined"
+                  type="number"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  fullWidth
+                  sx={{ mb: 2 }}
+                />
                 <Button
                   variant="contained"
                   color="primary"
                   onClick={handleSubmit}
                   sx={{
                     width: '200px',
-                    margin: '0 auto',
-                    display: 'block',
                     fontSize: '16px',
                     padding: '10px 20px',
-                    borderRadius: '5px',
+                    borderRadius: '6px',
                     boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
                   }}
                 >
                   {action === 'add' ? 'Add Funds' : 'Withdraw Funds'}
                 </Button>
-              </Box>
-            </Card>
-          )}
-        </Box>
+              </Card>
+            )}
+          </Card>
+        </Container>
       </Box>
 
       {/* Toast Container for notifications */}
