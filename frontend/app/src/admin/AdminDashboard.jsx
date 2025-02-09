@@ -81,7 +81,7 @@ const AdminDashboard = () => {
 
         {/* Main Content */}
         <Box className="w-4/5 p-6">
-          <div className="grid grid-cols-10 gap-4">
+          <div className="grid grid-cols-6 gap-4">
             {/* Main Charts Section */}
             <div className="col-span-7">
               <div className="grid grid-cols-3 gap-4">
@@ -189,14 +189,14 @@ const AdminDashboard = () => {
             </div>
 
             {/* Extra Charts Section */}
-            <div className="col-span-3">
+            {/* <div className="col-span-3">
               <div className={`rounded-lg flex justify-center p-2 shadow-md ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
                 <StackedAreaChart />
               </div>
               <div className={`rounded-lg flex justify-center p-2 mt-4 shadow-md ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
                 <StackedBarChart />
               </div>
-            </div>
+            </div> */}
           </div>
         </Box>
       </Box>

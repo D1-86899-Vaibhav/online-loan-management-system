@@ -63,6 +63,8 @@ const Wallet = () => {
           <UserSidebar />
         </Box>
 
+           
+          {/* Main Content */}
         <Container maxWidth="md" sx={{ mt: 5 }}>
           <Card sx={{ p: 4, boxShadow: 3 }}>
             <Typography variant="h4" color="primary" gutterBottom>
