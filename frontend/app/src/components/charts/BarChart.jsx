@@ -19,8 +19,8 @@ export default function StackedBarChart() {
             width={350}
             height={290}
             series={[
-                { data: pData, label: 'pv', id: 'pvId', stack: 'total' },
-                { data: uData, label: 'uv', id: 'uvId', stack: 'total' },
+                { data: pData, label: 'Loan Collected', id: 'pvId', stack: 'total' },
+                { data: uData, label: 'Loan Distrubuted', id: 'uvId', stack: 'total' },
             ]}
             xAxis={[{ data: xLabels, scaleType: 'band' }]}
         />
