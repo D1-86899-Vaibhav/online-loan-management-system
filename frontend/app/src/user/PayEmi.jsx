@@ -88,15 +88,23 @@ const PayEmi = () => {
     };
 
     return (
-        <Box display="flex" minHeight="100vh" flexDirection="column">
+        <Box className="min-h-screen flex flex-col">
             <Navbar />
-            <Box display="flex" flex={1}>
-                <Box width="20%" minHeight="100vh">
+            <Box className="flex flex-row flex-grow">
+                <Box className="w-1/5 bg-gray-100 p-4">
                     <UserSidebar />
                 </Box>
+                
                 <Box width="80%" p={4}>
                     <Card sx={{ p: 2, boxShadow: 3 }}>
-                        <Typography variant="h5" fontWeight="bold"> Pay EMI </Typography>
+                        <Typography
+                            variant="h5"
+                            fontWeight="bold"
+                            gutterBottom
+                            sx={{ mt: 1, ml: 2, color: "#1976d2" }} // Set the color to blue
+                        >
+                            PAY EMI'S
+                        </Typography>
                         <Typography variant="h6" sx={{ mt: 2, mb: 4 }}> Wallet Balance: ₹{walletBalance} </Typography>
                         <TableContainer>
                             <Table>

@@ -390,20 +390,25 @@ const KYCForm = () => {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <Box display="flex" minHeight="100vh" flexDirection="column">
+       <Box className="min-h-screen flex flex-col">
         {/* Navbar Component */}
         <Navbar isAuthenticated={true} />
 
-        <Box display="flex" flex={1}>
+         <Box className="flex flex-row flex-grow">
           {/* Sidebar */}
-          <Box width="20%" minHeight="100vh">
+          <Box className="w-1/5 bg-gray-100 p-4">
             <UserSidebar />
           </Box>
 
           {/* Main Content */}
           <Box width="80%" p={4}>
-            <Card sx={{ p: 4, maxWidth: 1200, margin: '0 auto' }}>
-              <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', textAlign: 'center' }}>
+            <Card sx={{ p: 4, boxShadow: 3 }}>
+              <Typography
+                            variant="h4"
+                            fontWeight="bold"
+                            gutterBottom
+                            sx={{ mt: -2, ml: 1, color: "#1976d2" }} // Set the color to blue
+                          >
                 KYC Form
               </Typography>
               <form onSubmit={handleSubmit}>

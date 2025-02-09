@@ -198,21 +198,26 @@ const UserProfile = () => {
   }
 
   return (
-    <Box display="flex" minHeight="100vh" flexDirection="column">
+    <Box className="min-h-screen flex flex-col">
       <Navbar isAuthenticated={true} />
       <ToastContainer />
-      <Box display="flex" flex={1}>
-        <Box width={{ xs: '100%', md: '20%' }} minHeight="100vh">
+      <Box className="flex flex-row flex-grow">
+        <Box className="w-1/5 bg-gray-100 p-4">
           <UserSidebar />
         </Box>
+
+
         <Box width={{ xs: '100%', md: '80%' }} p={4}>
-          <Typography variant="h5" color="primary" gutterBottom>
+          <Typography variant="h5"  
+            fontWeight="bold"
+            gutterBottom
+            sx={{ mt: 1, ml: 2, color: "#1976d2" }}>
             USER PROFILE
           </Typography>
-
-          <Card sx={{ p: 3, maxWidth: 900, margin: '0 auto' }}>
+          <Card sx={{ p: 4, boxShadow: 3 }}>
             <Grid container spacing={4}>
-              <Grid item xs={12} md={4} textAlign="center">
+
+              <Grid item xs={12} md={4} textAlign="center" display="flex" flexDirection="column" alignItems="center">
                 <Box sx={{ position: 'relative', display: 'inline-block' }}>
                   <Avatar
                     src={userDetails.avatarUrl}
@@ -239,11 +244,17 @@ const UserProfile = () => {
                   )}
                 </Box>
                 {!isEditing && (
-                  <Button variant="contained" color="primary" onClick={() => setIsEditing(true)} sx={{ mt: 2 }}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => setIsEditing(true)}
+                    sx={{ mt: 1, width: 'fit-content' }}
+                  >
                     Edit Profile
                   </Button>
                 )}
               </Grid>
+
 
               <Grid item xs={12} md={8}>
                 {!isEditing ? (

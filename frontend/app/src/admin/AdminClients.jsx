@@ -30,7 +30,6 @@ const AdminClients = () => {
     try {
       setLoading(true);
       const token = sessionStorage.getItem('authToken'); // Adjust based on your JWT storage
-      // Admin endpoint: returns all loans (not filtered by user)
       const response = await fetch('http://localhost:8080/loans/all', {
         method: 'GET',
         headers: {
@@ -67,8 +66,8 @@ const AdminClients = () => {
           loan.status === 'APPROVED'
             ? 'Active'
             : loan.status === 'PENDING'
-            ? 'Pending'
-            : 'Closed',
+              ? 'Pending'
+              : 'Closed',
       }));
 
       setLoans(formattedData);
@@ -139,22 +138,29 @@ const AdminClients = () => {
   }
 
   return (
-    <Box display="flex" flexDirection="column">
+    <Box className="min-h-screen flex flex-col"> {/* Outer background gray */}
       <Toaster />
       {/* Navbar */}
-      <AdminNavbar />
+      <AdminNavbar isAuthenticated={true} />
 
-      <Box display="flex">
+      <Box display="flex" flexGrow={1}>
         {/* Sidebar */}
-        <Box width="20%">
+
+        <Box className="flex flex-row flex-grow">
+        <Box className="w-1/5 bg-gray-100 p-4">
           <AdminSidebar />
         </Box>
 
         {/* Main Content */}
         <Box width="80%" p={4}>
           <Card sx={{ mb: 4, boxShadow: 3 }}>
-            <Typography variant="h5" fontWeight="bold" gutterBottom sx={{ mt: 3, ml: 2 }}>
-              Loan Applications
+            <Typography
+              variant="h5"
+              fontWeight="bold"
+              gutterBottom
+              sx={{ mt: 3, ml: 2, color: "#1976d2" }} // Set the color to blue
+            >
+              CLIENTS
             </Typography>
             <TableContainer>
               <Table>
@@ -195,8 +201,8 @@ const AdminClients = () => {
                                 loan.statusFormatted === 'Active'
                                   ? green[600]
                                   : loan.statusFormatted === 'Pending'
-                                  ? yellow[800]
-                                  : red[600],
+                                    ? yellow[800]
+                                    : red[600],
                             }}
                           >
                             {loan.statusFormatted}
@@ -238,6 +244,7 @@ const AdminClients = () => {
               sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}
             />
           )}
+        </Box>
         </Box>
       </Box>
     </Box>

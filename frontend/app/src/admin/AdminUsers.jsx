@@ -93,8 +93,8 @@ const AdminUsers = () => {
 
         {/* Main Content */}
         <Box className="w-4/5 p-6">
-          <Card className="p-6 shadow-lg">
-            <h1 className="text-2xl font-semibold text-blue-600 mt-5">All Users</h1>
+           <Card sx={{ p: 4, boxShadow: 3 }}>
+            <h1 className="text-2xl font-semibold text-blue-600 mt-5">ALL USERS</h1>
             <div className="mt-10">
               {error && (
                 <Box className="text-red-500 text-center">{error}</Box>

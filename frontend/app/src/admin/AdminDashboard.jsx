@@ -10,8 +10,9 @@ import { useTheme } from '@mui/material/styles';
 import TwoSimplePieChart from "../components/charts/PieChart";
 import PieChartWithPaddingAngle from "../components/charts/PieChartPadding";
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
-import CreditScoreIcon from '@mui/icons-material/CreditScore';
+ 
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import CreditScoreIcon from '@mui/icons-material/CreditScore';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import { Box } from '@mui/material';
 import axios from 'axios';
@@ -80,11 +81,11 @@ const AdminDashboard = () => {
                 <div className={`rounded-lg flex justify-center p-2 shadow-md min-h-[100px] ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
                   <div className="flex">
                     <div className="bg-purple-100 rounded-full my-5 p-5">
-                      <PeopleAltIcon className="text-purple-500" />
+                      <AccountBalanceWalletIcon className="text-purple-500" />
                     </div>
                     <div className="ml-5 mt-6">
                       <div className="font-semibold text-xl">{clientsCount}</div>
-                      <div className="text-xs text-slate-500 font-semibold">Clients</div>
+                      <div className="text-xs text-slate-500 font-semibold">Loan Applications</div>
                     </div>
                   </div>
                 </div>
