@@ -115,23 +115,28 @@ const AdminLoans = () => {
   }
 
   return (
-    <Box display="flex" flexDirection="column">
+ <Box className="min-h-screen flex flex-col"> 
       <Toaster />
       {/* Navbar */}
-      <AdminNavbar />
+      <AdminNavbar isAuthenticated={true} />
 
-      <Box display="flex">
+     <Box className="flex flex-row flex-grow">
         {/* Sidebar */}
-        <Box width="20%">
+        <Box className="w-1/5 bg-gray-100 p-4">
           <AdminSidebar />
         </Box>
 
         {/* Main Content */}
         <Box width="80%" p={4}>
           <Card sx={{ mb: 4, boxShadow: 3 }}>
-            <Typography variant="h5" fontWeight="bold" gutterBottom sx={{ mt: 3, ml: 2 }}>
-              Loan Applications
-            </Typography>
+               <Typography
+                          variant="h5"
+                          fontWeight="bold"
+                          gutterBottom
+                          sx={{ mt: 3, ml: 2, color: "#1976d2" }} // Set the color to blue
+                        >
+                          LOAN APPLICATIONS
+                        </Typography>
             <TableContainer>
               <Table>
                 <TableHead>

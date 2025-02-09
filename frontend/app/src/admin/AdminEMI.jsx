@@ -118,7 +118,7 @@ const AdminEmi = () => {
 
                 {/* Main Content */}
                 <Box className="w-4/5 p-6">
-                    <Card className="p-6 shadow-lg">
+                    <Card sx={{ p: 4, boxShadow: 3 }}>
                         {showModal && (
                             <CreateEmi hideModal={() => setShowModal(false)} editData={editData} loanEmails={loanEmails} />
                         )}

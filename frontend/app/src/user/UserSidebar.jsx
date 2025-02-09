@@ -15,20 +15,35 @@ const UserSidebar = () => {
 
   return (
     <div
-      className={`w-64 md:w-72 lg:w-80 bg-${isDarkMode ? "gray-900" : "gray-100"} 
-      text-${isDarkMode ? "white" : "black"} p-4 h-screen flex flex-col`}
+      style={{
+        width: "250px", // Fixed width
+        backgroundColor: isDarkMode ? "#1e1e1e" : "#ffffff", // Background color
+        color: isDarkMode ? "#ffffff" : "#000000", // Text color
+        padding: "16px",
+        height: "100vh", // Full height
+        display: "flex",
+        flexDirection: "column",
+        boxShadow: "2px 0px 5px rgba(0,0,0,0.1)", // Shadow effect
+      }}
     >
-      <h2 className="text-xl font-bold text-center py-4 border-b border-gray-400">
+      <h2
+        style={{
+          textAlign: "center",
+          fontWeight: "bold",
+          padding: "16px 0",
+          borderBottom: "1px solid gray",
+        }}
+      >
         USER DASHBOARD
       </h2>
 
       {/* Sidebar Links */}
-      <div className="mt-6 space-y-4">
+      <div style={{ marginTop: "24px" }}>
         {[
           { name: "Dashboard", icon: <DashboardIcon />, path: "/dashboard" },
           { name: "Loan Details", icon: <ReceiptLongIcon />, path: "/loan-details" },
           { name: "Pay EMI", icon: <PaymentIcon />, path: "/pay-emi" },
-          { name: "User Profile", icon: <AccountCircleIcon />, path: "/user-profile" },
+          { name: "User  Profile", icon: <AccountCircleIcon />, path: "/user-profile" },
           { name: "Wallet", icon: <AccountBalanceWalletIcon />, path: "/wallet" },
           { name: "KYC", icon: <DomainVerificationIcon />, path: "/kyc" },
           { name: "Apply For Loan", icon: <EditNoteIcon />, path: "/apply-for-loan" },
@@ -36,11 +51,29 @@ const UserSidebar = () => {
           <Link
             key={index}
             to={item.path}
-            className="flex items-center space-x-4 p-3 
-            hover:bg-gray-300 hover:rounded-lg transition duration-300 ease-in-out"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              padding: "12px 16px",
+              textDecoration: "none",
+              color: isDarkMode ? "#ffffff" : "#000000",
+              margin: "4px 0",
+              borderRadius: "8px",
+              transition: "background-color 0.3s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = isDarkMode
+                ? "#333333"
+                : "#f0f0f0";
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = "transparent";
+            }}
           >
-            <span className="text-lg text-blue-500">{item.icon}</span>
-            <span className="text-md font-medium">{item.name}</span>
+            <span style={{ marginRight: "16px", color: "#007bff" }}>
+              {item.icon}
+            </span>
+            {item.name}
           </Link>
         ))}
       </div>

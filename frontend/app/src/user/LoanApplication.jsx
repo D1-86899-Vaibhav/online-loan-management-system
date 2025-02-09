@@ -161,16 +161,22 @@ const LoanApplicationForm = () => {
   };
 
   return (
-    <Box display="flex" minHeight="100vh" flexDirection="column">
+    <Box className="min-h-screen flex flex-col">
       <Navbar isAuthenticated={true} />
       <ToastContainer position="top-right" autoClose={3000} />
-      <Box display="flex" flex={1}>
-        <Box width="20%" minHeight="100vh">
+
+      <Box className="flex flex-row flex-grow">
+        <Box className="w-1/5 bg-gray-100 p-4">
           <UserSidebar />
         </Box>
         <Box width="80%" p={4}>
-          <Card sx={{ p: 4, maxWidth: 900, margin: "0 auto" }}>
-            <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold", textAlign: "center" }}>
+          <Card sx={{ p: 4, boxShadow: 3 }}>
+            <Typography
+              variant="h4"
+              fontWeight="bold"
+              gutterBottom
+              sx={{ mt: -2, ml: 0, color: "#1976d2" }} // Set the color to blue
+            >
               Loan Application Form
             </Typography>
             <form onSubmit={handleSubmit}>
