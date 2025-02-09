@@ -7,4 +7,5 @@ public interface LoanApplicationService {
     LoanApplication submitLoanApplication(LoanApplication loanApplication);
     List<LoanApplication> getAllLoanApplications();
     LoanApplication getLoanApplicationById(Long id);
+	Long countLoanAppliedUsers();
 }

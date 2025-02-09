@@ -25,6 +25,10 @@ public class LoanApplicationController {
     @Autowired
     private JwtUtils jwtUtil;
 
+
+    
+    
+    
     @PostMapping("/apply")
     public ResponseEntity<String> submitLoanApplication(@RequestBody LoanApplicationRequest loanApplicationDTO, HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
@@ -83,5 +87,10 @@ public class LoanApplicationController {
 
         LoanApplication loanApplication = loanApplicationService.getLoanApplicationById(id);
         return ResponseEntity.ok(loanApplication);
+    }
+    
+    @GetMapping("/Loancount")
+    public Long getLoanAppliedUsersCount() {
+        return loanApplicationService.countLoanAppliedUsers();
     }
 }

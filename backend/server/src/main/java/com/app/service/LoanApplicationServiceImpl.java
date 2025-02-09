@@ -95,4 +95,9 @@ public class LoanApplicationServiceImpl implements LoanApplicationService {
     public LoanApplication getLoanApplicationById(Long id) {
         return loanApplicationRepository.findById(id).orElse(null);
     }
+
+	@Override
+	public Long countLoanAppliedUsers() {
+		return  loanApplicationRepository.countLoanAppliedUsers();
+	}
 }

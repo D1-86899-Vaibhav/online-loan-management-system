@@ -60,7 +60,10 @@ public class KYCController {
         return ResponseEntity.ok(updatedDetails);
     }
   
-    
+    @GetMapping("/kyccount")
+    public Long getLoanAppliedUsersCount() {
+        return kycService.countKycUsers();
+    }
     
     @PostMapping(consumes = { "multipart/form-data" })
     public ResponseEntity<ApiResponse> createKYC(
