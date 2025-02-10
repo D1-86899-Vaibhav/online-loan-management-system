@@ -10,6 +10,7 @@ import com.app.pojos.LoanEntity;
 import com.app.pojos.TransactionEntity;
 import com.app.pojos.TransactionStatus;
 import com.app.pojos.UserEntity;
+import com.app.pojos.UserRole;
 import com.app.pojos.WalletEntity;
 import com.app.repository.LoanRepository;
 import com.app.repository.TransactionRepository;
@@ -81,20 +82,33 @@ public class WalletServiceImpl implements WalletService {
 	}
 
 	public WalletEntity payEmi(Long userId, Double emiAmount) {
-	    WalletEntity wallet = walletRepository.findByUserId(userId)
+	    WalletEntity userWallet = walletRepository.findByUserId(userId)
 	            .orElseThrow(() -> new RuntimeException("Wallet not found"));
 
-	    if (wallet.getBalance().compareTo(emiAmount) < 0) {
+	    if (userWallet.getBalance().compareTo(emiAmount) < 0) {
 	        throw new RuntimeException("Insufficient balance");
 	    }
+	 // Find the admin user
+	    UserEntity adminUser = userRepository.findByRole(UserRole.ROLE_ADMIN)
+	            .stream()
+	            .findFirst()
+	            .orElseThrow(() -> new RuntimeException("Admin not found"));
 
-	    wallet.setBalance(wallet.getBalance() - emiAmount);
+	    WalletEntity adminWallet = walletRepository.findByUserId(adminUser.getId())
+	            .orElseThrow(() -> new RuntimeException("Admin wallet not found"));
+	    
+	    
+	    userWallet.setBalance(userWallet.getBalance() - emiAmount);
 	    UserEntity user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-	    TransactionEntity transaction = new TransactionEntity(wallet, user, emiAmount, "Payment", TransactionStatus.COMPLETED);
-	    transactionRepository.save(transaction);
+	    
+	    TransactionEntity debitTransaction = new TransactionEntity(userWallet, user, emiAmount, "EMI Payment", TransactionStatus.COMPLETED);
+	    TransactionEntity creditTransaction = new TransactionEntity(adminWallet, adminUser, emiAmount, "EMI Received", TransactionStatus.COMPLETED);
 
+	    transactionRepository.save(debitTransaction);
+	    transactionRepository.save(creditTransaction);
+	    
 	    LoanEntity loan = loanRepository.getReferenceById(userId);
-
+	    walletRepository.save(adminWallet);
 	    // Update the existing instance of LoanEntity
 	    loan.setPaidEmi(loan.getPaidEmi() + 1);
 	    loan.setRemainingEmi(loan.getRemainingEmi() - 1);
@@ -102,7 +116,7 @@ public class WalletServiceImpl implements WalletService {
 	    // Update other necessary fields
 	    loanRepository.save(loan);
 
-	    return walletRepository.save(wallet);
+	    return walletRepository.save(userWallet);
 	}
 
 
@@ -125,16 +139,37 @@ public class WalletServiceImpl implements WalletService {
 		return wallet.getBalance();
 	}
 	@Override
-    public void creditFunds(Long userId, CreditFundsRequest request) {
-        WalletEntity wallet = walletRepository.findByUserId(userId)
-                .orElseThrow(() -> new ApiException("Wallet not found for user ID " + userId));
-        wallet.setBalance(wallet.getBalance() + request.getAmount());
-        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        TransactionEntity transaction = new TransactionEntity(wallet, user, request.getAmount(),
-                "Loan Credited", TransactionStatus.COMPLETED);
-        transactionRepository.save(transaction);
-        walletRepository.save(wallet);
-    }
+	public void creditFunds(Long userId, CreditFundsRequest request, Long adminId) {
+	    WalletEntity adminWallet = walletRepository.findByUserId(adminId)
+	            .orElseThrow(() -> new ApiException("Admin wallet not found for user ID " + adminId));
+
+	    // Check if admin wallet has sufficient balance
+	    if (adminWallet.getBalance() < request.getAmount()) {
+	        throw new RuntimeException("Insufficient balance in admin wallet");
+	    }
+
+	    WalletEntity userWallet = walletRepository.findByUserId(userId)
+	            .orElseThrow(() -> new ApiException("User wallet not found for user ID " + userId));
+
+	    // Deduct the amount from admin wallet
+	    adminWallet.setBalance(adminWallet.getBalance() - request.getAmount());
+
+	    // Credit the amount to user wallet
+	    userWallet.setBalance(userWallet.getBalance() + request.getAmount());
+
+	    // Record transactions
+	    UserEntity adminUser = userRepository.findById(adminId).orElseThrow(() -> new RuntimeException("Admin not found"));
+	    UserEntity user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+
+	    TransactionEntity debitTransaction = new TransactionEntity(adminWallet, adminUser, request.getAmount(), "Loan Transfer Out", TransactionStatus.COMPLETED);
+	    TransactionEntity creditTransaction = new TransactionEntity(userWallet, user, request.getAmount(), "Loan Transfer In", TransactionStatus.COMPLETED);
+
+	    transactionRepository.save(debitTransaction);
+	    transactionRepository.save(creditTransaction);
+	    walletRepository.save(adminWallet);
+	    walletRepository.save(userWallet);
+	}
+
 
 //	private LoanEntity convertToLoanEntity(LoanDetailsResp loanDetailsResp) {
 //	    LoanEntity loanEntity = new LoanEntity();

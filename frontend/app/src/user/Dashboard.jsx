@@ -119,14 +119,14 @@ const Dashboard = () => {
   }
 
   return (
-    <Box display="flex" minHeight="100vh" flexDirection="column">
+    <Box className="min-h-screen flex flex-col">
       <Toaster />
       {/* Navbar Component */}
-      <Navbar isAuthenticated={true}/>
+      <Navbar isAuthenticated={true} />
 
-      <Box display="flex" flex={1}>
+      <Box className="flex flex-row flex-grow">
         {/* Sidebar */}
-        <Box width="20%" minHeight="100vh">
+        <Box className="w-1/5 bg-gray-100 p-4">
           <UserSidebar />
         </Box>
         {/* Main Content */}
@@ -134,8 +134,13 @@ const Dashboard = () => {
           {/* Transaction History */}
           <Card sx={{ mb: 4, boxShadow: 3 }}>
             <CardContent>
-              <Typography variant="h5" fontWeight="bold" gutterBottom>
-                Transaction History
+              <Typography
+                variant="h5"
+                fontWeight="bold"
+                gutterBottom
+                sx={{ mt: 1, ml: 2, color: "#1976d2" }} // Set the color to blue
+              >
+                TRANSACTION HISTORY
               </Typography>
               <TableContainer>
                 <Table>
@@ -160,8 +165,8 @@ const Dashboard = () => {
                                 transaction.status === 'COMPLETED'
                                   ? green[600]
                                   : transaction.status === 'PENDING'
-                                  ? yellow[800]
-                                  : red[600],
+                                    ? yellow[800]
+                                    : red[600],
                             }}
                           >
                             {transaction.status}
@@ -198,8 +203,8 @@ const Dashboard = () => {
                     item.status === 'APPROVED'
                       ? green[600]
                       : item.status === 'PENDING'
-                      ? yellow[800]
-                      : red[600];
+                        ? yellow[800]
+                        : red[600];
 
                   return (
                     <Grid item xs={12} md={4} key={index}>

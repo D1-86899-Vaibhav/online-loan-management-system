@@ -9,7 +9,7 @@ import CalculateIcon from "@mui/icons-material/Calculate";
 import ContactsIcon from "@mui/icons-material/Contacts";
 import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import LogoutIcon from "@mui/icons-material/Logout";
-
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 const AdminSidebar = () => {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
@@ -46,6 +46,7 @@ const AdminSidebar = () => {
           { name: "Calculator", icon: <CalculateIcon />, path: "/AdminCalculator" },
           { name: "Users", icon: <SupervisorAccountIcon />, path: "/AdminUsers" },
           { name: "Contact", icon: <ContactsIcon />, path: "/AdminContact" },
+          { name: "Wallet", icon: <AccountBalanceWalletIcon />, path: "/AdminWallet" },
           { name: "Logout", icon: <LogoutIcon />, path: "/logout" },
         ].map((item, index) => (
           <Link

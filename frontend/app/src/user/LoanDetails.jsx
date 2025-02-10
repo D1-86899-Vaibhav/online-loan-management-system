@@ -77,10 +77,10 @@ const LoanDetails = () => {
             loan.status === 'APPROVED'
               ? 'Active'
               : loan.status === 'PENDING'
-              ? 'Pending'
-              : loan.status === 'REJECTED'
-              ? 'Closed'
-              : loan.status,
+                ? 'Pending'
+                : loan.status === 'REJECTED'
+                  ? 'Closed'
+                  : loan.status,
         }));
 
         setLoans(formattedData);
@@ -130,14 +130,14 @@ const LoanDetails = () => {
   }
 
   return (
-    <Box display="flex" flexDirection="column">
+    <Box className="min-h-screen flex flex-col">
       <Toaster />
       {/* Navbar */}
       <Navbar isAuthenticated={true} />
 
-      <Box display="flex">
+      <Box className="flex flex-row flex-grow">
         {/* Sidebar */}
-        <Box width="20%">
+        <Box className="w-1/5 bg-gray-100 p-4">
           <UserSidebar />
         </Box>
 
@@ -148,9 +148,9 @@ const LoanDetails = () => {
               variant="h5"
               fontWeight="bold"
               gutterBottom
-              sx={{ mt: 3, ml: 2 }}
+              sx={{ mt: 3, ml: 2, color: "#1976d2" }} // Set the color to blue
             >
-              Loan Details
+            LOAN DETAILS
             </Typography>
             <TableContainer>
               <Table>
@@ -196,8 +196,8 @@ const LoanDetails = () => {
                                 loan.statusFormatted === 'Active'
                                   ? green[600]
                                   : loan.statusFormatted === 'Pending'
-                                  ? yellow[800]
-                                  : red[600],
+                                    ? yellow[800]
+                                    : red[600],
                             }}
                           >
                             {loan.statusFormatted}

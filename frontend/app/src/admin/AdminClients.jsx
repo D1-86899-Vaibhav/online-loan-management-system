@@ -18,19 +18,54 @@ import {
 import { green, yellow, red } from '@mui/material/colors';
 import toast, { Toaster } from 'react-hot-toast'; // For notifications
 
+// Component for AdminWallet
+const AdminWallet = ({ balance }) => (
+  <Card sx={{ mb: 4, p: 2, boxShadow: 3 }}>
+  <Typography variant="h6" color="primary">
+    Wallet Balance: <span style={{ color: 'black', fontWeight: 'bold' }}>₹{balance}</span>
+  </Typography>
+</Card>
+);
+
 const AdminClients = () => {
   const [loans, setLoans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [walletBalance, setWalletBalance] = useState(0);
   const itemsPerPage = 2; // Number of loans per page
+
+  // Fetch wallet balance data
+  const fetchWalletBalance = useCallback(async () => {
+    try {
+      const token = sessionStorage.getItem('authToken');
+      if (!token) {
+        throw new Error('Authentication token is missing. Please log in.');
+      }
+      const response = await fetch('http://localhost:8080/wallet/balance', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        const errorMsg = await response.text();
+        throw new Error(errorMsg || 'Failed to fetch wallet balance');
+      }
+      const data = await response.json();
+      setWalletBalance(data);
+    } catch (err) {
+      console.error('Error fetching wallet balance:', err);
+      toast.error('Error fetching wallet balance!');
+    }
+  }, []);
 
   // Fetch loans from the admin endpoint using the JWT token
   const fetchLoans = useCallback(async () => {
     try {
       setLoading(true);
       const token = sessionStorage.getItem('authToken'); // Adjust based on your JWT storage
-      // Admin endpoint: returns all loans (not filtered by user)
       const response = await fetch('http://localhost:8080/loans/all', {
         method: 'GET',
         headers: {
@@ -67,8 +102,8 @@ const AdminClients = () => {
           loan.status === 'APPROVED'
             ? 'Active'
             : loan.status === 'PENDING'
-            ? 'Pending'
-            : 'Closed',
+              ? 'Pending'
+              : 'Closed',
       }));
 
       setLoans(formattedData);
@@ -82,8 +117,9 @@ const AdminClients = () => {
   }, []);
 
   useEffect(() => {
+    fetchWalletBalance();
     fetchLoans();
-  }, [fetchLoans]);
+  }, [fetchWalletBalance, fetchLoans]);
 
   // Calculate pagination details
   const totalPages = Math.ceil(loans.length / itemsPerPage);
@@ -139,22 +175,32 @@ const AdminClients = () => {
   }
 
   return (
-    <Box display="flex" flexDirection="column">
+    <Box className="min-h-screen flex flex-col"> {/* Outer background gray */}
       <Toaster />
       {/* Navbar */}
-      <AdminNavbar />
+      <AdminNavbar isAuthenticated={true} />
 
-      <Box display="flex">
+      <Box display="flex" flexGrow={1}>
         {/* Sidebar */}
-        <Box width="20%">
+
+        <Box className="flex flex-row flex-grow">
+        <Box className="w-1/5 bg-gray-100 p-4">
           <AdminSidebar />
         </Box>
 
         {/* Main Content */}
         <Box width="80%" p={4}>
+          {/* Display Wallet Balance */}
+          <AdminWallet balance={walletBalance} />
+
           <Card sx={{ mb: 4, boxShadow: 3 }}>
-            <Typography variant="h5" fontWeight="bold" gutterBottom sx={{ mt: 3, ml: 2 }}>
-              Loan Applications
+            <Typography
+              variant="h5"
+              fontWeight="bold"
+              gutterBottom
+              sx={{ mt: 3, ml: 2, color: "#1976d2" }} // Set the color to blue
+            >
+              CLIENTS
             </Typography>
             <TableContainer>
               <Table>
@@ -195,8 +241,8 @@ const AdminClients = () => {
                                 loan.statusFormatted === 'Active'
                                   ? green[600]
                                   : loan.statusFormatted === 'Pending'
-                                  ? yellow[800]
-                                  : red[600],
+                                    ? yellow[800]
+                                    : red[600],
                             }}
                           >
                             {loan.statusFormatted}
@@ -238,6 +284,7 @@ const AdminClients = () => {
               sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}
             />
           )}
+        </Box>
         </Box>
       </Box>
     </Box>

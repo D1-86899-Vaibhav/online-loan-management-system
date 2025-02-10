@@ -158,4 +158,10 @@ public class KycServiceImpl implements KycService {
         }
     }
 
+	@Override
+	public Long countKycUsers() {
+		// TODO Auto-generated method stub
+		return kycRepository.countKycUsers();
+	}
+
 }

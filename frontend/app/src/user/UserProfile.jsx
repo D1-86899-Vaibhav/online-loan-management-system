@@ -38,8 +38,8 @@ const UserProfile = () => {
     bankAccountNo: '',
   });
 
-  const [isEditing, setIsEditing] = useState(false);
   const [formValues, setFormValues] = useState(userDetails);
+  const [isEditing, setIsEditing] = useState(false);
 
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [passwordForm, setPasswordForm] = useState({
@@ -49,28 +49,34 @@ const UserProfile = () => {
     confirmPassword: '',
   });
 
+  const [loading, setLoading] = useState(false);
+
+  // Helper functions to handle loading state
+  const startLoading = () => setLoading(true);
+  const endLoading = () => setLoading(false);
+
+  // Fetch user profile on component mount
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        localStorage.setItem("userId", "1");
-        const userId = localStorage.getItem("userId");
-        console.log("User  ID from localStorage:", userId);
-        if (!userId) {
-          console.error("No userId found in localStorage");
-          return;
+        startLoading();
+        const token = sessionStorage.getItem('authToken');
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
         }
 
-        const response = await axios.get(`http://localhost:8080/kyc/user/${userId}`);
+        const response = await axios.get(`http://localhost:8080/kyc/user/profile`, { headers });
         const apiData = response.data;
 
-        // Map API response fields to userDetails state fields
+        // Map API fields to local state structure
         const updatedUserDetails = {
           firstName: apiData.firstName || '',
           lastName: apiData.lastName || '',
           email: apiData.email || '',
           phone: apiData.phone || '',
           city: apiData.correspondenceCity || '',
-          avatarUrl: 'https://via.placeholder.com/150',
+          avatarUrl: apiData.avatarUrl || 'https://via.placeholder.com/150',
           gender: apiData.gender || '',
           dob: apiData.dob || '',
           state: apiData.correspondenceState || '',
@@ -81,9 +87,15 @@ const UserProfile = () => {
         };
 
         setUserDetails(updatedUserDetails);
-        setFormValues(updatedUserDetails); // Initialize formValues with the same data
+        setFormValues(updatedUserDetails);
+
+        // Prefill email in the password form
+        setPasswordForm((prev) => ({ ...prev, email: updatedUserDetails.email }));
       } catch (error) {
-        console.error("Error fetching user profile:", error);
+        console.error('Error fetching user profile:', error.response || error);
+        toast.error('Error fetching user profile. Please try again later.');
+      } finally {
+        endLoading();
       }
     };
 
@@ -92,12 +104,26 @@ const UserProfile = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormValues({ ...formValues, [name]: value });
+    setFormValues((prev) => ({ ...prev, [name]: value }));
   };
 
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
-    setPasswordForm({ ...passwordForm, [name]: value });
+    setPasswordForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleProfilePicChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const newAvatarUrl = reader.result;
+        // Update both states so that the new avatar is sent on update
+        setUserDetails((prev) => ({ ...prev, avatarUrl: newAvatarUrl }));
+        setFormValues((prev) => ({ ...prev, avatarUrl: newAvatarUrl }));
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handlePasswordSubmit = async (e) => {
@@ -108,11 +134,14 @@ const UserProfile = () => {
     }
 
     try {
-      const response = await axios.post('http://localhost:8080/users/change-password', passwordForm, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      startLoading();
+      const response = await axios.post(
+        'http://localhost:8080/users/change-password',
+        passwordForm,
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
 
       if (response.status === 200) {
         setIsChangingPassword(false);
@@ -123,65 +152,72 @@ const UserProfile = () => {
     } catch (error) {
       console.error("Error changing password:", error);
       toast.error('An error occurred while changing the password.');
+    } finally {
+      endLoading();
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const userId = localStorage.getItem("userId");
-      if (!userId) {
-        console.error("No userId found in localStorage");
-        return;
+      startLoading();
+      const token = sessionStorage.getItem('authToken');
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
       }
 
-      // Update the user details on the server
-      const response = await axios.put(`http://localhost:8080/kyc/update/${userId}`, formValues, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      // Fixed the syntax here: removed the extra curly brace.
+      const response = await axios.put(
+        `http://localhost:8080/kyc/user/update`,
+        formValues,
+        { headers }
+      );
 
       if (response.status === 200) {
-        setUserDetails(formValues); // Update local state with the updated data
+        setUserDetails(formValues);
         setIsEditing(false);
         toast.success('Profile updated successfully!');
       } else {
         toast.error('Failed to update profile. Please try again.');
       }
     } catch (error) {
-      console.error("Error occurred:", error);
-      toast.error('An error occurred while updating the profile.');
+      console.error('Error updating profile:', error.response || error);
+      toast.error('Error updating profile. Please try again later.');
+    } finally {
+      endLoading();
     }
   };
 
-  const handleProfilePicChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setUserDetails({ ...userDetails, avatarUrl: reader.result });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+        <Typography variant="h6">Loading Profile...</Typography>
+      </Box>
+    );
+  }
 
   return (
-    <Box display="flex" minHeight="100vh" flexDirection="column">
+    <Box className="min-h-screen flex flex-col">
       <Navbar isAuthenticated={true} />
       <ToastContainer />
-      <Box display="flex" flex={1}>
-        <Box width={{ xs: '100%', md: '20%' }} minHeight="100vh">
+      <Box className="flex flex-row flex-grow">
+        <Box className="w-1/5 bg-gray-100 p-4">
           <UserSidebar />
         </Box>
+
+
         <Box width={{ xs: '100%', md: '80%' }} p={4}>
-          <Typography variant="h5" color="primary" gutterBottom>
+          <Typography variant="h5"  
+            fontWeight="bold"
+            gutterBottom
+            sx={{ mt: 1, ml: 2, color: "#1976d2" }}>
             USER PROFILE
           </Typography>
-
-          <Card sx={{ p: 3, maxWidth: 900, margin: '0 auto' }}>
+          <Card sx={{ p: 4, boxShadow: 3 }}>
             <Grid container spacing={4}>
-              <Grid item xs={12} md={4} textAlign="center">
+
+              <Grid item xs={12} md={4} textAlign="center" display="flex" flexDirection="column" alignItems="center">
                 <Box sx={{ position: 'relative', display: 'inline-block' }}>
                   <Avatar
                     src={userDetails.avatarUrl}
@@ -199,17 +235,10 @@ const UserProfile = () => {
                         right: 10,
                         bgcolor: 'rgba(0,0,0,0.6)',
                         borderRadius: '50%',
-                        '&:hover': {
-                          bgcolor: 'rgba(0,0,0,0.8)',
-                        },
+                        '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' },
                       }}
                     >
-                      <input
-                        hidden
-                        accept="image/*"
-                        type="file"
-                        onChange={handleProfilePicChange}
-                      />
+                      <input hidden accept="image/*" type="file" onChange={handleProfilePicChange} />
                       <PhotoCameraIcon fontSize="small" sx={{ color: 'white' }} />
                     </IconButton>
                   )}
@@ -219,12 +248,13 @@ const UserProfile = () => {
                     variant="contained"
                     color="primary"
                     onClick={() => setIsEditing(true)}
-                    sx={{ mt: 2 }}
+                    sx={{ mt: 1, width: 'fit-content' }}
                   >
                     Edit Profile
                   </Button>
                 )}
               </Grid>
+
 
               <Grid item xs={12} md={8}>
                 {!isEditing ? (
@@ -239,15 +269,10 @@ const UserProfile = () => {
                     <DetailItem label="Gender" value={userDetails.gender} />
                     <DetailItem label="Email Address" value={userDetails.email} />
 
-                    {/* Change Password Section */}
                     <Typography variant="h6" gutterBottom sx={{ color: '#1565c0', fontWeight: 'bold', mt: 4 }}>
                       CHANGE PASSWORD
                     </Typography>
-                    <Button
-                      variant="outlined"
-                      color="primary"
-                      onClick={() => setIsChangingPassword(true)}
-                    >
+                    <Button variant="outlined" color="primary" onClick={() => setIsChangingPassword(true)}>
                       Change Password
                     </Button>
                   </>
@@ -316,13 +341,7 @@ const UserProfile = () => {
                       <Grid item xs={12} sm={6}>
                         <FormControl fullWidth>
                           <InputLabel>Gender</InputLabel>
-                          <Select
-                            name="gender"
-                            value={formValues.gender}
-                            onChange={handleChange}
-                            label="Gender"
-                            required
-                          >
+                          <Select name="gender" value={formValues.gender} onChange={handleChange} label="Gender" required>
                             <MenuItem value="Male">Male</MenuItem>
                             <MenuItem value="Female">Female</MenuItem>
                             <MenuItem value="Other">Other</MenuItem>
@@ -409,7 +428,6 @@ const UserProfile = () => {
                   </form>
                 )}
 
-                {/* Password Change Section */}
                 {isChangingPassword && (
                   <form onSubmit={handlePasswordSubmit}>
                     <Typography variant="h6" gutterBottom>
@@ -468,11 +486,7 @@ const UserProfile = () => {
                       <Button variant="contained" color="success" type="submit">
                         Change Password
                       </Button>
-                      <Button
-                        variant="contained"
-                        color="error"
-                        onClick={() => setIsChangingPassword(false)}
-                      >
+                      <Button variant="contained" color="error" onClick={() => setIsChangingPassword(false)}>
                         Cancel
                       </Button>
                     </Box>
@@ -489,7 +503,9 @@ const UserProfile = () => {
 
 const DetailItem = ({ label, value }) => (
   <Box display="flex" justifyContent="space-between" mb={2}>
-    <Typography variant="body1" color="textSecondary">{label}:</Typography>
+    <Typography variant="body1" color="textSecondary">
+      {label}:
+    </Typography>
     <Typography variant="body1">{value}</Typography>
   </Box>
 );

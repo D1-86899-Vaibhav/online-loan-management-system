@@ -1,53 +1,103 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Box, Card, Typography, Button, TextField, Grid, Container } from '@mui/material';
-import Navbar from './Navbar';
-import UserSidebar from './UserSidebar';
+import AdminNavbar from './AdminNavbar';
+import AdminSidebar from './AdminSidebar'; // Assuming you have a different sidebar for admin
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const Wallet = () => {
+const AdminWallet = () => {
+  // State variables
   const [walletBalance, setWalletBalance] = useState(0);
   const [amount, setAmount] = useState('');
-  const [action, setAction] = useState('');
+  const [action, setAction] = useState(''); // either 'add' or 'withdraw'
 
+  // Function to display toast notifications
+  const showToast = (message, type) => {
+    if (type === 'error') {
+      toast.error(message);
+    } else {
+      toast.success(message);
+    }
+  };
+
+  // Function to fetch the wallet balance from the API
+  const fetchWalletBalance = async () => {
+    try {
+      // Retrieve the JWT token from session storage
+      const token = sessionStorage.getItem('authToken');
+      if (!token) {
+        throw new Error('Authentication token is missing. Please log in.');
+      }
+      // Set up headers with the token
+      const headers = {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      };
+      const response = await axios.get('http://localhost:8080/wallet/balance', { headers });
+      // Since the API returns a single numeric value (e.g., 32.0), we set it directly
+      setWalletBalance(response.data);
+      console.log(response.data);
+    } catch (error) {
+      console.error('Error fetching wallet balance:', error.response?.data || error.message);
+      showToast('Error fetching wallet balance', 'error');
+    }
+  };
+
+  // Fetch the wallet balance when the component mounts
   useEffect(() => {
     fetchWalletBalance();
   }, []);
 
-  const fetchWalletBalance = async () => {
-    try {
-      const token = sessionStorage.getItem('authToken');
-      const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
-      const response = await axios.get('http://localhost:8080/wallet/balance', { headers });
-      setWalletBalance(response.data);
-    } catch (error) {
-      toast.error('Error fetching wallet balance');
-    }
-  };
-
+  // Handler for submitting the add/withdraw action
   const handleSubmit = async () => {
     const numericAmount = parseFloat(amount);
     if (isNaN(numericAmount) || numericAmount <= 0) {
-      toast.error('Please enter a valid amount!');
+      showToast('Please enter a valid amount!', 'error');
       return;
     }
 
     try {
+      // Retrieve the JWT token from session storage
       const token = sessionStorage.getItem('authToken');
-      const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
+      if (!token) {
+        throw new Error('Authentication token is missing. Please log in.');
+      }
+      // Set up headers with the token
+      const headers = {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      };
+
+      let response;
+      let successMessage = '';
 
       if (action === 'add') {
-        await axios.post('http://localhost:8080/wallet/add-funds', { amount: numericAmount }, { headers });
-        toast.success('Funds added successfully!');
+        // Call the API endpoint for adding funds
+        response = await axios.post(
+          'http://localhost:8080/wallet/add-funds',
+          { amount: numericAmount },
+          { headers }
+        );
+        successMessage = 'Funds added successfully!';
       } else if (action === 'withdraw') {
-        await axios.post('http://localhost:8080/wallet/withdraw-funds', { amount: numericAmount }, { headers });
-        toast.success('Funds withdrawn successfully!');
+        // Call the API endpoint for withdrawing funds
+        response = await axios.post(
+          'http://localhost:8080/wallet/withdraw-funds',
+          { amount: numericAmount },
+          { headers }
+        );
+        successMessage = 'Funds withdrawn successfully!';
       }
 
+      // Show success toast with the proper message
+      showToast(successMessage, 'success');
+
+      // Immediately call the get balance API again to refresh the balance
       fetchWalletBalance();
     } catch (error) {
-      toast.error('Transaction failed!');
+      console.error('Transaction error:', error.response?.data || error.message);
+      showToast('An error occurred while processing your request.', 'error');
     } finally {
       setAmount('');
       setAction('');
@@ -56,22 +106,23 @@ const Wallet = () => {
 
   return (
     <Box className="min-h-screen flex flex-col">
-      <Navbar isAuthenticated={true} />
+      {/* Navbar */}
+      <AdminNavbar isAuthenticated={true} />
 
       <Box className="flex flex-row flex-grow">
+        {/* Sidebar */}
         <Box className="w-1/5 bg-gray-100 p-4">
-          <UserSidebar />
+          <AdminSidebar />
         </Box>
 
-           
-          {/* Main Content */}
+        {/* Main Content */}
         <Container maxWidth="md" sx={{ mt: 5 }}>
           <Card sx={{ p: 4, boxShadow: 3 }}>
             <Typography variant="h4" color="primary" gutterBottom>
-             WALLET MANAGEMENT
+             ADMIN WALLET MANAGEMENT
             </Typography>
-            <Typography variant="body1" color="textSecondary" gutterBottom>
-              Manage your wallet balance with ease.
+            <Typography variant="body1" color="textSecondary" gutterBottom> 
+              Manage the admin wallet balance.
             </Typography>
 
             {/* Display current balance */}
@@ -166,9 +217,17 @@ const Wallet = () => {
           </Card>
         </Container>
       </Box>
-      <ToastContainer position="top-center" autoClose={3000} hideProgressBar />
+
+      {/* Toast Container for notifications */}
+      <ToastContainer
+        position="top-center"
+        autoClose={5000}
+        hideProgressBar
+        newestOnTop
+        closeButton
+      />
     </Box>
   );
 };
 
-export default Wallet;
+export default AdminWallet;

@@ -20,8 +20,8 @@ export default function StackedAreaChart() {
             width={350}
             height={290}
             series={[
-                { data: uData, label: 'uv', area: true, stack: 'total', showMark: false },
-                { data: pData, label: 'pv', area: true, stack: 'total', showMark: false },
+                { data: uData, label: 'Collected', area: true, stack: 'total', showMark: false ,color: '#8A2BE2'},
+                { data: pData, label: 'Distrubuted', area: true, stack: 'total', showMark: false ,color: '#FF0000'},
                 {
                     data: amtData,
                     label: 'amt',

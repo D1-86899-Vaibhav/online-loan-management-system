@@ -6,6 +6,8 @@ import com.app.dto.LoanSummaryResp;
 import com.app.pojos.LoanEntity;
 import com.app.pojos.LoanStatus;
 import com.app.repository.LoanRepository;
+import com.app.repository.UserRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +30,10 @@ public class LoanServiceImpl implements LoanService {
 
     @Autowired
     private WalletService walletService;
+    
+
+    @Autowired
+    private UserRepository userRepository;
 	/**
      * Creates and saves a new loan record.
      * This method can be used to create a pending loan when a loan application is submitted.
@@ -79,19 +85,17 @@ public class LoanServiceImpl implements LoanService {
 	
 	
 	//ADMIN SIDE
-	public LoanDetailsResp updateLoanStatus(Long loanId, String action) {
+	public LoanDetailsResp updateLoanStatus(Long loanId, String action,Long adminId) {
         Optional<LoanEntity> optionalLoan = loanRepository.findById(loanId);
         if (optionalLoan.isPresent()) {
             LoanEntity loan = optionalLoan.get();
-            System.out.println(loan);
             if (action.equalsIgnoreCase("approve")) {
                 loan.setStatus(LoanStatus.APPROVED);
                 loan.setNextEmiDate(loan.getStartDate()); 
                 loan.setEndDate(loan.getStartDate().plusMonths(loan.getDuration()));
              // Transfer the loan amount to the user's wallet and record the transaction
                 CreditFundsRequest creditFundsRequest = new CreditFundsRequest(loan.getLoanAmount());
-                walletService.creditFunds(loan.getUser().getId(), creditFundsRequest);
-                
+                walletService.creditFunds(loan.getUser().getId(), creditFundsRequest, adminId); 
             } else if (action.equalsIgnoreCase("reject")) {
                 loan.setStatus(LoanStatus.REJECTED);
             } else {

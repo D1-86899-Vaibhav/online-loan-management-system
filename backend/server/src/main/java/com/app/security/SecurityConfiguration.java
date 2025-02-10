@@ -29,25 +29,34 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain authorizeRequests(HttpSecurity http) throws Exception {
-        http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(csrf -> csrf.disable())  // Disable CSRF protection (since we're using stateless JWT)
-                .authorizeHttpRequests(request -> request
-                                // Allow unrestricted access to public endpoints (e.g., login, registration, API docs)
-                                .requestMatchers("/users/register", "/users/login", "/v*/api-doc*/**", "/swagger-ui/**").permitAll()
-                                // Allow preflight OPTIONS requests
-                                .requestMatchers(HttpMethod.OPTIONS).permitAll()
-                                // Other public routes
-                                .requestMatchers("/api/users/AllUsers", "/api/users/AllUsers/count").permitAll()
-                                .requestMatchers("/users/change-password", "/kyc/user/**", "/kyc/update/**").permitAll()
-                                
-                                // Restricted routes for users (must have ROLE_USER)
-                                .requestMatchers("/users/wallet/withdraw-funds", "/transactions", "/users/wallet/add-funds", "/loans/summary", "/loans/details")
-                                .hasAuthority("ROLE_USER")  
-                                .requestMatchers("/wallet/withdraw-funds", "/wallet/add-funds", "/wallet/balance", "/transactions", "/loans/summary", "/loans/details", "/loan-applications/apply")
-                                .hasAuthority("ROLE_USER")  
+     http.csrf(csrf -> csrf.disable())
+    .authorizeHttpRequests(request -> request
+        // Public endpoints
+        .requestMatchers("/users/register", "/users/login", "/v*/api-doc*/**", "/swagger-ui/**").permitAll()
+        .requestMatchers(HttpMethod.OPTIONS).permitAll()
 
-                                // Restricted routes for admins (must have ROLE_ADMIN)
-                                .requestMatchers("/loans/**").hasAuthority("ROLE_ADMIN")  
+        // Public data endpoints
+        .requestMatchers("/api/users/AllUsers", "/api/users/AllUsers/count").permitAll()
+        .requestMatchers("/loan-applications/Loancount").permitAll()
+        .requestMatchers("/kyc/kyccount").permitAll()
+        .requestMatchers("/users/change-password").permitAll()
+        .requestMatchers("/kyc/user/**").permitAll()
+        .requestMatchers("/kyc/update/**").permitAll()
+
+        // Common access (e.g., wallet balance)
+        .requestMatchers("/wallet/balance").permitAll()
+
+        // Role-based access control
+        .requestMatchers("/users/wallet/withdraw-funds", "/transactions", "/users/wallet/add-funds", 
+                "/loans/summary", "/loans/details", "/loan-applications/apply").hasAuthority("ROLE_USER")
+
+        .requestMatchers("/loans/**").hasAuthority("ROLE_ADMIN")
+        
+        // Any other request requires authentication
+        .anyRequest().authenticated()
+    )
+    .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
 
                                 // All other routes must be authenticated
                                 .anyRequest().authenticated()
@@ -59,14 +68,13 @@ public class SecurityConfiguration {
         return http.build();
     }
 
-    // CORS configuration to allow frontend (React app) to make requests
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000")); // Allow frontend origin (React app)
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Allowed HTTP methods
+        configuration.setAllowedOrigins(List.of("http://localhost:3000")); // Allow frontend origin
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*")); // Allow all headers
-        configuration.setAllowCredentials(true); // Allow credentials (cookies, authentication headers)
+        configuration.setAllowCredentials(true); // Allow authentication headers & cookies
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration); // Apply CORS settings globally to all endpoints
