@@ -2,6 +2,7 @@ package com.app.controller;
 
 import com.app.dto.AddFundsRequest;
 import com.app.dto.WithdrawFundsRequest;
+import com.app.pojos.TransactionEntity;
 import com.app.pojos.WalletEntity;
 import com.app.security.JwtUtils;
 import com.app.service.WalletService;
@@ -9,7 +10,10 @@ import com.app.service.WalletService;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -75,5 +79,16 @@ public class WalletController {
 	    Double balance = walletService.getBalance(userId);
 	    return ResponseEntity.ok(balance);
 	}
+	
+
+    @GetMapping("/transactions")
+    public ResponseEntity<?> getWalletTransactions(@RequestParam Long walletId) {
+        try {
+            List<TransactionEntity> transactions = walletService.getWalletTransactions(walletId);
+            return ResponseEntity.ok(transactions);
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + ex.getMessage());
+        }
+    }
 
 }

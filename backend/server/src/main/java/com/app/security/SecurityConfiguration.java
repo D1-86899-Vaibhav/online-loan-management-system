@@ -43,6 +43,7 @@ public class SecurityConfiguration {
                 .requestMatchers("/kyc/user/**").permitAll()
                 .requestMatchers("/kyc/update/**").permitAll()
                 
+                .requestMatchers("/wallet/transactions").permitAll()
                 // ✅ Endpoints from main branch
                 .requestMatchers("/wallet/balance").permitAll()
 

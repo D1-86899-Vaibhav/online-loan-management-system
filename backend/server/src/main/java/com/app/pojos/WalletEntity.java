@@ -1,5 +1,7 @@
 package com.app.pojos;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
@@ -25,5 +27,10 @@ public class WalletEntity {
 
     @Column(name = "balance", nullable = false)
     private Double balance = 0.0;
+
+	public List<TransactionEntity> getTransactions() {
+		// TODO Auto-generated method stub
+		return null;
+	}
     
 }

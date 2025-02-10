@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
 
 // Public Pages
@@ -16,7 +16,6 @@ import AdminCalculator from './admin/AdminCalculator';
 import AdminUsers from './admin/AdminUsers';
 import AdminContact from './admin/AdminContact';
 import AdminWallet from './admin/AdminWallet';
-
 
 // User Routes
 import Dashboard from './user/Dashboard';
@@ -38,6 +37,9 @@ import { SharedWalletProvider } from './components/SharedWallet';
 import ProtectedRoute from './auth/ProtectedRoute';
 
 export default function App() {
+  // State to manage transaction data for the graph
+  const [transactionData, setTransactionData] = useState([]);
+
   return (
     <Routes>
       {/* Public Routes */}
@@ -51,7 +53,7 @@ export default function App() {
         path="AdminDashboard"
         element={
           <ProtectedRoute requiredRole="ROLE_ADMIN">
-            <AdminDashboard />
+            <AdminDashboard transactionData={transactionData} />
           </ProtectedRoute>
         }
       />
@@ -104,13 +106,13 @@ export default function App() {
         }
       />
       <Route
-      path="AdminWallet"
-      element={
-        <ProtectedRoute requiredRole="ROLE_ADMIN">
-          <AdminWallet />
-        </ProtectedRoute>
-      }
-     />
+        path="AdminWallet"
+        element={
+          <ProtectedRoute requiredRole="ROLE_ADMIN">
+            <AdminWallet setTransactionData={setTransactionData} />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="admin-logout"
         element={
