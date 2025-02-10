@@ -3,6 +3,7 @@ package com.app.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -33,7 +34,7 @@ public interface LoanRepository extends JpaRepository<LoanEntity, Long> {
          "l.id, l.loanAmount, l.emiAmount, l.duration, l.startDate, l.endDate, " +
          "l.totalEmi, l.paidEmi, l.remainingEmi, l.lastEmiDate, l.nextEmiDate, l.status,l.user.id) " +
          "FROM LoanEntity l")
-  List<LoanDetailsResp> findAllLoanDetails();
+  List<LoanDetailsResp> findAllLoanDetails(Sort sort);
 	
 	
 	  LoanEntity getReferenceById(Long userId);

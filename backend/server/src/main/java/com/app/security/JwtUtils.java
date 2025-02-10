@@ -29,9 +29,6 @@ public class JwtUtils {
 
     @Value("${spring.security.jwt.exp.time}")
     private int jwtExpirationMs;
-    
-    @Value("${spring.security.jwt.temp.exp.time}")
-    private int tempTokenExpirationMs;
 
     private Key key;
 
@@ -42,11 +39,8 @@ public class JwtUtils {
         key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    /*
-     * Generate Final JWT Token (after OTP verification)
-     */
     public String generateJwtToken(Authentication authentication) {
-        log.info("Generating final JWT token for authentication: {}", authentication);
+        log.info("Generating JWT token for authentication: {}", authentication);
         CustomUserDetailsImpl userPrincipal = (CustomUserDetailsImpl) authentication.getPrincipal();
 
         return Jwts.builder()
@@ -59,44 +53,11 @@ public class JwtUtils {
                 .compact();
     }
 
-    /*
-     * Generate Temporary Token (Step 1 - Before OTP Verification)
-     */
-    public String generateTempToken(Long userId) {
-        log.info("Generating Temporary Token for user ID: {}", userId);
-        return Jwts.builder()
-                .setSubject(String.valueOf(userId))
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(new Date().getTime() + tempTokenExpirationMs)) // Shorter expiry
-                .claim("temp", true) // Mark it as a temporary token
-                .signWith(key, SignatureAlgorithm.HS512)
-                .compact();
-    }
-
-    /*
-     * Generate Final Token (Step 2 - After OTP Verification)
-     */
-    public String generateFinalToken(Long userId, List<String> role) {
-        log.info("Generating Final JWT Token for user ID: {}", userId);
-
-        return Jwts.builder()
-                .setSubject(String.valueOf(userId))
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(new Date().getTime() + jwtExpirationMs))
-                .claim("role", role) // Include role in JWT
-                .claim("user_id", userId) 
-                .claim("temp", false)
-                .signWith(key, SignatureAlgorithm.HS512)
-                .compact();
-    }
-
-
     public String getUserNameFromJwtToken(Claims claims) {
         return claims.getSubject();
     }
 
     public Claims validateJwtToken(String jwtToken) {
-    	log.info("Received JWT token: {}", jwtToken);
         try {
             return Jwts.parserBuilder()
                     .setSigningKey(key)
@@ -121,9 +82,7 @@ public class JwtUtils {
     }
 
     public Long getUserIdFromJwtToken(Claims claims) {
-        // Use the "sub" claim for user ID since you're setting it as subject in the token
-        Object userId = claims.getSubject(); // "sub" is the standard field for the user ID
-
+        Object userId = claims.get("user_id");
         if (userId instanceof Integer) {
             return ((Integer) userId).longValue();
         } else if (userId instanceof Long) {
@@ -138,7 +97,6 @@ public class JwtUtils {
             throw new IllegalArgumentException("Invalid type for user_id in JWT token: " + userId.getClass().getName());
         }
     }
-
     public String getUserRoleFromClaims(Claims claims) {
         return claims.get("authorities", String.class);
     }
