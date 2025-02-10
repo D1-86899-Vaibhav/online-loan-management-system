@@ -29,42 +29,37 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain authorizeRequests(HttpSecurity http) throws Exception {
-     http.csrf(csrf -> csrf.disable())
-    .authorizeHttpRequests(request -> request
-        // Public endpoints
-        .requestMatchers("/users/register", "/users/login", "/v*/api-doc*/**", "/swagger-ui/**").permitAll()
-        .requestMatchers(HttpMethod.OPTIONS).permitAll()
+        http.csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(request -> request
+                // Public endpoints
+                .requestMatchers("/users/register", "/users/login", "/v*/api-doc*/**", "/swagger-ui/**").permitAll()
+                .requestMatchers(HttpMethod.OPTIONS).permitAll()
 
-        // Public data endpoints
-        .requestMatchers("/api/users/AllUsers", "/api/users/AllUsers/count").permitAll()
-        .requestMatchers("/loan-applications/Loancount").permitAll()
-        .requestMatchers("/kyc/kyccount").permitAll()
-        .requestMatchers("/users/change-password").permitAll()
-        .requestMatchers("/kyc/user/**").permitAll()
-        .requestMatchers("/kyc/update/**").permitAll()
+                // Public data endpoints
+                .requestMatchers("/api/users/AllUsers", "/api/users/AllUsers/count").permitAll()
+                .requestMatchers("/loan-applications/Loancount").permitAll()
+                .requestMatchers("/kyc/kyccount").permitAll()
+                .requestMatchers("/users/change-password").permitAll()
+                .requestMatchers("/kyc/user/**").permitAll()
+                .requestMatchers("/kyc/update/**").permitAll()
 
-        // Common access (e.g., wallet balance)
-        .requestMatchers("/wallet/balance").permitAll()
+                // Common access (e.g., wallet balance)
+                .requestMatchers("/wallet/balance").permitAll()
 
-        // Role-based access control
-        .requestMatchers("/users/wallet/withdraw-funds", "/transactions", "/users/wallet/add-funds", 
-                "/loans/summary", "/loans/details", "/loan-applications/apply").hasAuthority("ROLE_USER")
+                // Role-based access control
+                .requestMatchers("/users/wallet/withdraw-funds", "/transactions", "/users/wallet/add-funds", 
+                        "/loans/summary", "/loans/details", "/loan-applications/apply").hasAuthority("ROLE_USER")
 
-        .requestMatchers("/loans/**").hasAuthority("ROLE_ADMIN")
-        
-        // Any other request requires authentication
-        .anyRequest().authenticated()
-    )
-    .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
-
-                                // All other routes must be authenticated
-                                .anyRequest().authenticated()
-                )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)); // Stateless session management
+                .requestMatchers("/loans/**").hasAuthority("ROLE_ADMIN")
+                
+                // Any other request requires authentication
+                .anyRequest().authenticated()
+            )
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)); // Stateless session management
 
         // Add JWT Authentication Filter before UsernamePasswordAuthenticationFilter
         http.addFilterBefore(customJWTAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 

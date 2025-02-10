@@ -31,20 +31,8 @@ const Dashboard = () => {
   const API_TRANSACTIONS_URL = 'http://localhost:8080/transactions';
   const API_LOANS_SUMMARY_URL = 'http://localhost:8080/loans/summary';
 
-  // Loading counter
-  let loadingCount = 0;
-
-  const startLoading = () => {
-    loadingCount += 1;
-    setLoading(true);
-  };
-
-  const endLoading = () => {
-    loadingCount -= 1;
-    if (loadingCount <= 0) {
-      setLoading(false);
-    }
-  };
+  const startLoading = () => setLoading(true);
+  const endLoading = () => setLoading(false);
 
   // Function to fetch transactions using Axios
   const fetchTransactions = async () => {
@@ -165,8 +153,8 @@ const Dashboard = () => {
                                 transaction.status === 'COMPLETED'
                                   ? green[600]
                                   : transaction.status === 'PENDING'
-                                    ? yellow[800]
-                                    : red[600],
+                                  ? yellow[800]
+                                  : red[600],
                             }}
                           >
                             {transaction.status}
@@ -203,8 +191,8 @@ const Dashboard = () => {
                     item.status === 'APPROVED'
                       ? green[600]
                       : item.status === 'PENDING'
-                        ? yellow[800]
-                        : red[600];
+                      ? yellow[800]
+                      : red[600];
 
                   return (
                     <Grid item xs={12} md={4} key={index}>

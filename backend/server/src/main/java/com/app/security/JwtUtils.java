@@ -76,14 +76,14 @@ public class JwtUtils {
     /*
      * Generate Final Token (Step 2 - After OTP Verification)
      */
-    public String generateFinalToken(Long userId, List<String> roles) {
+    public String generateFinalToken(Long userId, List<String> role) {
         log.info("Generating Final JWT Token for user ID: {}", userId);
 
         return Jwts.builder()
                 .setSubject(String.valueOf(userId))
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(new Date().getTime() + jwtExpirationMs))
-                .claim("roles", roles) // Include role in JWT
+                .claim("role", role) // Include role in JWT
                 .claim("user_id", userId) 
                 .claim("temp", false)
                 .signWith(key, SignatureAlgorithm.HS512)
