@@ -1,9 +1,12 @@
 package com.app.service;
 
+import java.util.List;
+
 import com.app.dto.AddFundsRequest;
 import com.app.dto.ApiResponse;
 import com.app.dto.CreditFundsRequest;
 import com.app.dto.WithdrawFundsRequest;
+import com.app.pojos.TransactionEntity;
 import com.app.pojos.WalletEntity;
 
 public interface WalletService {
@@ -16,4 +19,7 @@ public interface WalletService {
 	 public Double getBalance(Long userId);
 	 
 	 void creditFunds(Long userId, CreditFundsRequest request,Long adminId);
+	 
+	 
+	List<TransactionEntity> getWalletTransactions(Long walletId); 
 }

@@ -18,6 +18,7 @@ import com.app.repository.UserRepository;
 import com.app.repository.WalletRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -191,16 +192,14 @@ public class WalletServiceImpl implements WalletService {
 		walletRepository.save(adminWallet);
 		walletRepository.save(userWallet);
 	}
+ 
+    public List<TransactionEntity> getWalletTransactions(Long walletId) {
+        WalletEntity wallet = walletRepository.findById(walletId)
+                .orElseThrow(() -> new RuntimeException("Wallet not found"));
+        return transactionRepository.findByWallet(wallet);
+    }
 
-//	private LoanEntity convertToLoanEntity(LoanDetailsResp loanDetailsResp) {
-//	    LoanEntity loanEntity = new LoanEntity();
-//	    loanEntity.setId(loanDetailsResp.getId());
-//	    loanEntity.setPaidEmi(loanDetailsResp.getPaidEMI());
-//	    loanEntity.setRemainingEmi(loanDetailsResp.getRemainingEMI());
-//	    loanEntity.setDuration(loanDetailsResp.getDuration());
-//	    loanEntity.setEmiAmount(loanDetailsResp.getEmiAmount());
-//	    // Set other necessary fields
-//	    return loanEntity;
-//	}
+ 
+ 
 
 }

@@ -41,9 +41,11 @@ public class SecurityConfiguration {
                 .requestMatchers("/kyc/kyccount").permitAll()
                 .requestMatchers("/users/change-password").permitAll()
                 .requestMatchers("/kyc/user/**").permitAll()
+ 
                 .requestMatchers("/kyc/update/**","/transactions/**").permitAll()
 
                 // Common access (e.g., wallet balance)
+ 
                 .requestMatchers("/wallet/balance").permitAll()
 
                 // Role-based access control
