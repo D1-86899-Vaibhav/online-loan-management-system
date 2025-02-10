@@ -17,6 +17,7 @@ const PayEmi = () => {
     const currentLoans = emiDetails.slice(indexOfFirstLoan, indexOfLastLoan);
     const totalPages = Math.ceil(emiDetails.length / itemsPerPage);
 
+    // Fetch wallet balance
     const fetchWalletBalance = async () => {
         try {
             const token = sessionStorage.getItem('authToken');
@@ -35,6 +36,7 @@ const PayEmi = () => {
         }
     };
 
+    // Fetch loan EMI details
     const fetchEmiDetails = async () => {
         try {
             const token = sessionStorage.getItem('authToken');
@@ -46,7 +48,9 @@ const PayEmi = () => {
                 Authorization: `Bearer ${token}`,
             };
             const response = await axios.get('http://localhost:8080/loans/details', { headers });
-            setEmiDetails(response.data);
+            // Filter only approved loans
+            const approvedLoans = response.data.filter(loan => loan.status === 'APPROVED');
+            setEmiDetails(approvedLoans);
         } catch (error) {
             console.error('Error fetching EMI details:', error.response?.data || error.message);
             toast.error('Error fetching EMI details!', { position: 'top-right', autoClose: 3000 });
@@ -58,7 +62,8 @@ const PayEmi = () => {
         fetchEmiDetails();
     }, []);
 
-    const handlePay = async (emiId, emiAmount) => {
+    // Handle EMI payment
+    const handlePay = async (id, emiAmount) => {
         if (emiAmount > walletBalance) {
             toast.error('Insufficient balance in wallet!', { position: 'top-right', autoClose: 3000 });
             return;
@@ -72,11 +77,18 @@ const PayEmi = () => {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${token}`,
             };
-            const response = await axios.post('http://localhost:8080/wallet/pay-emi', emiAmount, { headers });
+
+            const response = await axios.post(
+                'http://localhost:8080/wallet/pay-emi',
+                { emiAmount, loanId: id },
+                { headers }
+            );
+
+            // Update wallet balance and EMI details
             setWalletBalance(response.data);
-            const updatedEmiDetails = emiDetails.map((emi) => emi.id === emiId ? { ...emi, paidEMI: emi.paidEMI + 1, remainingEMI: emi.remainingEMI - 1 } : emi);
+            const updatedEmiDetails = emiDetails.map((emi) => emi.id === id ? { ...emi, paidEMI: emi.paidEMI + 1, remainingEMI: emi.remainingEMI - 1 } : emi);
             setEmiDetails(updatedEmiDetails);
-            toast.success(`EMI ID: ${emiId} paid successfully!`, { position: 'top-right', autoClose: 3000 });
+            toast.success(`EMI for Loan ID: ${id} paid successfully!`, { position: 'top-right', autoClose: 3000 });
         } catch (error) {
             console.error('Error processing EMI payment:', error.response?.data || error.message);
             toast.error('An error occurred while processing your EMI payment.', { position: 'top-right', autoClose: 3000 });
@@ -101,7 +113,7 @@ const PayEmi = () => {
                             variant="h5"
                             fontWeight="bold"
                             gutterBottom
-                            sx={{ mt: 1, ml: 2, color: "#1976d2" }} // Set the color to blue
+                            sx={{ mt: 1, ml: 2, color: "#1976d2" }}
                         >
                             PAY EMI'S
                         </Typography>
@@ -119,7 +131,7 @@ const PayEmi = () => {
                                 </TableHead>
                                 <TableBody>
                                     {currentLoans.map((emi) => (
-                                        <TableRow key={emi.id}>
+                                        <TableRow key={emi.id}> {/* Use 'id' instead of 'loanId' */}
                                             <TableCell>{emi.totalEMI}</TableCell>
                                             <TableCell>{emi.paidEMI}</TableCell>
                                             <TableCell>{emi.remainingEMI}</TableCell>

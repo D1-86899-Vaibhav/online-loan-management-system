@@ -32,7 +32,7 @@ public class SecurityConfiguration {
         http.csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(request -> request
                 // Public endpoints
-                .requestMatchers("/users/register", "/users/login", "/v*/api-doc*/**", "/swagger-ui/**").permitAll()
+                .requestMatchers("/users/**", "/users/login", "/v*/api-doc*/**", "/swagger-ui/**").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS).permitAll()
 
                 // Public data endpoints
@@ -41,16 +41,16 @@ public class SecurityConfiguration {
                 .requestMatchers("/kyc/kyccount").permitAll()
                 .requestMatchers("/users/change-password").permitAll()
                 .requestMatchers("/kyc/user/**").permitAll()
-                .requestMatchers("/kyc/update/**").permitAll()
+                .requestMatchers("/kyc/update/**","/transactions/**").permitAll()
 
                 // Common access (e.g., wallet balance)
                 .requestMatchers("/wallet/balance").permitAll()
 
                 // Role-based access control
-                .requestMatchers("/users/wallet/withdraw-funds", "/transactions", "/users/wallet/add-funds", 
+                .requestMatchers("wallet/withdraw-funds", "wallet/add-funds","wallet/pay-emi", 
                         "/loans/summary", "/loans/details", "/loan-applications/apply").hasAuthority("ROLE_USER")
 
-                .requestMatchers("/loans/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers("/loans/**","/transactions/**").hasAuthority("ROLE_ADMIN")
                 
                 // Any other request requires authentication
                 .anyRequest().authenticated()

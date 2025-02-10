@@ -1,3 +1,4 @@
+// Updated OtpService.java
 package com.app.service;
 
 import org.springframework.stereotype.Service;
@@ -8,20 +9,22 @@ import java.util.Random;
 @Service
 public class OtpService {
 
-    private final Map<Long, String> otpStorage = new HashMap<>();
+    // Use email as the key instead of user ID.
+    private final Map<String, String> otpStorage = new HashMap<>();
     private final Random random = new Random();
 
-    public String generateOtp(Long userId) {
-        String otp = String.format("%06d", random.nextInt(999999));
-        otpStorage.put(userId, otp);
+    public String generateOtp(String email) {
+        // Generate a 6-digit OTP.
+        String otp = String.format("%06d", random.nextInt(1000000));
+        otpStorage.put(email, otp);
         return otp;
     }
 
-    public boolean validateOtp(Long userId, String otp) {
-        return otp.equals(otpStorage.get(userId));
+    public boolean validateOtp(String email, String otp) {
+        return otp.equals(otpStorage.get(email));
     }
 
-    public void removeOtp(Long userId) {
-        otpStorage.remove(userId);
+    public void removeOtp(String email) {
+        otpStorage.remove(email);
     }
 }
