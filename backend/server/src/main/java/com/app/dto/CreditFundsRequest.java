@@ -7,13 +7,18 @@ import lombok.Setter;
 
 //@Getter
 //@Setter
-@AllArgsConstructor
+//@AllArgsConstructor
 //@NoArgsConstructor
 public class CreditFundsRequest {
     private Double amount;
     
     public CreditFundsRequest() {
 		
+	}
+    
+	public CreditFundsRequest(Double amount) {
+		super();
+		this.amount = amount;
 	}
 
 	public Double getAmount() {
