@@ -7,8 +7,8 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "loan_applications")
-@Getter
-@Setter
+//@Getter
+//@Setter
 public class LoanApplication {
 
     @Id
@@ -38,4 +38,60 @@ public class LoanApplication {
     @Enumerated(EnumType.STRING)
     @Column(name = "application_status", nullable = false)
     private LoanApplicationStatus applicationStatus = LoanApplicationStatus.PENDING;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public UserEntity getUser() {
+		return user;
+	}
+
+	public void setUser(UserEntity user) {
+		this.user = user;
+	}
+
+	public Double getLoanAmount() {
+		return loanAmount;
+	}
+
+	public void setLoanAmount(Double loanAmount) {
+		this.loanAmount = loanAmount;
+	}
+
+	public String getLoanPurpose() {
+		return loanPurpose;
+	}
+
+	public void setLoanPurpose(String loanPurpose) {
+		this.loanPurpose = loanPurpose;
+	}
+
+	public Integer getLoanPeriod() {
+		return loanPeriod;
+	}
+
+	public void setLoanPeriod(Integer loanPeriod) {
+		this.loanPeriod = loanPeriod;
+	}
+
+	public Double getInterestRate() {
+		return interestRate;
+	}
+
+	public void setInterestRate(Double interestRate) {
+		this.interestRate = interestRate;
+	}
+
+	public LoanApplicationStatus getApplicationStatus() {
+		return applicationStatus;
+	}
+
+	public void setApplicationStatus(LoanApplicationStatus applicationStatus) {
+		this.applicationStatus = applicationStatus;
+	}
 }
