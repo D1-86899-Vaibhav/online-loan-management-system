@@ -10,10 +10,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @SpringBootApplication
-public class BackendApiApplication {
+public class OnlineLoanManagementApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(BackendApiApplication.class, args);
+		SpringApplication.run(OnlineLoanManagementApplication.class, args);
 	}
 	@Bean // equivalent to <bean id ..../> in xml file
 	public ModelMapper modelMapper() {

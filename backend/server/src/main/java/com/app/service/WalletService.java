@@ -15,7 +15,7 @@ public interface WalletService {
     void addFunds(Long userId, AddFundsRequest request);
     boolean withdrawFunds(Long userId, WithdrawFundsRequest request);
 
-	public WalletEntity payEmi(Long userId, Double emiAmount);
+	public WalletEntity payEmi(Long userId, Double emiAmount, Long loanId);
 	 public Double getBalance(Long userId);
 	 
 	 void creditFunds(Long userId, CreditFundsRequest request,Long adminId);

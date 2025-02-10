@@ -1,109 +1,55 @@
 import React, { useEffect, useState } from "react";
-import { Box, Card, Button, CircularProgress } from "@mui/material";
+import { Box, Card, CircularProgress } from "@mui/material";
 import AdminSidebar from "./AdminSidebar";
 import AdminNavbar from "./AdminNavbar";
 import DataGridTable from "../components/DataGridTable";
-import { collection, getDocs, deleteDoc, doc, getDoc } from "firebase/firestore";
-import { db } from "../firebase";
-import CreateEmi from "../components/modal/createEmi";
-import columns from "../components/columns/EmiColumns";
-import { GridActionsCellItem } from "@mui/x-data-grid";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/DeleteOutlined";
-import { confirmAlert } from "react-confirm-alert";
-import "react-confirm-alert/src/react-confirm-alert.css";
+import axios from "axios"; // Import axios
 
 const AdminEmi = () => {
-    const recordsCollectionRef = collection(db, "emis");
-    const loansCollectionRef = collection(db, "loans");
-    const [records, setRecords] = useState([]);
-    const [editData, setEditData] = useState(null);
-    const [showModal, setShowModal] = useState(false);
+    const [emiTransactions, setEmiTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [recordColumns, setRecordColumns] = useState([]);
-    const [loanEmails, setLoanEmails] = useState([]);
 
-    // Fetch loan emails (loan IDs or related identifiers)
-    const fetchLoanEmails = async () => {
-        try {
-            const loanDocs = await getDocs(loansCollectionRef);
-            const loans = loanDocs.docs.map((doc) => ({ loanId: doc.id }));
-            setLoanEmails(loans);
-        } catch (error) {
-            console.error("Error fetching loan emails:", error.message);
-        }
-    };
+    // Define columns to only include the desired fields
+    const columns = [
+        { field: "transaction_id", headerName: "Transaction ID", width: 150 },
+        { field: "amount", headerName: "Amount", width: 150 },
+        { field: "transaction_date", headerName: "Date", width: 150 },
+        { field: "transaction_status", headerName: "Status", width: 150 },
+        { field: "transaction_type", headerName: "Type", width: 150 }
+    ];
 
-    // Fetch EMI records
-    const fetchEmis = async () => {
+    // Fetch EMI Received transactions from the API
+    const fetchEmiReceivedTransactions = async () => {
         try {
-            const emiDocs = await getDocs(recordsCollectionRef);
-            const emiData = emiDocs.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-            setRecords(emiData);
+            const response = await axios.get("http://localhost:8080/transactions/emi-received", {
+                headers: {
+                    Authorization: `Bearer ${sessionStorage.getItem("authToken")}`, // Pass token here
+                },
+            });
+
+            // Map the response to the format required by the DataGrid (using the response data directly)
+            const transactions = response.data.map((transaction) => ({
+                id: transaction.id, // Ensure each row has an id property
+                transaction_id: transaction.id,
+                amount: transaction.amount,
+                transaction_date: transaction.date,
+                transaction_status: transaction.status,
+                transaction_type: transaction.type,
+            }));
+
+            setEmiTransactions(transactions); // Set the transactions to state
         } catch (error) {
-            console.error("Error fetching EMI records:", error.message);
+            console.error("Error fetching EMI received transactions:", error);
         } finally {
-            setLoading(false);
+            setLoading(false); // Stop loading spinner after data is fetched
         }
-    };
-
-    // Add actions column dynamically
-    const initializeColumns = () => {
-        const actionColumn = {
-            field: "actions",
-            type: "actions",
-            headerName: "Actions",
-            width: 100,
-            cellClassName: "actions",
-            getActions: ({ id }) => [
-                <GridActionsCellItem icon={<EditIcon />} label="Edit" onClick={() => handleEditClick(id)} color="inherit" />,
-                <GridActionsCellItem icon={<DeleteIcon />} label="Delete" onClick={() => handleDeleteClick(id)} color="inherit" />,
-            ],
-        };
-        setRecordColumns([...columns, actionColumn]);
     };
 
     useEffect(() => {
-        fetchLoanEmails();
-        fetchEmis();
-        initializeColumns();
+        fetchEmiReceivedTransactions(); // Fetch the EMI transactions when component mounts
+        setRecordColumns(columns); // Set columns without action column
     }, []);
-
-    const handleEditClick = async (id) => {
-        try {
-            const recordDocRef = doc(recordsCollectionRef, id);
-            const recordDoc = await getDoc(recordDocRef);
-            if (recordDoc.exists()) {
-                setEditData({ id: recordDoc.id, ...recordDoc.data() });
-                setShowModal(true);
-            } else {
-                console.warn("No such document found!");
-            }
-        } catch (error) {
-            console.error("Error fetching record for edit:", error.message);
-        }
-    };
-
-    const handleDeleteClick = (id) => {
-        confirmAlert({
-            title: "Confirm Deletion",
-            message: "Are you sure you want to delete this record?",
-            buttons: [
-                { label: "Yes", onClick: () => handleDelete(id) },
-                { label: "No" },
-            ],
-        });
-    };
-
-    const handleDelete = async (id) => {
-        try {
-            const recordDocRef = doc(recordsCollectionRef, id);
-            await deleteDoc(recordDocRef);
-            setRecords((prevRecords) => prevRecords.filter((record) => record.id !== id));
-        } catch (error) {
-            console.error("Error deleting record:", error.message);
-        }
-    };
 
     return (
         <Box className="min-h-screen flex flex-col">
@@ -119,22 +65,16 @@ const AdminEmi = () => {
                 {/* Main Content */}
                 <Box className="w-4/5 p-6">
                     <Card sx={{ p: 4, boxShadow: 3 }}>
-                        {showModal && (
-                            <CreateEmi hideModal={() => setShowModal(false)} editData={editData} loanEmails={loanEmails} />
-                        )}
-
-                        <h1 className="text-2xl font-bold text-blue-600 mb-4">All EMIs</h1>
-
-                        {/* Add EMI Button */}
-                        <div className="flex justify-end mb-4">
-                            <Button variant="contained" color="primary" onClick={() => { setEditData(null); setShowModal(true); }}>
-                                Add EMI
-                            </Button>
-                        </div>
+                        <h1 className="text-2xl font-bold text-blue-600 mb-4">
+                            EMI Received Transactions
+                        </h1>
 
                         {/* Data Grid Table */}
                         {!loading ? (
-                            <DataGridTable data={records} columns={recordColumns} />
+                            <DataGridTable
+                                data={emiTransactions}
+                                columns={recordColumns}
+                            />
                         ) : (
                             <Box className="flex justify-center items-center h-40">
                                 <CircularProgress />

@@ -1,117 +1,157 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import toast, { Toaster } from 'react-hot-toast';
-import axios from 'axios';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import toast, { Toaster } from "react-hot-toast";
+import axios from "axios";
 
 export default function Register() {
   const navigate = useNavigate();
-  const [showOTP, setShowOTP] = useState(false);
 
-  const [firstName, setFirst] = useState('');
-  const [lastName, setLast] = useState('');
-  const [email, setMail] = useState('');
-  const [password, setPass] = useState('');
-  const [confirmPassword, setConfPass] = useState('');
-  const [phone, setPhone] = useState('');
-  const [otp, setOtp] = useState('');
+  // Form fields
+  const [firstName, setFirst] = useState("");
+  const [lastName, setLast] = useState("");
+  const [email, setMail] = useState("");
+  const [password, setPass] = useState("");
+  const [confirmPassword, setConfPass] = useState("");
+  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
 
-  // Replace with your actual API endpoint
-  const API_URL = 'http://localhost:8080/users/register';
+  // OTP state: otpSent indicates that an OTP has been sent,
+  // and isOtpVerified indicates that the entered OTP is verified.
+  const [otpSent, setOtpSent] = useState(false);
+  const [isOtpVerified, setIsOtpVerified] = useState(false);
 
+  // API endpoints (adjust as needed)
+  const API_URL_REGISTER = "http://localhost:8080/users/register";
+  const API_URL_SEND_OTP = "http://localhost:8080/users/send-otp";
+  const API_URL_VERIFY_OTP = "http://localhost:8080/users/verify-otp";
+
+  // Send OTP to the user's email
+  const handleSendOTP = async () => {
+    if (email.trim() === "") {
+      toast.error("Please enter an email!");
+      return;
+    }
+
+    try {
+      toast.loading("Sending OTP...", { id: "otpSend" });
+      const response = await axios.post(
+        API_URL_SEND_OTP,
+        { email },
+        { headers: { "Content-Type": "application/json" } }
+      );
+      toast.dismiss("otpSend");
+      if (response.status === 200) {
+        setOtpSent(true);
+        toast.success("OTP has been sent to your email!");
+      }
+    } catch (error) {
+      toast.dismiss("otpSend");
+      toast.error(
+        error.response?.data?.message ||
+          "Failed to send OTP. Please try again."
+      );
+    }
+  };
+
+  // Verify the OTP entered by the user using the email field (as in your previous code)
+  const handleVerifyOTP = async () => {
+    if (otp.trim() === "") {
+      toast.error("Please enter the OTP!");
+      return;
+    }
+
+    try {
+      toast.loading("Verifying OTP...", { id: "otpVerify" });
+      // Here we send the email and otp to the verification endpoint
+      const response = await axios.post(
+        API_URL_VERIFY_OTP,
+        { email, otp },
+        { headers: { "Content-Type": "application/json" } }
+      );
+      toast.dismiss("otpVerify");
+      if (response.status === 200) {
+        setIsOtpVerified(true);
+        toast.success("OTP verified successfully!");
+      }
+    } catch (error) {
+      toast.dismiss("otpVerify");
+      toast.error(
+        error.response?.data?.message ||
+          "OTP verification failed. Please try again."
+      );
+    }
+  };
+
+  // Handle form submission (registration)
   const onRegister = async (e) => {
     e.preventDefault();
 
-    // Frontend validation
-    if (firstName.trim() === '') {
-      toast.error("First Name Required!");
+    // Prevent submission unless OTP is verified
+    if (!isOtpVerified) {
+      toast.error("Please verify the OTP sent to your email first!");
       return;
     }
-    if (lastName.trim() === '') {
-      toast.error("Last Name Required!");
+
+    // Basic validations
+    if (firstName.trim() === "") {
+      toast.error("First Name is required!");
       return;
     }
-    if (email.trim() === '') {
-      toast.error("Email is Required!");
+    if (lastName.trim() === "") {
+      toast.error("Last Name is required!");
       return;
     }
-    if (password.trim() === '') {
-      toast.error("Password is Required!");
+    if (email.trim() === "") {
+      toast.error("Email is required!");
       return;
     }
-    if (confirmPassword.trim() === '') {
-      toast.error("Please Confirm your Password!");
+    if (password.trim() === "") {
+      toast.error("Password is required!");
+      return;
+    }
+    if (confirmPassword.trim() === "") {
+      toast.error("Please confirm your password!");
       return;
     }
     if (password !== confirmPassword) {
       toast.error("Passwords do not match!");
       return;
     }
-    if (phone.trim() === '') {
-      toast.error("Phone Number is Required!");
-      return;
-    }
-    if (otp.trim() === '') {
-      toast.error("OTP is Required!");
+    if (phone.trim() === "") {
+      toast.error("Phone number is required!");
       return;
     }
 
-    // Prepare the payload. Adjust keys based on your API's requirements.
+    // Prepare the payload (OTP is already verified so need not be sent)
     const payload = {
       firstName,
       lastName,
       email,
       password,
       phone,
-      otp,
     };
 
     try {
       toast.loading("Registering...", { id: "registerToast" });
-
-      const response = await axios.post(API_URL, payload, {
-        headers: { 'Content-Type': 'application/json' },
+      const response = await axios.post(API_URL_REGISTER, payload, {
+        headers: { "Content-Type": "application/json" },
       });
-
       toast.dismiss("registerToast");
 
-      // If the registration is successful:
-      toast.success("You are registered successfully!");
-
-      // Redirect after a short delay
-      setTimeout(() => {
-        navigate('/login'); // Adjust the route if necessary
-      }, 2000);
+      if (response.status === 201) {
+        toast.success("You are registered successfully!");
+        setTimeout(() => {
+          navigate("/login");
+        }, 2000);
+      }
     } catch (error) {
       toast.dismiss("registerToast");
-
-      // Extract error message from response if available
       const errorMessage =
         error.response?.data?.message ||
         "Registration failed. Please try again.";
       toast.error(errorMessage);
       console.error("Registration error:", error);
     }
-  };
-
-  const onOtp = async () => {
-    if (otp.trim() === '') {
-      toast.error("Please Enter OTP!");
-    } else {
-      // If your API has an endpoint to verify the OTP, you can call it here.
-      // For example: await axios.post('/api/verify-otp', { phone, otp });
-      toast.success("OTP Verified!");
-    }
-  };
-
-  const handleSendOTP = () => {
-    if (phone.trim() === '') {
-      toast.error("Please Enter Phone Number!");
-      return;
-    }
-    setShowOTP(true);
-    // If your API supports sending OTP automatically, you can call it here.
-    // For example: await axios.post('/api/send-otp', { phone });
-    toast.success("OTP Sent to the registered number!");
   };
 
   return (
@@ -125,12 +165,10 @@ export default function Register() {
           REGISTER
         </h2>
 
+        {/* Row 1: First Name & Last Name */}
         <div className="flex justify-between gap-4">
           <div className="flex-1">
-            <label
-              htmlFor="firstName"
-              className="text-sm font-semibold mb-1 block"
-            >
+            <label htmlFor="firstName" className="text-sm font-semibold mb-1 block">
               First Name
             </label>
             <input
@@ -143,10 +181,7 @@ export default function Register() {
             />
           </div>
           <div className="flex-1">
-            <label
-              htmlFor="lastName"
-              className="text-sm font-semibold mb-1 block"
-            >
+            <label htmlFor="lastName" className="text-sm font-semibold mb-1 block">
               Last Name
             </label>
             <input
@@ -160,25 +195,32 @@ export default function Register() {
           </div>
         </div>
 
+        {/* Row 2: Email (with OTP button) & Password */}
         <div className="flex justify-between gap-4">
           <div className="flex-1">
             <label htmlFor="email" className="text-sm font-semibold mb-1 block">
               Email
             </label>
-            <input
-              id="email"
-              className="w-full px-3 py-2 border rounded"
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setMail(e.target.value)}
-            />
+            <div className="flex items-center gap-2">
+              <input
+                id="email"
+                className="w-full px-3 py-2 border rounded"
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setMail(e.target.value)}
+              />
+              <button
+                className="px-4 py-2 text-white bg-blue-950 hover:bg-blue-900 rounded-md"
+                type="button"
+                onClick={handleSendOTP}
+              >
+                Send OTP
+              </button>
+            </div>
           </div>
           <div className="flex-1">
-            <label
-              htmlFor="password"
-              className="text-sm font-semibold mb-1 block"
-            >
+            <label htmlFor="password" className="text-sm font-semibold mb-1 block">
               Password
             </label>
             <input
@@ -192,6 +234,7 @@ export default function Register() {
           </div>
         </div>
 
+        {/* Row 3: Confirm Password & Mobile (phone) field */}
         <div className="flex justify-between gap-4">
           <div className="flex-1">
             <label
@@ -213,28 +256,20 @@ export default function Register() {
             <label htmlFor="phone" className="text-sm font-semibold mb-1 block">
               Phone Number
             </label>
-            <div className="flex items-center gap-2">
-              <input
-                id="phone"
-                className="w-full px-3 py-2 border rounded"
-                type="text"
-                placeholder="Phone Number"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                maxLength={10}
-              />
-              <button
-                className="px-7 text-white bg-blue-950 hover:bg-blue-900 rounded-md"
-                type="button"
-                onClick={handleSendOTP}
-              >
-                Send OTP
-              </button>
-            </div>
+            <input
+              id="phone"
+              className="w-full px-3 py-2 border rounded"
+              type="text"
+              placeholder="Phone Number"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              maxLength={10}
+            />
           </div>
         </div>
 
-        {showOTP && (
+        {/* OTP Input Row (shown if OTP is sent and not yet verified) */}
+        {otpSent && !isOtpVerified && (
           <div className="flex items-center gap-2">
             <div className="flex-1">
               <label htmlFor="otp" className="text-sm font-semibold mb-1 block">
@@ -252,18 +287,24 @@ export default function Register() {
             <button
               className="px-4 py-2 mt-5 text-white bg-blue-950 hover:bg-blue-900 rounded-md"
               type="button"
-              onClick={onOtp}
+              onClick={handleVerifyOTP}
             >
               Verify OTP
             </button>
           </div>
         )}
 
+        {/* Submit Button */}
         <div className="mt-6">
           <center>
             <button
-              className="px-4 py-2 text-white bg-blue-950 hover:bg-blue-900 rounded-md"
+              className={`px-4 py-2 text-white rounded-md ${
+                isOtpVerified
+                  ? "bg-blue-950 hover:bg-blue-900"
+                  : "bg-gray-500 cursor-not-allowed"
+              }`}
               type="submit"
+              disabled={!isOtpVerified}
             >
               <span className="text-sm">SIGN UP</span>
             </button>
@@ -275,7 +316,7 @@ export default function Register() {
             Already have an account?
             <span
               className="ml-1 font-semibold hover:text-blue-900 text-slate-700"
-              onClick={() => navigate('/login')}
+              onClick={() => navigate("/login")}
             >
               Sign In
             </span>

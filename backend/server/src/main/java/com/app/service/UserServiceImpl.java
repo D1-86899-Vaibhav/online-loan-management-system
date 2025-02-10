@@ -97,6 +97,12 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
+	@Override
+	public UserEntity findById(Long userId) {
+		return userRepository.findById(userId)
+	            .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+	}
+
 	 
 
 }

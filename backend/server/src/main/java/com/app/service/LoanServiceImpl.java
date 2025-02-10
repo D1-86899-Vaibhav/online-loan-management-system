@@ -9,6 +9,7 @@ import com.app.repository.LoanRepository;
 import com.app.repository.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -123,7 +124,7 @@ public class LoanServiceImpl implements LoanService {
 	 // New method: Get all loans (for admin)
     @Override
     public List<LoanDetailsResp> getAllLoanDetails() {
-        return loanRepository.findAllLoanDetails();
+        return loanRepository.findAllLoanDetails(Sort.by(Sort.Order.desc("id")));
     }
 
 }

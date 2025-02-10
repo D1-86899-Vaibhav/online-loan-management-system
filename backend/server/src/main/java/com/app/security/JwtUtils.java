@@ -40,7 +40,7 @@ public class JwtUtils {
     }
 
     public String generateJwtToken(Authentication authentication) {
-        log.info("Generating JWT token for authentication: {}", authentication);
+        //log.info("Generating JWT token for authentication: {}", authentication);
         CustomUserDetailsImpl userPrincipal = (CustomUserDetailsImpl) authentication.getPrincipal();
 
         return Jwts.builder()
@@ -65,7 +65,7 @@ public class JwtUtils {
                     .parseClaimsJws(jwtToken)
                     .getBody();
         } catch (JwtException e) {
-            log.error("Invalid JWT token: {}", e.getMessage());
+           // log.error("Invalid JWT token: {}", e.getMessage());
             return null;
         }
     }
@@ -113,7 +113,7 @@ public class JwtUtils {
         // Principal is set to the email and credentials hold the userId.
         UsernamePasswordAuthenticationToken token =
                 new UsernamePasswordAuthenticationToken(email, userId, authorities);
-        log.info("Token authenticated: isAuthenticated={}", token.isAuthenticated());
+       // log.info("Token authenticated: isAuthenticated={}", token.isAuthenticated());
         return token;
     }
 }

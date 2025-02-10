@@ -1,40 +1,31 @@
 package com.app.controller;
 
 import java.util.Map;
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.bind.annotation.*;
 import com.app.dto.ApiResponse;
 import com.app.dto.AuthRequest;
 import com.app.dto.AuthResp;
-import com.app.dto.PasswordChangeRequest;
+import com.app.dto.OtpRequest;
 import com.app.dto.UserDTO;
 import com.app.pojos.UserEntity;
 import com.app.repository.WalletRepository;
 import com.app.security.CustomUserDetailsImpl;
 import com.app.security.JwtUtils;
+import com.app.service.EmailService;
+import com.app.service.OtpService;
 import com.app.service.UserService;
-
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 
-@CrossOrigin(origins = "http://localhost:3000") 
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/users")
-
-// Specify React's URL
 public class UserController {
 
     @Autowired
@@ -48,73 +39,85 @@ public class UserController {
     
     @Autowired
     private WalletRepository walletRepository;
-    /*
-     * User registration endpoint.
-     * URL - /users/register
+
+    @Autowired
+    private OtpService otpService;
+
+    @Autowired
+    private EmailService emailService;
+
+    /**
+     * Endpoint to send OTP to a given email for registration.
+     */
+    @PostMapping("/send-otp")
+    @Operation(description = "Send OTP to email for registration")
+    public ResponseEntity<?> sendOtp(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        System.out.println("Sending OTP to email: " + email);
+        String otp = otpService.generateOtp(email); // Use email to generate OTP
+        emailService.sendOtpEmail(email, otp);
+        return ResponseEntity.ok(new ApiResponse("OTP sent to your email"));
+    }
+    
+    /**
+     * Endpoint to verify the OTP using the email.
+     */
+    @PostMapping("/verify-otp")
+    @Operation(description = "Verify OTP using email")
+    public ResponseEntity<?> verifyOtp(@RequestBody @Valid OtpRequest otpRequest) {
+        System.out.println("Verifying OTP for email: " + otpRequest.getEmail());
+        boolean isValid = otpService.validateOtp(otpRequest.getEmail(), otpRequest.getOtp());
+        if (isValid) {
+            otpService.removeOtp(otpRequest.getEmail());
+            return ResponseEntity.ok(new ApiResponse("OTP Verified Successfully"));
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ApiResponse("Invalid OTP"));
+    }
+    
+    /**
+     * Registration endpoint – invoked after the OTP is verified on the client side.
      */
     @PostMapping("/register")
-    @Operation(description = "User register")
+    @Operation(description = "Register new user after OTP verification")
     public ResponseEntity<?> registerUser(@RequestBody @Valid UserDTO dto) {
-        System.out.println("register user " + dto);
+        System.out.println("Registering user: " + dto);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(userService.registerNewUser(dto));
     }
     
-    /*
-     * User login endpoint.
-     * URL - /users/login
+    /**
+     * Login endpoint – standard login without OTP.
      */
     @PostMapping("/login")
-    @Operation(description = "User login")
+    @Operation(description = "User login with email & password")
     public ResponseEntity<?> userSignIn(@RequestBody @Valid AuthRequest dto) {
-        System.out.println("in login " + dto);
-        
-        // Create authentication token using supplied email and password.
-        UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword());
-
-        // Authenticate the token using Spring Security.
-        Authentication authToken = authenticationManager.authenticate(authenticationToken);
-
-        // Extract the authenticated user from Principal and cast it to CustomUserDetailsImpl
-        CustomUserDetailsImpl customUserDetails = (CustomUserDetailsImpl) authToken.getPrincipal();
-        
-        // Get the UserEntity from CustomUserDetailsImpl
-        UserEntity user = customUserDetails.getUserEntity();
-
+        System.out.println("User attempting login: " + dto);
+        // Authenticate user credentials
+        Authentication authToken = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword()));
+        // Retrieve user details
+        UserEntity user = ((CustomUserDetailsImpl) authToken.getPrincipal()).getUserEntity();
         // Generate JWT token
-        String token = jwtUtils.generateJwtToken(authToken);
-
-        // Return response with token and user role
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new AuthResp("Successful Auth!", token, user.getRole().name()));
+        String authTokenJWT = jwtUtils.generateJwtToken(authToken);
+        System.out.println("Generated Auth Token: " + authTokenJWT);
+        return ResponseEntity.ok(new AuthResp("Login Successful", authTokenJWT, user.getRole().name()));
     }
-
-    
-    
     
     @PutMapping("/profile")
     public ResponseEntity<?> updateProfile(@RequestBody @Valid UserDTO user) {
-        System.out.println("update user " + user);
+        System.out.println("Updating user profile: " + user);
         ApiResponse response = userService.updateUser(user);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
-    
-    
+
     @PostMapping("/change-password")
-    public ResponseEntity<?> changePassword(@RequestBody PasswordChangeRequest changePasswordRequest) {
+    public ResponseEntity<?> changePassword(@RequestBody @Valid com.app.dto.PasswordChangeRequest changePasswordRequest) {
         try {
             userService.changePassword(changePasswordRequest);
-            return ResponseEntity.ok().body("Password changed successfully!");
+            return ResponseEntity.ok().body(new ApiResponse("Password changed successfully!"));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(new ApiResponse(e.getMessage()));
         }
     }
-    
-    
-    
-    
-    
-    
-    
 }

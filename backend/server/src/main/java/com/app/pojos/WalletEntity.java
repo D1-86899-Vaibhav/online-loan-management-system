@@ -10,8 +10,8 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "wallet")
-@Getter
-@Setter
+//@Getter
+//@Setter
 public class WalletEntity {
 
     @Id
@@ -28,9 +28,29 @@ public class WalletEntity {
     @Column(name = "balance", nullable = false)
     private Double balance = 0.0;
 
-	public List<TransactionEntity> getTransactions() {
-		// TODO Auto-generated method stub
-		return null;
+ 
+	public Long getId() {
+		return id;
 	}
-    
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public UserEntity getUser() {
+		return user;
+	}
+
+	public void setUser(UserEntity user) {
+		this.user = user;
+	}
+
+	public Double getBalance() {
+		return balance;
+	}
+
+	public void setBalance(Double balance) {
+		this.balance = balance;
+	}
+ 
 }
