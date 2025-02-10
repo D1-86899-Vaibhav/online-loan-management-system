@@ -8,9 +8,13 @@ import lombok.Setter;
 //@Getter
 //@Setter
 @AllArgsConstructor
-@NoArgsConstructor
+//@NoArgsConstructor
 public class CreditFundsRequest {
     private Double amount;
+    
+    public CreditFundsRequest() {
+		
+	}
 
 	public Double getAmount() {
 		return amount;

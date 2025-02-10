@@ -10,7 +10,7 @@ import lombok.Setter;
 
 //@Getter
 //@Setter
-@NoArgsConstructor
+//@NoArgsConstructor
 @AllArgsConstructor
 public class LoanDetailsResp {
 
@@ -27,6 +27,10 @@ public class LoanDetailsResp {
 	    private LocalDate nextEMIDate;
 	    private String status;
 	   private Long userId;
+	   
+	   public LoanDetailsResp() {
+		
+	   }
 	    
 	    // Constructor matching the query
 	    public LoanDetailsResp(Long id, Double loanAmount, Double emiAmount, Integer duration,
