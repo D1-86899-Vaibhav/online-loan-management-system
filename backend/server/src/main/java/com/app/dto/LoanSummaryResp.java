@@ -6,8 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
-@Setter
+//@Getter
+//@Setter
 
 @NoArgsConstructor
 public class LoanSummaryResp {
@@ -23,5 +23,23 @@ public class LoanSummaryResp {
 	    this.status = status; // Convert enum to String if needed
 	    this.count = count;
 	    this.totalAmount = totalAmount;
+	}
+	public String getStatus() {
+		return status;
+	}
+	public void setStatus(String status) {
+		this.status = status;
+	}
+	public Long getCount() {
+		return count;
+	}
+	public void setCount(Long count) {
+		this.count = count;
+	}
+	public Double getTotalAmount() {
+		return totalAmount;
+	}
+	public void setTotalAmount(Double totalAmount) {
+		this.totalAmount = totalAmount;
 	}
 }

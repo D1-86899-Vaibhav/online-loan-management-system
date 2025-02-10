@@ -8,8 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
-@Setter
+//@Getter
+//@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class LoanDetailsResp {
@@ -65,6 +65,82 @@ public class LoanDetailsResp {
 	        this.status = status.name();
 	        this.userId = userId;
 	    }
-
-	    
+		public Long getId() {
+			return id;
+		}
+		public void setId(Long id) {
+			this.id = id;
+		}
+		public Double getLoanAmount() {
+			return loanAmount;
+		}
+		public void setLoanAmount(Double loanAmount) {
+			this.loanAmount = loanAmount;
+		}
+		public Double getEmiAmount() {
+			return emiAmount;
+		}
+		public void setEmiAmount(Double emiAmount) {
+			this.emiAmount = emiAmount;
+		}
+		public Integer getDuration() {
+			return duration;
+		}
+		public void setDuration(Integer duration) {
+			this.duration = duration;
+		}
+		public LocalDate getStartDate() {
+			return startDate;
+		}
+		public void setStartDate(LocalDate startDate) {
+			this.startDate = startDate;
+		}
+		public LocalDate getEndDate() {
+			return endDate;
+		}
+		public void setEndDate(LocalDate endDate) {
+			this.endDate = endDate;
+		}
+		public Integer getTotalEMI() {
+			return totalEMI;
+		}
+		public void setTotalEMI(Integer totalEMI) {
+			this.totalEMI = totalEMI;
+		}
+		public Integer getPaidEMI() {
+			return paidEMI;
+		}
+		public void setPaidEMI(Integer paidEMI) {
+			this.paidEMI = paidEMI;
+		}
+		public Integer getRemainingEMI() {
+			return remainingEMI;
+		}
+		public void setRemainingEMI(Integer remainingEMI) {
+			this.remainingEMI = remainingEMI;
+		}
+		public LocalDate getLastEMIDate() {
+			return lastEMIDate;
+		}
+		public void setLastEMIDate(LocalDate lastEMIDate) {
+			this.lastEMIDate = lastEMIDate;
+		}
+		public LocalDate getNextEMIDate() {
+			return nextEMIDate;
+		}
+		public void setNextEMIDate(LocalDate nextEMIDate) {
+			this.nextEMIDate = nextEMIDate;
+		}
+		public String getStatus() {
+			return status;
+		}
+		public void setStatus(String status) {
+			this.status = status;
+		}
+		public Long getUserId() {
+			return userId;
+		}
+		public void setUserId(Long userId) {
+			this.userId = userId;
+		}	    
 }
