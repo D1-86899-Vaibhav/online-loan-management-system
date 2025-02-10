@@ -8,11 +8,16 @@ import lombok.Setter;
 //@Getter
 //@Setter
 @AllArgsConstructor
-@NoArgsConstructor
+//@NoArgsConstructor
 public class AuthResp {
     private String message;
     private String jwt;
     private String role;
+    
+    public AuthResp() {
+		
+	}
+    
 	public String getMessage() {
 		return message;
 	}
