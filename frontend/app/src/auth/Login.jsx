@@ -20,8 +20,7 @@ export default function Login() {
 
   const onLogin = async (e) => {
     e.preventDefault();
-
-    // Input validation
+  
     if (email.trim() === '') {
       toast.error("Please Enter a Valid Email!");
       return;
@@ -30,60 +29,47 @@ export default function Login() {
       toast.error("Please Enter the Password!");
       return;
     }
-
+  
     const payload = { email, password: pass };
-
+  
     try {
-      // Show loading toast
       toast.loading("Logging in...", { id: "loginToast" });
-
-      // Make API call using axios
+  
       const response = await axios.post(API_URL, payload, {
         headers: { 'Content-Type': 'application/json' },
       });
-
-      // Dismiss loading toast
+  
       toast.dismiss("loginToast");
-
-      // Check if the request was successful
+  
       if (response.status === 200) {
-        // Extract token and role from the response data
-        const { jwt: token, role } = response.data;
-
-        if (!token) {
-          throw new Error("Token not found in response.");
+        const { jwt, role } = response.data;
+  
+        if (!jwt) {
+          throw new Error("JWT token not found in response.");
         }
-
-        // Store token and role in sessionStorage
-        sessionStorage.setItem('authToken', token);
+  
+        sessionStorage.setItem('tempToken', jwt);
         sessionStorage.setItem('userRole', role);
-
-        toast.success("Login Successful!");
-
-        // Redirect based on user role
-        if (role === 'ROLE_ADMIN') {
-          navigate('/AdminDashboard');
-        } else {
-          navigate('/dashboard');
-        }
+  
+        toast.success("OTP sent to your email!");
+  
+        // Debugging log
+        console.log("Navigating to /verify-otp");
+  
+        // Delay navigation to ensure sessionStorage updates
+        setTimeout(() => {
+          navigate('/verify-otp', { replace: true });
+        }, 500);  // Slight delay (0.5s) for smoother transition
       } else {
         throw new Error("Login failed. Please try again.");
       }
     } catch (error) {
-      // Dismiss loading toast in case of error
       toast.dismiss("loginToast");
-
-      // Extract error message from response if available
-      const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
-        "An error occurred. Please try again.";
-      toast.error(errorMessage);
-
+      toast.error(error.response?.data?.message || error.message || "An error occurred. Please try again.");
       console.error("Login error:", error);
     }
-  };
-
+  };  
+  
   return (
     <div className="flex items-center justify-center min-h-screen bg-blue-50">
       <Toaster />
