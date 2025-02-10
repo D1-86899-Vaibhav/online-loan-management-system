@@ -34,6 +34,7 @@ import { SharedWalletProvider } from './components/SharedWallet';
 
 // ProtectedRoute component handles authentication and role checks
 import ProtectedRoute from './auth/ProtectedRoute';
+import VerifyOtp from './auth/VerifyOtp';
 
 export default function App() {
   return (
@@ -43,6 +44,7 @@ export default function App() {
       <Route path="login" element={<Login />} />
       <Route path="register" element={<Register />} />
       <Route path="MainPage" element={<Main />} />
+      <Route path="verify-otp" element={<VerifyOtp />} />
 
       {/* Admin Routes (only for Admin users) */}
       <Route
