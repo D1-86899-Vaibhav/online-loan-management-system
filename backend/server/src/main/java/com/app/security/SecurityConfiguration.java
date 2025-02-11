@@ -21,13 +21,13 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableWebSecurity
 public class SecurityConfiguration {
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private CustomJWTAuthenticationFilter customJWTAuthenticationFilter;
+	@Autowired
+	private CustomJWTAuthenticationFilter customJWTAuthenticationFilter;
 
-    @Bean
+	@Bean
     public SecurityFilterChain authorizeRequests(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(request -> request
@@ -46,10 +46,10 @@ public class SecurityConfiguration {
 
                 // Common access (e.g., wallet balance)
  
-                .requestMatchers("/wallet/balance").permitAll()
+                .requestMatchers("/wallet/balance","wallet/withdraw-funds", "wallet/add-funds").permitAll()
 
                 // Role-based access control
-                .requestMatchers("wallet/withdraw-funds", "wallet/add-funds","wallet/pay-emi", 
+                .requestMatchers("wallet/pay-emi", 
                         "/loans/summary", "/loans/details", "/loan-applications/apply").hasAuthority("ROLE_USER")
 
                 .requestMatchers("/loans/**","/transactions/**").hasAuthority("ROLE_ADMIN")
@@ -65,21 +65,21 @@ public class SecurityConfiguration {
         return http.build();
     }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000")); // Allow frontend origin
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*")); // Allow all headers
-        configuration.setAllowCredentials(true); // Allow authentication headers & cookies
+	@Bean
+	public CorsConfigurationSource corsConfigurationSource() {
+		CorsConfiguration configuration = new CorsConfiguration();
+		configuration.setAllowedOrigins(List.of("http://localhost:3000")); // Allow frontend origin
+		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+		configuration.setAllowedHeaders(List.of("*")); // Allow all headers
+		configuration.setAllowCredentials(true); // Allow authentication headers & cookies
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration); // Apply CORS settings globally to all endpoints
-        return source;
-    }
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", configuration); // Apply CORS settings globally to all endpoints
+		return source;
+	}
 
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
-    }
+	@Bean
+	public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+		return config.getAuthenticationManager();
+	}
 }
