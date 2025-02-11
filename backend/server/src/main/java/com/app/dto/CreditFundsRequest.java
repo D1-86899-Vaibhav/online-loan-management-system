@@ -16,12 +16,10 @@ public class CreditFundsRequest {
 		
 	}
     
-
 	public CreditFundsRequest(Double amount) {
 		super();
 		this.amount = amount;
 	}
-
 
 	public Double getAmount() {
 		return amount;

@@ -1,24 +1,44 @@
 import * as React from 'react';
 import { LineChart } from '@mui/x-charts/LineChart';
 
-const uData = [4000, 3000, 2000, 2780, 1890, 2390, 3490,1345,3456,1000,2451,2132];
-const pData = [2400, 1398, 9800, 3908, 4800, 3800, 4300,700,1345,1000,2312,1212];
-const xLabels = [
- 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul','Aug','Sept','Oct','Nov','Dec'
-];
+const xLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
 
-export default function BiaxialLineChart() {
-    return (
-        <LineChart
-            width={900}
-            height={333}
-            series={[
-                { data: pData, label: 'Loan Collected', yAxisId: 'leftAxisId', color: '#8A2BE2' },
-                { data: uData, label: 'Loan Distributed', yAxisId: 'rightAxisId', color: '#FF0000' },
-            ]}
-            xAxis={[{ scaleType: 'point', data: xLabels }]}
-            yAxis={[{ id: 'leftAxisId' }, { id: 'rightAxisId' }]}
-            rightAxis="rightAxisId"
-        />
-    );
-}
+const BiaxialLineChart = ({ transactionData }) => {
+  const [creditedData, setCreditedData] = React.useState([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+  const [debitedData, setDebitedData] = React.useState([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+
+  React.useEffect(() => {
+    if (transactionData) {
+      const newCreditedData = [...creditedData];
+      const newDebitedData = [...debitedData];
+
+      transactionData.forEach(transaction => {
+        const month = new Date(transaction.date).getMonth();
+        if (transaction.type === 'add') {
+          newCreditedData[month] += transaction.amount;
+        } else if (transaction.type === 'withdraw') {
+          newDebitedData[month] += transaction.amount;
+        }
+      });
+
+      setCreditedData(newCreditedData);
+      setDebitedData(newDebitedData);
+    }
+  }, [transactionData]);
+
+  return (
+    <LineChart
+      width={900}
+      height={333}
+      series={[
+        { data: creditedData, label: 'Credited', yAxisId: 'leftAxisId', color: '#9B1C80' },
+        { data: debitedData, label: 'Debited', yAxisId: 'rightAxisId', color: '#1E90FF' },
+      ]}
+      xAxis={[{ scaleType: 'point', data: xLabels }]}
+      yAxis={[{ id: 'leftAxisId' }, { id: 'rightAxisId' }]}
+      rightAxis="rightAxisId"
+    />
+  );
+};
+
+export default BiaxialLineChart;

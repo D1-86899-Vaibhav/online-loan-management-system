@@ -3,6 +3,7 @@ package com.app.controller;
 import com.app.dto.AddFundsRequest;
 import com.app.dto.PayEmiRequest;
 import com.app.dto.WithdrawFundsRequest;
+import com.app.pojos.TransactionEntity;
 import com.app.pojos.WalletEntity;
 import com.app.security.JwtUtils;
 import com.app.service.WalletService;
@@ -10,7 +11,10 @@ import com.app.service.WalletService;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = "http://localhost:3000") // Specify React's URL
 public class WalletController {
 
+ 
     @Autowired
     private WalletService walletService;
 
@@ -78,3 +83,4 @@ public class WalletController {
         return ResponseEntity.ok(balance);
     }
 }
+
