@@ -1,151 +1,92 @@
 package com.app.controller;
 
-import java.time.LocalDate;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.app.dto.ApiResponse;
 import com.app.dto.KycDetailsUpdateRequest;
 import com.app.pojos.KycEntity;
-import com.app.security.JwtUtils;
+import com.app.repository.KycRepository;
 import com.app.service.KycService;
-
-import io.jsonwebtoken.Claims;
-import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/kyc")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:3000")
 public class KYCController {
 
     @Autowired
-    private KycService kycService;
-    @Autowired
-    private JwtUtils jwtUtil;
+    private KycRepository kycRepository;
 
-    @GetMapping("/user/profile")
-    public ResponseEntity<?> getKYCByUserId(HttpServletRequest request) {
-    	
-    	 String authHeader = request.getHeader("Authorization");
-         String token = authHeader.substring(7); // Remove "Bearer " prefix
-
-         Claims claims = jwtUtil.validateJwtToken(token);
-         Long userId = jwtUtil.getUserIdFromJwtToken(claims);
-    	
-        KycEntity kyc = kycService.getKycRecordsByUserId(userId);
-        if (kyc != null) {
-            return ResponseEntity.ok(kyc);
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("KYC record not found for user ID: " + userId));
-        }
-    }
-
-    @PutMapping("/user/update")
-    public ResponseEntity<KycEntity> updateKycDetails(
-    		HttpServletRequest request,
-        @RequestBody KycDetailsUpdateRequest kycDetailsUpdateRequest) {
-    	
-
-   	 	String authHeader = request.getHeader("Authorization");
-        String token = authHeader.substring(7); // Remove "Bearer " prefix
-
-        Claims claims = jwtUtil.validateJwtToken(token);
-        Long userId = jwtUtil.getUserIdFromJwtToken(claims);
+    @PostMapping
+    @Transactional
+    public ResponseEntity<?> createKyc(@RequestBody KycEntity kyc) {
+        // Set a default KYC status (for example, "PENDING")
+        kyc.setKycStatus("PENDING");
         
-    	KycEntity updatedDetails = kycService.updateKycDetails(userId, kycDetailsUpdateRequest);
-        return ResponseEntity.ok(updatedDetails);
-    }
-  
-    @GetMapping("/kyccount")
-    public Long getLoanAppliedUsersCount() {
-        return kycService.countKycUsers();
+        // Save the KYC record in the database
+        KycEntity savedKyc = kycRepository.save(kyc);
+        return ResponseEntity.ok(savedKyc);
     }
     
-    @PostMapping(consumes = { "multipart/form-data" })
-    public ResponseEntity<ApiResponse> createKYC(
-            @RequestParam("userId") Long userId,
-            @RequestParam("firstName") String firstName,
-            @RequestParam("lastName") String lastName,
-            @RequestParam(value = "dob", required = false) String dob, // LocalDate as String from frontend
-            @RequestParam(value = "gender", required = false) String gender,
-            @RequestParam(value = "fatherName", required = false) String fatherName,
-            @RequestParam(value = "motherName", required = false) String motherName,
-            @RequestParam(value = "maritalStatus", required = false) String maritalStatus,
-            @RequestParam("permanentStreet") String permanentStreet,
-            @RequestParam("permanentCity") String permanentCity,
-            @RequestParam("permanentState") String permanentState,
-            @RequestParam("permanentZipCode") String permanentZipCode,
-            @RequestParam(value = "correspondenceStreet", required = false) String correspondenceStreet,
-            @RequestParam(value = "correspondenceCity", required = false) String correspondenceCity,
-            @RequestParam(value = "correspondenceState", required = false) String correspondenceState,
-            @RequestParam(value = "correspondenceZipCode", required = false) String correspondenceZipCode,
-            @RequestParam("phone") String phone,
-            @RequestParam("email") String email,
-            @RequestParam("panNumber") String panNumber,
-            @RequestParam(value = "aadhaarNumber", required = false) String aadhaarNumber,
-            @RequestParam(value = "passportNumber", required = false) String passportNumber,
-            @RequestParam(value = "voterIdNumber", required = false) String voterIdNumber,
-            @RequestParam(value = "drivingLicenseNumber", required = false) String drivingLicenseNumber,
-            @RequestPart(value = "aadhaarCardImagePath", required = false) MultipartFile aadhaarCardImagePathFile,
-            @RequestPart(value = "utilityBillImagePath", required = false) MultipartFile utilityBillImagePathFile,
-            @RequestPart(value = "rentalAgreementImagePath", required = false) MultipartFile rentalAgreementImagePathFile,
-            @RequestPart(value = "passportImagePath", required = false) MultipartFile passportImagePathFile,
-            @RequestPart("panCardImage") MultipartFile panCardImageFile, // panCardImage is required in frontend validation
-            @RequestParam("annualIncome") Double annualIncome,
-            @RequestParam(value = "sourceOfIncome", required = false) String sourceOfIncome,
-            @RequestParam(value = "occupation", required = false) String occupation,
-            @RequestParam(value = "employerName", required = false) String employerName,
-            @RequestParam("bankAccountNumber") String bankAccountNumber,
-            @RequestParam("ifscCode") String ifscCode,
-            @RequestParam(value = "accountType", required = false) String accountType
-    ) {
-        try {
-            KycEntity kyc = new KycEntity();
-            kyc.setUserId(userId);
-            kyc.setFirstName(firstName);
-            kyc.setLastName(lastName);
-            if (dob != null && !dob.isEmpty()) {
-                kyc.setDob(LocalDate.parse(dob)); // Parse date string to LocalDate
-            }
-            kyc.setGender(gender);
-            kyc.setFatherName(fatherName);
-            kyc.setMotherName(motherName);
-            kyc.setMaritalStatus(maritalStatus);
-            kyc.setPermanentStreet(permanentStreet);
-            kyc.setPermanentCity(permanentCity);
-            kyc.setPermanentState(permanentState);
-            kyc.setPermanentZipCode(permanentZipCode);
-            kyc.setCorrespondenceStreet(correspondenceStreet);
-            kyc.setCorrespondenceCity(correspondenceCity);
-            kyc.setCorrespondenceState(correspondenceState);
-            kyc.setCorrespondenceZipCode(correspondenceZipCode);
-            kyc.setPhone(phone);
-            kyc.setEmail(email);
-            kyc.setPanNumber(panNumber);
-            kyc.setAadhaarNumber(aadhaarNumber);
-            kyc.setPassportNumber(passportNumber);
-            kyc.setVoterIdNumber(voterIdNumber);
-            kyc.setDrivingLicenseNumber(drivingLicenseNumber);
-            kyc.setAnnualIncome(annualIncome);
-            kyc.setSourceOfIncome(sourceOfIncome);
-            kyc.setOccupation(occupation);
-            kyc.setEmployerName(employerName);
-            kyc.setBankAccountNumber(bankAccountNumber);
-            kyc.setIfscCode(ifscCode);
-            kyc.setAccountType(accountType);
-
-            // **Call the updated createKycRecord method in KycService, passing file parameters**
-            ApiResponse response = kycService.createKycRecord(kyc, aadhaarCardImagePathFile, utilityBillImagePathFile, rentalAgreementImagePathFile, passportImagePathFile, panCardImageFile);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-
-        } catch (Exception e) {
-            System.err.println("Error creating KYC record: " + e.getMessage());
-            e.printStackTrace(); // Print the full stack trace for debugging
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse("Error creating KYC record: " + e.getMessage()));
-        }
-    }
+   
 }
+
+//public class KYCController {
+//
+//	@Autowired
+//	private KycService kycService;
+//
+//	@PostMapping
+//	public ResponseEntity<?> createKyc(@RequestBody KycDetailsUpdateRequest dto) {
+//		// Map the DTO to the entity
+////		KycEntity kyc = new KycEntity();
+////		kyc.setUserId(dto.getUserId());
+////		kyc.setFirstName(dto.getFirstName());
+////		kyc.setLastName(dto.getLastName());
+////		kyc.setDob(dto.getDob());
+////		kyc.setGender(dto.getGender());
+////		kyc.setFatherName(dto.getFatherName());
+////		kyc.setMotherName(dto.getMotherName());
+////		kyc.setMaritalStatus(dto.getMaritalStatus());
+////		kyc.setPermanentStreet(dto.getPermanentStreet());
+////		kyc.setPermanentCity(dto.getPermanentCity());
+////		kyc.setPermanentState(dto.getPermanentState());
+////		kyc.setPermanentZipCode(dto.getPermanentZipCode());
+////		kyc.setCorrespondenceStreet(dto.getCorrespondenceStreet());
+////		kyc.setCorrespondenceCity(dto.getCorrespondenceCity());
+////		kyc.setCorrespondenceState(dto.getCorrespondenceState());
+////		kyc.setCorrespondenceZipCode(dto.getCorrespondenceZipCode());
+////		kyc.setPhone(dto.getPhone());
+////		kyc.setEmail(dto.getEmail());
+////		kyc.setPanNumber(dto.getPanNumber());
+////		kyc.setAadhaarNumber(dto.getAadhaarNumber());
+////		kyc.setPassportNumber(dto.getPassportNumber());
+////		kyc.setVoterIdNumber(dto.getVoterIdNumber());
+////		kyc.setDrivingLicenseNumber(dto.getDrivingLicenseNumber());
+////		kyc.setAnnualIncome(dto.getAnnualIncome());
+////		kyc.setSourceOfIncome(dto.getSourceOfIncome());
+////		kyc.setOccupation(dto.getOccupation());
+////		kyc.setEmployerName(dto.getEmployerName());
+////		kyc.setBankAccountNumber(dto.getBankAccountNumber());
+////		kyc.setIfscCode(dto.getIfscCode());
+////		kyc.setAccountType(dto.getAccountType());
+////		kyc.setOtherSourceOfIncome(dto.getOtherSourceOfIncome());
+////		kyc.setOtherOccupation(dto.getOtherOccupation());
+//
+//		try {
+//			ApiResponse response = kycService.createKycRecord(dto);
+//			HttpStatus status = response.getMessage().contains("successfully") ? HttpStatus.CREATED
+//					: HttpStatus.BAD_REQUEST;
+//			return ResponseEntity.status(HttpStatus.OK).body("Done");
+//		} catch (RuntimeException e) {
+//			e.printStackTrace();
+//			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+//		}
+//		// Call the service to create the record
+////        ApiResponse response = kycService.createKycRecord(kyc);
+////        HttpStatus status = response.getMessage().contains("successfully") ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST;
+////        return new ResponseEntity<>(response, status);
+//	}
+//}

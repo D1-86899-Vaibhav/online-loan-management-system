@@ -11,10 +11,5 @@ public interface KycService {
 	
     KycEntity getKycRecordsByUserId(Long userId);
     public KycEntity updateKycDetails(Long id, KycDetailsUpdateRequest request);
-    ApiResponse createKycRecord(KycEntity kyc,
-                                MultipartFile aadhaarCardImagePathFile,
-                                MultipartFile utilityBillImagePathFile,
-                                MultipartFile rentalAgreementImagePathFile,
-                                MultipartFile passportImagePathFile,
-                                MultipartFile panCardImageFile);
+    ApiResponse createKycRecord(KycDetailsUpdateRequest kyc);
 }

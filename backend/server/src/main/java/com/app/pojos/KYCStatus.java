@@ -1,6 +1,8 @@
 package com.app.pojos;
 
 public enum KYCStatus {
-	VERIFIED,
-    NOT_VERIFIED
+    NOT_VERIFIED,
+    PENDING,
+    VERIFIED,
+    REJECTED
 }

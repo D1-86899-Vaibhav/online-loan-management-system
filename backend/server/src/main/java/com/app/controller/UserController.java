@@ -13,7 +13,9 @@ import com.app.dto.AuthRequest;
 import com.app.dto.AuthResp;
 import com.app.dto.OtpRequest;
 import com.app.dto.UserDTO;
+import com.app.pojos.KycEntity;
 import com.app.pojos.UserEntity;
+import com.app.repository.KycRepository;
 import com.app.repository.WalletRepository;
 import com.app.security.CustomUserDetailsImpl;
 import com.app.security.JwtUtils;
@@ -45,6 +47,9 @@ public class UserController {
 
     @Autowired
     private EmailService emailService;
+    
+    @Autowired
+    private KycRepository kycRepository;
 
     /**
      * Endpoint to send OTP to a given email for registration.
@@ -104,12 +109,24 @@ public class UserController {
         return ResponseEntity.ok(new AuthResp("Login Successful", authTokenJWT, user.getRole().name()));
     }
     
+    @GetMapping("/users/profile/{userId}")
+    public ResponseEntity<?> getUserProfile(@PathVariable Long userId) {
+        KycEntity kyc = kycRepository.findByUserId(userId);
+        if (kyc == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse("KYC details not found for user with id: " + userId));
+        }
+        return ResponseEntity.ok(kyc);
+    }
+    
     @PutMapping("/profile")
     public ResponseEntity<?> updateProfile(@RequestBody @Valid UserDTO user) {
         System.out.println("Updating user profile: " + user);
         ApiResponse response = userService.updateUser(user);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
+    
+    
 
     @PostMapping("/change-password")
     public ResponseEntity<?> changePassword(@RequestBody @Valid com.app.dto.PasswordChangeRequest changePasswordRequest) {

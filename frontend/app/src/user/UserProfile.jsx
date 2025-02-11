@@ -66,7 +66,7 @@ const UserProfile = () => {
           headers['Authorization'] = `Bearer ${token}`;
         }
 
-        const response = await axios.get(`http://localhost:8080/kyc/user/profile`, { headers });
+        const response = await axios.get(`http://localhost:8080/kyc/users/profile`, { headers });
         const apiData = response.data;
 
         // Map API fields to local state structure
