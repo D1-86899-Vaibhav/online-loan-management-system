@@ -7,7 +7,7 @@ import lombok.Setter;
 
 //@Getter
 //@Setter
-@AllArgsConstructor
+//@AllArgsConstructor
 //@NoArgsConstructor
 public class AuthResp {
     private String message;
@@ -18,6 +18,13 @@ public class AuthResp {
 		
 	}
     
+	public AuthResp(String message, String jwt, String role) {
+		super();
+		this.message = message;
+		this.jwt = jwt;
+		this.role = role;
+	}
+
 	public String getMessage() {
 		return message;
 	}
