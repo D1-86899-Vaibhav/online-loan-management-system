@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../firebase'; // Ensure this path is correct
 import AdminSidebar from './AdminSidebar'; // Use the AdminSidebar component
 import AdminNavbar from './AdminNavbar'; // Use the AdminNavbar component
 import StackedBarChart from '../components/charts/BarChart';
