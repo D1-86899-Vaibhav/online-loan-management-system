@@ -25,18 +25,18 @@ public class KYCController {
 
     @Autowired
     private KycService kycService;
+    
     @Autowired
     private JwtUtils jwtUtil;
 
     @GetMapping("/user/profile")
     public ResponseEntity<?> getKYCByUserId(HttpServletRequest request) {
-    	
-    	 String authHeader = request.getHeader("Authorization");
-         String token = authHeader.substring(7); // Remove "Bearer " prefix
+        String authHeader = request.getHeader("Authorization");
+        String token = authHeader.substring(7);
 
-         Claims claims = jwtUtil.validateJwtToken(token);
-         Long userId = jwtUtil.getUserIdFromJwtToken(claims);
-    	
+        Claims claims = jwtUtil.validateJwtToken(token);
+        Long userId = jwtUtil.getUserIdFromJwtToken(claims);
+
         KycEntity kyc = kycService.getKycRecordsByUserId(userId);
         if (kyc != null) {
             return ResponseEntity.ok(kyc);
@@ -47,24 +47,24 @@ public class KYCController {
 
     @PutMapping("/user/update")
     public ResponseEntity<KycEntity> updateKycDetails(
-    		HttpServletRequest request,
-        @RequestBody KycDetailsUpdateRequest kycDetailsUpdateRequest) {
-    	
+            HttpServletRequest request,
+            @RequestBody KycDetailsUpdateRequest kycDetailsUpdateRequest) {
 
-   	 	String authHeader = request.getHeader("Authorization");
-        String token = authHeader.substring(7); // Remove "Bearer " prefix
+        String authHeader = request.getHeader("Authorization");
+        String token = authHeader.substring(7);
 
         Claims claims = jwtUtil.validateJwtToken(token);
         Long userId = jwtUtil.getUserIdFromJwtToken(claims);
-        
-    	KycEntity updatedDetails = kycService.updateKycDetails(userId, kycDetailsUpdateRequest);
+
+        KycEntity updatedDetails = kycService.updateKycDetails(userId, kycDetailsUpdateRequest);
         return ResponseEntity.ok(updatedDetails);
     }
-  
+
     @GetMapping("/kyccount")
     public Long getLoanAppliedUsersCount() {
         return kycService.countKycUsers();
     }
+
     @PostMapping(consumes = { "multipart/form-data" })
     public ResponseEntity<ApiResponse> createKYC(@RequestBody KycRequest kycRequest) {
         try {
@@ -75,8 +75,10 @@ public class KYCController {
                                                               kycRequest.getRentalAgreementImagePathFile(),
                                                               kycRequest.getPassportImagePathFile(),
                                                               kycRequest.getPanCardImageFile());
+
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
+
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                                  .body(new ApiResponse("Error creating KYC record: " + e.getMessage()));
@@ -84,3 +86,4 @@ public class KYCController {
     }
 
 }
+
