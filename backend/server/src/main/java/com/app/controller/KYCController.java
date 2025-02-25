@@ -24,18 +24,18 @@ public class KYCController {
 
     @Autowired
     private KycService kycService;
+    
     @Autowired
     private JwtUtils jwtUtil;
 
     @GetMapping("/user/profile")
     public ResponseEntity<?> getKYCByUserId(HttpServletRequest request) {
-    	
-    	 String authHeader = request.getHeader("Authorization");
-         String token = authHeader.substring(7); // Remove "Bearer " prefix
+        String authHeader = request.getHeader("Authorization");
+        String token = authHeader.substring(7);
 
-         Claims claims = jwtUtil.validateJwtToken(token);
-         Long userId = jwtUtil.getUserIdFromJwtToken(claims);
-    	
+        Claims claims = jwtUtil.validateJwtToken(token);
+        Long userId = jwtUtil.getUserIdFromJwtToken(claims);
+
         KycEntity kyc = kycService.getKycRecordsByUserId(userId);
         if (kyc != null) {
             return ResponseEntity.ok(kyc);
@@ -46,31 +46,30 @@ public class KYCController {
 
     @PutMapping("/user/update")
     public ResponseEntity<KycEntity> updateKycDetails(
-    		HttpServletRequest request,
-        @RequestBody KycDetailsUpdateRequest kycDetailsUpdateRequest) {
-    	
+            HttpServletRequest request,
+            @RequestBody KycDetailsUpdateRequest kycDetailsUpdateRequest) {
 
-   	 	String authHeader = request.getHeader("Authorization");
-        String token = authHeader.substring(7); // Remove "Bearer " prefix
+        String authHeader = request.getHeader("Authorization");
+        String token = authHeader.substring(7);
 
         Claims claims = jwtUtil.validateJwtToken(token);
         Long userId = jwtUtil.getUserIdFromJwtToken(claims);
-        
-    	KycEntity updatedDetails = kycService.updateKycDetails(userId, kycDetailsUpdateRequest);
+
+        KycEntity updatedDetails = kycService.updateKycDetails(userId, kycDetailsUpdateRequest);
         return ResponseEntity.ok(updatedDetails);
     }
-  
+
     @GetMapping("/kyccount")
     public Long getLoanAppliedUsersCount() {
         return kycService.countKycUsers();
     }
-    
+
     @PostMapping(consumes = { "multipart/form-data" })
     public ResponseEntity<ApiResponse> createKYC(
             @RequestParam("userId") Long userId,
             @RequestParam("firstName") String firstName,
             @RequestParam("lastName") String lastName,
-            @RequestParam(value = "dob", required = false) String dob, // LocalDate as String from frontend
+            @RequestParam(value = "dob", required = false) String dob,
             @RequestParam(value = "gender", required = false) String gender,
             @RequestParam(value = "fatherName", required = false) String fatherName,
             @RequestParam(value = "motherName", required = false) String motherName,
@@ -94,7 +93,7 @@ public class KYCController {
             @RequestPart(value = "utilityBillImagePath", required = false) MultipartFile utilityBillImagePathFile,
             @RequestPart(value = "rentalAgreementImagePath", required = false) MultipartFile rentalAgreementImagePathFile,
             @RequestPart(value = "passportImagePath", required = false) MultipartFile passportImagePathFile,
-            @RequestPart("panCardImage") MultipartFile panCardImageFile, // panCardImage is required in frontend validation
+            @RequestPart("panCardImage") MultipartFile panCardImageFile,
             @RequestParam("annualIncome") Double annualIncome,
             @RequestParam(value = "sourceOfIncome", required = false) String sourceOfIncome,
             @RequestParam(value = "occupation", required = false) String occupation,
@@ -109,7 +108,7 @@ public class KYCController {
             kyc.setFirstName(firstName);
             kyc.setLastName(lastName);
             if (dob != null && !dob.isEmpty()) {
-                kyc.setDob(LocalDate.parse(dob)); // Parse date string to LocalDate
+                kyc.setDob(LocalDate.parse(dob));
             }
             kyc.setGender(gender);
             kyc.setFatherName(fatherName);
@@ -138,13 +137,12 @@ public class KYCController {
             kyc.setIfscCode(ifscCode);
             kyc.setAccountType(accountType);
 
-            // **Call the updated createKycRecord method in KycService, passing file parameters**
             ApiResponse response = kycService.createKycRecord(kyc, aadhaarCardImagePathFile, utilityBillImagePathFile, rentalAgreementImagePathFile, passportImagePathFile, panCardImageFile);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
         } catch (Exception e) {
             System.err.println("Error creating KYC record: " + e.getMessage());
-            e.printStackTrace(); // Print the full stack trace for debugging
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse("Error creating KYC record: " + e.getMessage()));
         }
     }

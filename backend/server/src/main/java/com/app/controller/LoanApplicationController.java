@@ -22,21 +22,18 @@ public class LoanApplicationController {
 
     @Autowired
     private LoanApplicationService loanApplicationService;
+    
     @Autowired
     private JwtUtils jwtUtil;
 
-
-    
-    
-    
     @PostMapping("/apply")
     public ResponseEntity<String> submitLoanApplication(@RequestBody LoanApplicationRequest loanApplicationDTO, HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
-        String token = authHeader.substring(7); // Remove "Bearer " prefix
+        String token = authHeader.substring(7);
         System.out.println("in apply ctrlor");
         Claims claims = jwtUtil.validateJwtToken(token);
         if (claims == null) {
-            return ResponseEntity.status(401).body("Failure: Unauthorized"); // Unauthorized
+            return ResponseEntity.status(401).body("Failure: Unauthorized");
         }
         Long userId = jwtUtil.getUserIdFromJwtToken(claims);
         String userRole = jwtUtil.getUserRoleFromClaims(claims);
@@ -50,23 +47,20 @@ public class LoanApplicationController {
         if (savedApplication != null) {
             return ResponseEntity.ok("Success: Loan application submitted");
         } else {
-            return ResponseEntity.status(500).body("Failure: Loan application submission failed"); // Internal Server Error
+            return ResponseEntity.status(500).body("Failure: Loan application submission failed");
         }
     }
 
-
     @GetMapping("/all")
     public ResponseEntity<List<LoanApplication>> getAllLoanApplications(HttpServletRequest request) {
-    	String authHeader = request.getHeader("Authorization");
-        String token = authHeader.substring(7); // Remove "Bearer " prefix
+        String authHeader = request.getHeader("Authorization");
+        String token = authHeader.substring(7);
 
         Claims claims = jwtUtil.validateJwtToken(token);
         if (claims == null) {
-            return ResponseEntity.status(401).build(); // Unauthorized
+            return ResponseEntity.status(401).build();
         }
         String userRole = jwtUtil.getUserRoleFromClaims(claims);
-
-        // You can add role-based logic here if needed
 
         List<LoanApplication> loanApplications = loanApplicationService.getAllLoanApplications();
         return ResponseEntity.ok(loanApplications);
@@ -74,21 +68,19 @@ public class LoanApplicationController {
 
     @GetMapping("/{id}")
     public ResponseEntity<LoanApplication> getLoanApplicationById(@PathVariable Long id, HttpServletRequest request) {
-    	String authHeader = request.getHeader("Authorization");
-        String token = authHeader.substring(7); // Remove "Bearer " prefix
+        String authHeader = request.getHeader("Authorization");
+        String token = authHeader.substring(7);
 
         Claims claims = jwtUtil.validateJwtToken(token);
         if (claims == null) {
-            return ResponseEntity.status(401).build(); // Unauthorized
+            return ResponseEntity.status(401).build();
         }
         Long userId = jwtUtil.getUserIdFromJwtToken(claims);
-        
-        // You can add userId-based or role-based logic here if needed
 
         LoanApplication loanApplication = loanApplicationService.getLoanApplicationById(id);
         return ResponseEntity.ok(loanApplication);
     }
-    
+
     @GetMapping("/Loancount")
     public Long getLoanAppliedUsersCount() {
         return loanApplicationService.countLoanAppliedUsers();
