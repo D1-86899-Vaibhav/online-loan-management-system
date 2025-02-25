@@ -46,22 +46,16 @@ public class UserController {
     @Autowired
     private EmailService emailService;
 
-    /**
-     * Endpoint to send OTP to a given email for registration.
-     */
     @PostMapping("/send-otp")
     @Operation(description = "Send OTP to email for registration")
     public ResponseEntity<?> sendOtp(@RequestBody Map<String, String> request) {
         String email = request.get("email");
         System.out.println("Sending OTP to email: " + email);
-        String otp = otpService.generateOtp(email); // Use email to generate OTP
+        String otp = otpService.generateOtp(email);
         emailService.sendOtpEmail(email, otp);
         return ResponseEntity.ok(new ApiResponse("OTP sent to your email"));
     }
     
-    /**
-     * Endpoint to verify the OTP using the email.
-     */
     @PostMapping("/verify-otp")
     @Operation(description = "Verify OTP using email")
     public ResponseEntity<?> verifyOtp(@RequestBody @Valid OtpRequest otpRequest) {
@@ -75,9 +69,6 @@ public class UserController {
                 .body(new ApiResponse("Invalid OTP"));
     }
     
-    /**
-     * Registration endpoint – invoked after the OTP is verified on the client side.
-     */
     @PostMapping("/register")
     @Operation(description = "Register new user after OTP verification")
     public ResponseEntity<?> registerUser(@RequestBody @Valid UserDTO dto) {
@@ -86,19 +77,13 @@ public class UserController {
                 .body(userService.registerNewUser(dto));
     }
     
-    /**
-     * Login endpoint – standard login without OTP.
-     */
     @PostMapping("/login")
     @Operation(description = "User login with email & password")
     public ResponseEntity<?> userSignIn(@RequestBody @Valid AuthRequest dto) {
         System.out.println("User attempting login: " + dto);
-        // Authenticate user credentials
         Authentication authToken = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword()));
-        // Retrieve user details
         UserEntity user = ((CustomUserDetailsImpl) authToken.getPrincipal()).getUserEntity();
-        // Generate JWT token
         String authTokenJWT = jwtUtils.generateJwtToken(authToken);
         System.out.println("Generated Auth Token: " + authTokenJWT);
         return ResponseEntity.ok(new AuthResp("Login Successful", authTokenJWT, user.getRole().name()));
