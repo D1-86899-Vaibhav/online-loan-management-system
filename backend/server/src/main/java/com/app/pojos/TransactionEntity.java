@@ -16,10 +16,14 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Table(name = "transactions")
 //@Getter
 //@Setter
-@NoArgsConstructor
+//@NoArgsConstructor
 public class TransactionEntity {
 
-    public TransactionEntity(WalletEntity wallet, UserEntity user2, Double valueOf, String string,
+    public TransactionEntity() {
+		
+	}
+
+	public TransactionEntity(WalletEntity wallet, UserEntity user2, Double valueOf, String string,
 			TransactionStatus string2) {
     	this.wallet = wallet;
         this.user = user2;
