@@ -13,4 +13,5 @@ public interface LoanApplicationMapper {
     LoanApplication toEntity(LoanApplicationRequest dto);
 
     LoanApplicationRequest toDTO(LoanApplication entity);
+    
 }
