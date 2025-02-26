@@ -21,9 +21,9 @@ export default function Register() {
   const [isOtpVerified, setIsOtpVerified] = useState(false);
 
   // API endpoints (adjust as needed)
-  const API_URL_REGISTER = "http://localhost:8080/users/register";
-  const API_URL_SEND_OTP = "http://localhost:8080/users/send-otp";
-  const API_URL_VERIFY_OTP = "http://localhost:8080/users/verify-otp";
+  const API_URL_REGISTER = "http://65.2.80.0:8080/users/register";
+  const API_URL_SEND_OTP = "http://65.2.80.0:8080/users/send-otp";
+  const API_URL_VERIFY_OTP = "http://65.2.80.0:8080/users/verify-otp";
 
   // Send OTP to the user's email
   const handleSendOTP = async () => {

@@ -30,7 +30,7 @@ const AdminLoans = () => {
     try {
       setLoading(true);
       const token = sessionStorage.getItem('authToken'); // Adjust based on your JWT storage
-      const response = await fetch('http://localhost:8080/loans/all', {
+      const response = await fetch('http://65.2.80.0:8080/loans/all', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

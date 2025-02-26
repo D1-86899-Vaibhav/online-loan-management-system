@@ -10,7 +10,7 @@ export default function VerifyOtp() {
   const [otp, setOtp] = useState("");
 
   // API endpoint for verifying OTP
-  const API_URL_VERIFY_OTP = "http://localhost:8080/users/verify-otp";
+  const API_URL_VERIFY_OTP = "http://65.2.80.0:8080/users/verify-otp";
 
   // Verify OTP
   const handleVerifyOTP = async () => {

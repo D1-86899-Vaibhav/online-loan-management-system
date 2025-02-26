@@ -8,7 +8,7 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
 
-  const API_URL = 'http://localhost:8080/users/login';
+  const API_URL = 'http://65.2.80.0:8080/users/login';
 
   useEffect(() => {
     const token = sessionStorage.getItem('authToken');

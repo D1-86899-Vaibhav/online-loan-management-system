@@ -19,7 +19,7 @@ const Wallet = () => {
     try {
       const token = sessionStorage.getItem('authToken');
       const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
-      const response = await axios.get('http://localhost:8080/wallet/balance', { headers });
+      const response = await axios.get('http://65.2.80.0:8080/wallet/balance', { headers });
       setWalletBalance(response.data);
     } catch (error) {
       toast.error('Error fetching wallet balance');
@@ -38,10 +38,10 @@ const Wallet = () => {
       const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
 
       if (action === 'add') {
-        await axios.post('http://localhost:8080/wallet/add-funds', { amount: numericAmount }, { headers });
+        await axios.post('http://65.2.80.0:8080/wallet/add-funds', { amount: numericAmount }, { headers });
         toast.success('Funds added successfully!');
       } else if (action === 'withdraw') {
-        await axios.post('http://localhost:8080/wallet/withdraw-funds', { amount: numericAmount }, { headers });
+        await axios.post('http://65.2.80.0:8080/wallet/withdraw-funds', { amount: numericAmount }, { headers });
         toast.success('Funds withdrawn successfully!');
       }
 

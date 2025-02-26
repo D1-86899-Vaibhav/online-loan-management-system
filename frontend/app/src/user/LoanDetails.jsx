@@ -26,7 +26,7 @@ const LoanDetails = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 2; // Number of loans per page
 
-  const API_LOANS_DETAILS_URL = 'http://localhost:8080/loans/details';
+  const API_LOANS_DETAILS_URL = 'http://65.2.80.0:8080/loans/details';
 
   useEffect(() => {
     const fetchLoans = async () => {

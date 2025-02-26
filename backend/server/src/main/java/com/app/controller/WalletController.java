@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/wallet")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://65.2.80.0:3000") 
 public class WalletController {
 
     @Autowired

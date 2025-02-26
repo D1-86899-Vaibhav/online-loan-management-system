@@ -17,7 +17,7 @@ const AdminUsers = () => {
 
   const getUsers = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/users/AllUsers");
+      const response = await fetch("http://65.2.80.0:8080/api/users/AllUsers");
 
       // Check if the response is OK (status code 200)
       if (!response.ok) {

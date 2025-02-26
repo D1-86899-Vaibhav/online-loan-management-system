@@ -15,7 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/transactions")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://65.2.80.0:3000")
 public class TransactionController {
 
     @Autowired
