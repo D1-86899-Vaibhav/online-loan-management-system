@@ -37,7 +37,7 @@ const AdminDashboard = ({ transactionData }) => {
             if (!token) {
                 throw new Error('Authentication token is missing. Please log in.');
             }
-            const response = await fetch('http://localhost:8080/wallet/balance', {
+            const response = await fetch('http://65.2.80.0:8080/wallet/balance', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -59,13 +59,13 @@ const AdminDashboard = ({ transactionData }) => {
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
-                const response = await axios.get('http://localhost:8080/api/users/AllUsers/count');
+                const response = await axios.get('http://65.2.80.0:8080/api/users/AllUsers/count');
                 setRegisteredUsersCount(response.data);
 
-                const responseL = await axios.get('http://localhost:8080/loan-applications/Loancount');
+                const responseL = await axios.get('http://65.2.80.0:8080/loan-applications/Loancount');
                 setLoanAppliedCount(responseL.data);
 
-                const responseK = await axios.get('http://localhost:8080/kyc/kyccount');
+                const responseK = await axios.get('http://65.2.80.0:8080/kyc/kyccount');
                 setKycAppliedCount(responseK.data);
             } catch (error) {
                 console.error('Error fetching dashboard data:', error);

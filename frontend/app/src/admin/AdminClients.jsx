@@ -42,7 +42,7 @@ const AdminClients = () => {
       if (!token) {
         throw new Error('Authentication token is missing. Please log in.');
       }
-      const response = await fetch('http://localhost:8080/wallet/balance', {
+      const response = await fetch('http://65.2.80.0:8080/wallet/balance', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -66,7 +66,7 @@ const AdminClients = () => {
     try {
       setLoading(true);
       const token = sessionStorage.getItem('authToken'); // Adjust based on your JWT storage
-      const response = await fetch('http://localhost:8080/loans/all', {
+      const response = await fetch('http://65.2.80.0:8080/loans/all', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -135,7 +135,7 @@ const AdminClients = () => {
   const handleUpdateStatus = async (id, action) => {
     try {
       const token = sessionStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:8080/loans/${id}/updateStatus`, {
+      const response = await fetch(`http://65.2.80.0:8080/loans/${id}/updateStatus`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

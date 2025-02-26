@@ -23,7 +23,7 @@ import com.app.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://65.2.80.0:3000")
 @RestController
 @RequestMapping("/users")
 public class UserController {

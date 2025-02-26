@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/wallet")
-@CrossOrigin(origins = "http://localhost:3000") // Specify React's URL
+@CrossOrigin(origins = "http://65.2.80.0:3000") // Specify React's URL
 public class WalletController {
 
  

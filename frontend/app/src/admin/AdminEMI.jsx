@@ -22,7 +22,7 @@ const AdminEmi = () => {
     // Fetch EMI Received transactions from the API
     const fetchEmiReceivedTransactions = async () => {
         try {
-            const response = await axios.get("http://localhost:8080/transactions/emi-received", {
+            const response = await axios.get("http://65.2.80.0:8080/transactions/emi-received", {
                 headers: {
                     Authorization: `Bearer ${sessionStorage.getItem("authToken")}`, // Pass token here
                 },

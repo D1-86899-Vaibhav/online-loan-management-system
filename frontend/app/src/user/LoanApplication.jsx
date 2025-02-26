@@ -143,7 +143,7 @@ const LoanApplicationForm = () => {
           return;
         }
 
-        const response = await axios.post("http://localhost:8080/loan-applications/apply", formData, {
+        const response = await axios.post("http://65.2.80.0:8080/loan-applications/apply", formData, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

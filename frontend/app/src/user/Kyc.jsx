@@ -132,7 +132,7 @@ const KYCForm = () => {
   const occupationOptions = ['Salaried', 'Self-Employed', 'Business', 'Professional', 'Student', 'Homemaker', 'Retired', 'Others'];
   const incomeProofOptions = ['Salary Slip', 'Bank Statement', 'ITR Acknowledgement', 'Form 16', 'Others'];
 
-  const API_BASE_URL = 'http://localhost:8080'; // Backend API base URL
+  const API_BASE_URL = 'http://65.2.80.0:8080'; // Backend API base URL
 
 
   // Handle form submission

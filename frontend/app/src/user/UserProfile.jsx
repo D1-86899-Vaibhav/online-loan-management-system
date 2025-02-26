@@ -66,7 +66,7 @@ const UserProfile = () => {
           headers['Authorization'] = `Bearer ${token}`;
         }
 
-        const response = await axios.get(`http://localhost:8080/kyc/user/profile`, { headers });
+        const response = await axios.get(`http://65.2.80.0:8080/kyc/user/profile`, { headers });
         const apiData = response.data;
 
         // Map API fields to local state structure
@@ -136,7 +136,7 @@ const UserProfile = () => {
     try {
       startLoading();
       const response = await axios.post(
-        'http://localhost:8080/users/change-password',
+        'http://65.2.80.0:8080/users/change-password',
         passwordForm,
         {
           headers: { "Content-Type": "application/json" },
@@ -169,7 +169,7 @@ const UserProfile = () => {
 
       // Fixed the syntax here: removed the extra curly brace.
       const response = await axios.put(
-        `http://localhost:8080/kyc/user/update`,
+        `http://65.2.80.0:8080/kyc/user/update`,
         formValues,
         { headers }
       );

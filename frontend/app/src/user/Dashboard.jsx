@@ -28,8 +28,8 @@ const Dashboard = () => {
   const itemsPerPage = 5;
 
   // URLs for the APIs
-  const API_TRANSACTIONS_URL = 'http://localhost:8080/transactions';
-  const API_LOANS_SUMMARY_URL = 'http://localhost:8080/loans/summary';
+  const API_TRANSACTIONS_URL = 'http://65.2.80.0:8080/transactions';
+  const API_LOANS_SUMMARY_URL = 'http://65.2.80.0:8080/loans/summary';
 
   const startLoading = () => setLoading(true);
   const endLoading = () => setLoading(false);

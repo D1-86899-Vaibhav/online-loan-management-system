@@ -29,7 +29,7 @@ const AdminWallet = ({ setTransactionData }) => {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       };
-      const response = await axios.get('http://localhost:8080/wallet/balance', { headers });
+      const response = await axios.get('http://65.2.80.0:8080/wallet/balance', { headers });
       setWalletBalance(response.data);
     } catch (error) {
       console.error('Error fetching wallet balance:', error.response?.data || error.message);
@@ -63,14 +63,14 @@ const AdminWallet = ({ setTransactionData }) => {
 
       if (action === 'add') {
         response = await axios.post(
-          'http://localhost:8080/wallet/add-funds',
+          'http://65.2.80.0:8080/wallet/add-funds',
           { amount: numericAmount },
           { headers }
         );
         successMessage = 'Funds added successfully!';
       } else if (action === 'withdraw') {
         response = await axios.post(
-          'http://localhost:8080/wallet/withdraw-funds',
+          'http://65.2.80.0:8080/wallet/withdraw-funds',
           { amount: numericAmount },
           { headers }
         );

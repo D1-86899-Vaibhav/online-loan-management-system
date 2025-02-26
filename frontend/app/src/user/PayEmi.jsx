@@ -28,7 +28,7 @@ const PayEmi = () => {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${token}`,
             };
-            const response = await axios.get('http://localhost:8080/wallet/balance', { headers });
+            const response = await axios.get('http://65.2.80.0:8080/wallet/balance', { headers });
             setWalletBalance(response.data);
         } catch (error) {
             console.error('Error fetching wallet balance:', error.response?.data || error.message);
@@ -47,7 +47,7 @@ const PayEmi = () => {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${token}`,
             };
-            const response = await axios.get('http://localhost:8080/loans/details', { headers });
+            const response = await axios.get('http://65.2.80.0:8080/loans/details', { headers });
             // Filter only approved loans
             const approvedLoans = response.data.filter(loan => loan.status === 'APPROVED');
             setEmiDetails(approvedLoans);
@@ -79,7 +79,7 @@ const PayEmi = () => {
             };
 
             const response = await axios.post(
-                'http://localhost:8080/wallet/pay-emi',
+                'http://65.2.80.0:8080/wallet/pay-emi',
                 { emiAmount, loanId: id },
                 { headers }
             );
