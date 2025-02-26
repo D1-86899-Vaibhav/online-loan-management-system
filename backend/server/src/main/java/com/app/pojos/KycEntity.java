@@ -110,6 +110,9 @@ public class KycEntity {
     @Column(name = "passport_image_path")
     private String passportImagePath;
 
+    @Column(name = "pan_card_image_path")
+    private String panCardImagePath;
+    
     // Financial Information
     @Column(name = "annual_income")
     private Double annualIncome;
@@ -432,5 +435,13 @@ public class KycEntity {
 
 	public void setKycStatus(KYCStatus kycStatus) {
 		this.kycStatus = kycStatus;
+	}
+
+	public String getPanCardImagePath() {
+		return panCardImagePath;
+	}
+
+	public void setPanCardImagePath(String panCardImagePath) {
+		this.panCardImagePath = panCardImagePath;
 	}
 }

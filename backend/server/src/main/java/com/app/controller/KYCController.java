@@ -1,7 +1,5 @@
 package com.app.controller;
 
-import java.time.LocalDate;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -68,22 +66,13 @@ public class KYCController {
     @PostMapping(consumes = { "multipart/form-data" })
     public ResponseEntity<ApiResponse> createKYC(@RequestBody KycRequest kycRequest) {
         try {
-            KycEntity kyc = kycRequest.toEntity();
-            ApiResponse response = kycService.createKycRecord(kyc, 
-                                                              kycRequest.getAadhaarCardImagePathFile(),
-                                                              kycRequest.getUtilityBillImagePathFile(),
-                                                              kycRequest.getRentalAgreementImagePathFile(),
-                                                              kycRequest.getPassportImagePathFile(),
-                                                              kycRequest.getPanCardImageFile());
+            ApiResponse response = kycService.createKycRecord(kycRequest);
 
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
-
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                                  .body(new ApiResponse("Error creating KYC record: " + e.getMessage()));
         }
     }
-
 }
-
